@@ -1,13 +1,9 @@
+import 'dart:ui';
 import 'package:flutter/material.dart';
 
 void main() {
   runApp(const MyApp());
 }
-
-// 🎨 GLOBAL COLORS
-const Color primaryBlue = Color(0xFF0072FF);
-const Color accentCyan = Color(0xFF00C6FF);
-const Color glassWhite = Colors.white10;
 
 class MyApp extends StatelessWidget {
   const MyApp({super.key});
@@ -16,8 +12,16 @@ class MyApp extends StatelessWidget {
   Widget build(BuildContext context) {
     return MaterialApp(
       debugShowCheckedModeBanner: false,
-      title: 'Career Navigator',
-      theme: ThemeData(useMaterial3: true, fontFamily: 'Roboto'),
+      title: 'Carrer Navigator',
+      theme: ThemeData(
+        // Modern Cyan/Teal Seed for a Tech Look
+        colorScheme: ColorScheme.fromSeed(
+          seedColor: const Color(0xFF00E5FF),
+          brightness: Brightness.dark,
+        ),
+        useMaterial3: true,
+        fontFamily: 'Roboto',
+      ),
       home: const RegistrationPage(),
     );
   }
@@ -32,266 +36,149 @@ class RegistrationPage extends StatefulWidget {
 
 class _RegistrationPageState extends State<RegistrationPage> {
   final _formKey = GlobalKey<FormState>();
-
-  final _nameController = TextEditingController();
-  final _emailController = TextEditingController();
-  final _passwordController = TextEditingController();
-  final _confirmPasswordController = TextEditingController();
-
   bool _isLoading = false;
   bool _obscurePassword = true;
-  bool _obscureConfirmPassword = true;
-  bool _agreeToTerms = false;
 
-  // ================= REGISTER =================
-  void _register() {
-    if (!_formKey.currentState!.validate()) return;
+  // New Modern Color Palette
+  final Color primaryCyan = const Color(0xFF00E5FF);
+  final Color darkBlueBg = const Color(0xFF0A192F);
 
-    if (!_agreeToTerms) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(
-          content: Text("Please accept Terms"),
-          backgroundColor: Colors.red,
-        ),
-      );
-      return;
-    }
-
-    setState(() => _isLoading = true);
-
-    Future.delayed(const Duration(seconds: 2), () {
-      setState(() => _isLoading = false);
-
-      showDialog(
-        context: context,
-        builder: (_) => AlertDialog(
-          title: const Text("Success"),
-          content: const Text("Account created successfully"),
-          actions: [
-            TextButton(
-              onPressed: () => Navigator.pop(context),
-              child: const Text("OK"),
-            ),
-          ],
-        ),
-      );
-    });
-  }
-
-  // ================= UI =================
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      body: Container(
-        decoration: const BoxDecoration(
-          image: DecorationImage(
-            image: AssetImage("assets/background/bg2.png"),
-            fit: BoxFit.cover,
+      body: Stack(
+        children: [
+          // 1. Background Image
+          Container(
+            decoration: const BoxDecoration(
+              image: DecorationImage(
+                image: AssetImage('assets/background/bg2.png'),
+                fit: BoxFit.cover,
+              ),
+            ),
           ),
-        ),
-        child: SafeArea(
-          child: SingleChildScrollView(
-            padding: const EdgeInsets.all(20),
-            child: Column(
-              children: [
-                const SizedBox(height: 20),
 
-                // 🔷 HEADER
-                Container(
-                  padding: const EdgeInsets.all(20),
-                  decoration: BoxDecoration(
-                    gradient: const LinearGradient(
-                      colors: [accentCyan, primaryBlue],
-                    ),
-                    borderRadius: BorderRadius.circular(20),
-                    boxShadow: [
-                      BoxShadow(
-                        color: Colors.blueAccent.withOpacity(0.4),
-                        blurRadius: 15,
-                      ),
-                    ],
-                  ),
-                  child: const Column(
-                    children: [
-                      Icon(Icons.explore, size: 60, color: Colors.white),
-                      SizedBox(height: 10),
-                      Text(
-                        "Career Navigator",
-                        style: TextStyle(
-                          fontSize: 26,
-                          fontWeight: FontWeight.bold,
-                          color: Colors.white,
-                        ),
-                      ),
-                      SizedBox(height: 6),
-                      Text(
-                        "Start your journey",
-                        style: TextStyle(color: Colors.white70),
-                      ),
-                    ],
-                  ),
-                ),
-
-                const SizedBox(height: 30),
-
-                // 🔷 GOOGLE BUTTON
-                OutlinedButton(
-                  onPressed: () {},
-                  style: OutlinedButton.styleFrom(
-                    padding: const EdgeInsets.symmetric(vertical: 14),
-                    backgroundColor: Colors.white.withOpacity(0.08),
-                    side: BorderSide(color: Colors.white.withOpacity(0.3)),
-                    shape: RoundedRectangleBorder(
-                      borderRadius: BorderRadius.circular(14),
-                    ),
-                  ),
-                  child: const Text(
-                    "Continue with Google",
-                    style: TextStyle(color: Colors.white),
-                  ),
-                ),
-
-                const SizedBox(height: 20),
-
-                const Row(
+          // 2. Main Content
+          SafeArea(
+            child: Center(
+              child: SingleChildScrollView(
+                padding: const EdgeInsets.symmetric(horizontal: 24.0),
+                child: Column(
                   children: [
-                    Expanded(child: Divider(color: Colors.white)),
-                    Padding(
-                      padding: EdgeInsets.symmetric(horizontal: 10),
-                      child: Text("OR", style: TextStyle(color: Colors.white)),
-                    ),
-                    Expanded(child: Divider(color: Colors.white)),
+                    const SizedBox(height: 20),
+                    _buildHeader(),
+                    const SizedBox(height: 40),
+                    _buildGlassForm(),
+                    const SizedBox(height: 20),
+                    _buildLoginLink(),
                   ],
                 ),
+              ),
+            ),
+          ),
+        ],
+      ),
+    );
+  }
 
-                const SizedBox(height: 20),
+  // Header Section
+  Widget _buildHeader() {
+    return Column(
+      children: [
+        Container(
+          padding: const EdgeInsets.all(15),
+          decoration: BoxDecoration(
+            shape: BoxShape.circle,
+            border: Border.all(color: primaryCyan, width: 2),
+            boxShadow: [
+              BoxShadow(color: primaryCyan.withOpacity(0.3), blurRadius: 20),
+            ],
+          ),
+          child: Icon(Icons.auto_awesome, size: 50, color: primaryCyan),
+        ),
+        const SizedBox(height: 15),
+        const Text(
+          'CARRER NAVIGATOR',
+          style: TextStyle(
+            fontSize: 28,
+            fontWeight: FontWeight.w900,
+            color: Colors.white,
+            letterSpacing: 1.5,
+          ),
+        ),
+        const Text(
+          'Chart your professional future',
+          style: TextStyle(color: Colors.white70, fontSize: 14),
+        ),
+      ],
+    );
+  }
 
-                // 🔷 FORM CONTAINER (GLASS EFFECT)
-                Container(
-                  padding: const EdgeInsets.all(20),
-                  decoration: BoxDecoration(
-                    color: Colors.white.withOpacity(0.1),
-                    borderRadius: BorderRadius.circular(20),
-                    border: Border.all(color: Colors.white24),
+  // Glassmorphism Form Container
+  Widget _buildGlassForm() {
+    return ClipRRect(
+      borderRadius: BorderRadius.circular(30),
+      child: BackdropFilter(
+        filter: ImageFilter.blur(sigmaX: 10, sigmaY: 10),
+        child: Container(
+          padding: const EdgeInsets.all(25),
+          decoration: BoxDecoration(
+            color: Colors.white.withOpacity(0.1),
+            borderRadius: BorderRadius.circular(30),
+            border: Border.all(color: Colors.white.withOpacity(0.2)),
+          ),
+          child: Form(
+            key: _formKey,
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.stretch,
+              children: [
+                _buildGoogleButton(),
+                const SizedBox(height: 25),
+                const Row(
+                  children: [
+                    Expanded(child: Divider(color: Colors.white24)),
+                    Padding(
+                      padding: EdgeInsets.symmetric(horizontal: 10),
+                      child: Text(
+                        "OR",
+                        style: TextStyle(color: Colors.white54, fontSize: 12),
+                      ),
+                    ),
+                    Expanded(child: Divider(color: Colors.white24)),
+                  ],
+                ),
+                const SizedBox(height: 25),
+                _buildTextField(Icons.person_outline, "Full Name"),
+                const SizedBox(height: 15),
+                _buildTextField(Icons.email_outlined, "Email Address"),
+                const SizedBox(height: 15),
+                _buildTextField(
+                  Icons.lock_outline,
+                  "Password",
+                  isPassword: true,
+                ),
+                const SizedBox(height: 30),
+
+                // MAIN ACTION BUTTON: Cyan Glow Effect
+                ElevatedButton(
+                  onPressed: () {},
+                  style: ElevatedButton.styleFrom(
+                    backgroundColor: primaryCyan,
+                    foregroundColor: Colors.black,
+                    padding: const EdgeInsets.symmetric(vertical: 16),
+                    shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(15),
+                    ),
+                    elevation: 8,
+                    shadowColor: primaryCyan.withOpacity(0.5),
                   ),
-                  child: Form(
-                    key: _formKey,
-                    child: Column(
-                      children: [
-                        _buildField(
-                          controller: _nameController,
-                          label: "Full Name",
-                          icon: Icons.person,
-                        ),
-
-                        const SizedBox(height: 15),
-
-                        _buildField(
-                          controller: _emailController,
-                          label: "Email",
-                          icon: Icons.email,
-                        ),
-
-                        const SizedBox(height: 15),
-
-                        _buildField(
-                          controller: _passwordController,
-                          label: "Password",
-                          icon: Icons.lock,
-                          obscure: _obscurePassword,
-                          toggle: () {
-                            setState(() {
-                              _obscurePassword = !_obscurePassword;
-                            });
-                          },
-                        ),
-
-                        const SizedBox(height: 15),
-
-                        _buildField(
-                          controller: _confirmPasswordController,
-                          label: "Confirm Password",
-                          icon: Icons.lock,
-                          obscure: _obscureConfirmPassword,
-                          toggle: () {
-                            setState(() {
-                              _obscureConfirmPassword =
-                                  !_obscureConfirmPassword;
-                            });
-                          },
-                        ),
-
-                        const SizedBox(height: 15),
-
-                        // 🔷 TERMS
-                        Row(
-                          children: [
-                            Checkbox(
-                              value: _agreeToTerms,
-                              activeColor: accentCyan,
-                              onChanged: (val) {
-                                setState(() {
-                                  _agreeToTerms = val!;
-                                });
-                              },
-                            ),
-                            const Expanded(
-                              child: Text(
-                                "I agree to Terms & Privacy",
-                                style: TextStyle(color: Colors.white),
-                              ),
-                            ),
-                          ],
-                        ),
-
-                        const SizedBox(height: 20),
-
-                        // 🔷 CREATE BUTTON (GRADIENT)
-                        ElevatedButton(
-                          onPressed: _isLoading ? null : _register,
-                          style: ElevatedButton.styleFrom(
-                            backgroundColor: Colors.transparent,
-                            shadowColor: Colors.transparent,
-                            padding: EdgeInsets.zero,
-                            shape: RoundedRectangleBorder(
-                              borderRadius: BorderRadius.circular(14),
-                            ),
-                          ),
-                          child: Ink(
-                            decoration: BoxDecoration(
-                              gradient: const LinearGradient(
-                                colors: [accentCyan, primaryBlue],
-                              ),
-                              borderRadius: BorderRadius.circular(14),
-                            ),
-                            child: Container(
-                              height: 50,
-                              alignment: Alignment.center,
-                              child: _isLoading
-                                  ? const CircularProgressIndicator(
-                                      color: Colors.white,
-                                    )
-                                  : const Text(
-                                      "Create Account",
-                                      style: TextStyle(
-                                        color: Colors.white,
-                                        fontWeight: FontWeight.bold,
-                                      ),
-                                    ),
-                            ),
-                          ),
-                        ),
-                      ],
+                  child: const Text(
+                    'CREATE ACCOUNT',
+                    style: TextStyle(
+                      fontWeight: FontWeight.bold,
+                      letterSpacing: 1.2,
                     ),
                   ),
-                ),
-
-                const SizedBox(height: 20),
-
-                // 🔷 LOGIN TEXT
-                const Text(
-                  "Already have an account? Sign in",
-                  style: TextStyle(color: Colors.white70),
                 ),
               ],
             ),
@@ -301,40 +188,65 @@ class _RegistrationPageState extends State<RegistrationPage> {
     );
   }
 
-  // ================= FIELD BUILDER =================
-  Widget _buildField({
-    required TextEditingController controller,
-    required String label,
-    required IconData icon,
-    bool obscure = false,
-    VoidCallback? toggle,
+  Widget _buildTextField(
+    IconData icon,
+    String label, {
+    bool isPassword = false,
   }) {
     return TextFormField(
-      controller: controller,
-      obscureText: obscure,
+      obscureText: isPassword && _obscurePassword,
       style: const TextStyle(color: Colors.white),
       decoration: InputDecoration(
-        prefixIcon: Icon(icon, color: Colors.white70),
-        suffixIcon: toggle != null
-            ? IconButton(
-                icon: Icon(
-                  obscure ? Icons.visibility_off : Icons.visibility,
-                  color: Colors.white70,
-                ),
-                onPressed: toggle,
-              )
-            : null,
+        prefixIcon: Icon(icon, color: primaryCyan.withOpacity(0.7)),
         labelText: label,
         labelStyle: const TextStyle(color: Colors.white70),
         filled: true,
-        fillColor: Colors.white.withOpacity(0.08),
-        border: OutlineInputBorder(
-          borderRadius: BorderRadius.circular(12),
-          borderSide: BorderSide.none,
+        fillColor: Colors.white.withOpacity(0.05),
+        enabledBorder: OutlineInputBorder(
+          borderRadius: BorderRadius.circular(15),
+          borderSide: BorderSide(color: Colors.white.withOpacity(0.1)),
+        ),
+        focusedBorder: OutlineInputBorder(
+          borderRadius: BorderRadius.circular(15),
+          borderSide: BorderSide(color: primaryCyan),
         ),
       ),
-      validator: (value) =>
-          value == null || value.isEmpty ? "Required field" : null,
+    );
+  }
+
+  Widget _buildGoogleButton() {
+    return OutlinedButton.icon(
+      onPressed: () {},
+      icon: const Icon(Icons.g_mobiledata, color: Colors.white, size: 30),
+      label: const Text(
+        'Continue with Google',
+        style: TextStyle(color: Colors.white),
+      ),
+      style: OutlinedButton.styleFrom(
+        padding: const EdgeInsets.symmetric(vertical: 12),
+        side: const BorderSide(color: Colors.white24),
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(15)),
+        backgroundColor: Colors.white.withOpacity(0.05),
+      ),
+    );
+  }
+
+  Widget _buildLoginLink() {
+    return Row(
+      mainAxisAlignment: MainAxisAlignment.center,
+      children: [
+        const Text(
+          "Already a navigator? ",
+          style: TextStyle(color: Colors.white70),
+        ),
+        TextButton(
+          onPressed: () {},
+          child: Text(
+            "Sign In",
+            style: TextStyle(color: primaryCyan, fontWeight: FontWeight.bold),
+          ),
+        ),
+      ],
     );
   }
 }
