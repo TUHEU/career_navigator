@@ -1,5 +1,7 @@
 import 'dart:ui';
+import 'dart:io';
 import 'package:flutter/material.dart';
+import 'package:image_picker/image_picker.dart';
 
 void main() {
   runApp(const MyApp());
@@ -12,21 +14,14 @@ class MyApp extends StatelessWidget {
   Widget build(BuildContext context) {
     return MaterialApp(
       debugShowCheckedModeBanner: false,
-      title: 'Carrer Navigator',
-      theme: ThemeData(
-        // Modern Cyan/Teal Seed for a Tech Look
-        colorScheme: ColorScheme.fromSeed(
-          seedColor: const Color(0xFF00E5FF),
-          brightness: Brightness.dark,
-        ),
-        useMaterial3: true,
-        fontFamily: 'Roboto',
-      ),
+      title: 'Career Navigator',
+      theme: ThemeData.dark().copyWith(useMaterial3: true),
       home: const RegistrationPage(),
     );
   }
 }
 
+// ================== PAGE 1 ==================
 class RegistrationPage extends StatefulWidget {
   const RegistrationPage({super.key});
 
@@ -36,41 +31,60 @@ class RegistrationPage extends StatefulWidget {
 
 class _RegistrationPageState extends State<RegistrationPage> {
   final _formKey = GlobalKey<FormState>();
-  bool _isLoading = false;
   bool _obscurePassword = true;
-
-  // New Modern Color Palette
   final Color primaryCyan = const Color(0xFF00E5FF);
-  final Color darkBlueBg = const Color(0xFF0A192F);
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       body: Stack(
         children: [
-          // 1. Background Image
           Container(
             decoration: const BoxDecoration(
               image: DecorationImage(
                 image: AssetImage('assets/background/bg2.png'),
                 fit: BoxFit.cover,
+                opacity: 0.5,
               ),
             ),
           ),
-
-          // 2. Main Content
           SafeArea(
             child: Center(
               child: SingleChildScrollView(
-                padding: const EdgeInsets.symmetric(horizontal: 24.0),
+                padding: const EdgeInsets.symmetric(horizontal: 24),
                 child: Column(
                   children: [
-                    const SizedBox(height: 20),
                     _buildHeader(),
                     const SizedBox(height: 40),
                     _buildGlassForm(),
                     const SizedBox(height: 20),
-                    _buildLoginLink(),
+
+                    // 🔥 SIGN IN LINK
+                    Row(
+                      mainAxisAlignment: MainAxisAlignment.center,
+                      children: [
+                        const Text(
+                          "Already have an account? ",
+                          style: TextStyle(color: Colors.white70),
+                        ),
+                        GestureDetector(
+                          onTap: () {
+                            ScaffoldMessenger.of(context).showSnackBar(
+                              const SnackBar(
+                                content: Text("Navigate to Sign In screen"),
+                              ),
+                            );
+                          },
+                          child: Text(
+                            "Sign In",
+                            style: TextStyle(
+                              color: primaryCyan,
+                              fontWeight: FontWeight.bold,
+                            ),
+                          ),
+                        ),
+                      ],
+                    ),
                   ],
                 ),
               ),
@@ -81,104 +95,73 @@ class _RegistrationPageState extends State<RegistrationPage> {
     );
   }
 
-  // Header Section
   Widget _buildHeader() {
     return Column(
-      children: [
-        Container(
-          padding: const EdgeInsets.all(15),
-          decoration: BoxDecoration(
-            shape: BoxShape.circle,
-            border: Border.all(color: primaryCyan, width: 2),
-            boxShadow: [
-              BoxShadow(color: primaryCyan.withOpacity(0.3), blurRadius: 20),
-            ],
-          ),
-          child: Icon(Icons.auto_awesome, size: 50, color: primaryCyan),
-        ),
-        const SizedBox(height: 15),
-        const Text(
-          'CARRER NAVIGATOR',
+      children: const [
+        Icon(Icons.explore, size: 60, color: Color(0xFF00E5FF)),
+        Text(
+          'CAREER NAVIGATOR',
           style: TextStyle(
-            fontSize: 28,
-            fontWeight: FontWeight.w900,
+            fontSize: 26,
+            fontWeight: FontWeight.bold,
             color: Colors.white,
-            letterSpacing: 1.5,
           ),
         ),
-        const Text(
-          'Chart your professional future',
-          style: TextStyle(color: Colors.white70, fontSize: 14),
-        ),
+        Text("Create your account", style: TextStyle(color: Colors.white70)),
       ],
     );
   }
 
-  // Glassmorphism Form Container
   Widget _buildGlassForm() {
     return ClipRRect(
-      borderRadius: BorderRadius.circular(30),
+      borderRadius: BorderRadius.circular(25),
       child: BackdropFilter(
         filter: ImageFilter.blur(sigmaX: 10, sigmaY: 10),
         child: Container(
-          padding: const EdgeInsets.all(25),
+          padding: const EdgeInsets.all(20),
           decoration: BoxDecoration(
             color: Colors.white.withOpacity(0.1),
-            borderRadius: BorderRadius.circular(30),
-            border: Border.all(color: Colors.white.withOpacity(0.2)),
+            borderRadius: BorderRadius.circular(25),
           ),
           child: Form(
             key: _formKey,
             child: Column(
-              crossAxisAlignment: CrossAxisAlignment.stretch,
               children: [
                 _buildGoogleButton(),
-                const SizedBox(height: 25),
-                const Row(
-                  children: [
-                    Expanded(child: Divider(color: Colors.white24)),
-                    Padding(
-                      padding: EdgeInsets.symmetric(horizontal: 10),
-                      child: Text(
-                        "OR",
-                        style: TextStyle(color: Colors.white54, fontSize: 12),
-                      ),
-                    ),
-                    Expanded(child: Divider(color: Colors.white24)),
-                  ],
-                ),
-                const SizedBox(height: 25),
-                _buildTextField(Icons.person_outline, "Full Name"),
+                const SizedBox(height: 20),
+
+                _buildTextField(Icons.email, "Email"),
                 const SizedBox(height: 15),
-                _buildTextField(Icons.email_outlined, "Email Address"),
+
+                _buildTextField(Icons.lock, "Password", isPassword: true),
                 const SizedBox(height: 15),
+
                 _buildTextField(
                   Icons.lock_outline,
-                  "Password",
+                  "Confirm Password",
                   isPassword: true,
                 ),
-                const SizedBox(height: 30),
 
-                // MAIN ACTION BUTTON: Cyan Glow Effect
+                const SizedBox(height: 25),
+
                 ElevatedButton(
-                  onPressed: () {},
+                  onPressed: () {
+                    Navigator.push(
+                      context,
+                      MaterialPageRoute(
+                        builder: (_) => const ProfileSetupPage(),
+                      ),
+                    );
+                  },
                   style: ElevatedButton.styleFrom(
                     backgroundColor: primaryCyan,
                     foregroundColor: Colors.black,
-                    padding: const EdgeInsets.symmetric(vertical: 16),
+                    minimumSize: const Size(double.infinity, 50),
                     shape: RoundedRectangleBorder(
                       borderRadius: BorderRadius.circular(15),
                     ),
-                    elevation: 8,
-                    shadowColor: primaryCyan.withOpacity(0.5),
                   ),
-                  child: const Text(
-                    'CREATE ACCOUNT',
-                    style: TextStyle(
-                      fontWeight: FontWeight.bold,
-                      letterSpacing: 1.2,
-                    ),
-                  ),
+                  child: const Text("CONTINUE"),
                 ),
               ],
             ),
@@ -197,19 +180,11 @@ class _RegistrationPageState extends State<RegistrationPage> {
       obscureText: isPassword && _obscurePassword,
       style: const TextStyle(color: Colors.white),
       decoration: InputDecoration(
-        prefixIcon: Icon(icon, color: primaryCyan.withOpacity(0.7)),
+        prefixIcon: Icon(icon, color: primaryCyan),
         labelText: label,
-        labelStyle: const TextStyle(color: Colors.white70),
         filled: true,
         fillColor: Colors.white.withOpacity(0.05),
-        enabledBorder: OutlineInputBorder(
-          borderRadius: BorderRadius.circular(15),
-          borderSide: BorderSide(color: Colors.white.withOpacity(0.1)),
-        ),
-        focusedBorder: OutlineInputBorder(
-          borderRadius: BorderRadius.circular(15),
-          borderSide: BorderSide(color: primaryCyan),
-        ),
+        border: OutlineInputBorder(borderRadius: BorderRadius.circular(15)),
       ),
     );
   }
@@ -217,36 +192,125 @@ class _RegistrationPageState extends State<RegistrationPage> {
   Widget _buildGoogleButton() {
     return OutlinedButton.icon(
       onPressed: () {},
-      icon: const Icon(Icons.g_mobiledata, color: Colors.white, size: 30),
+      icon: const Icon(Icons.g_mobiledata, color: Colors.white),
       label: const Text(
-        'Continue with Google',
+        "Continue with Google",
         style: TextStyle(color: Colors.white),
-      ),
-      style: OutlinedButton.styleFrom(
-        padding: const EdgeInsets.symmetric(vertical: 12),
-        side: const BorderSide(color: Colors.white24),
-        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(15)),
-        backgroundColor: Colors.white.withOpacity(0.05),
       ),
     );
   }
+}
 
-  Widget _buildLoginLink() {
-    return Row(
-      mainAxisAlignment: MainAxisAlignment.center,
-      children: [
-        const Text(
-          "Already a navigator? ",
-          style: TextStyle(color: Colors.white70),
+// ================== PAGE 2 ==================
+class ProfileSetupPage extends StatefulWidget {
+  const ProfileSetupPage({super.key});
+
+  @override
+  State<ProfileSetupPage> createState() => _ProfileSetupPageState();
+}
+
+class _ProfileSetupPageState extends State<ProfileSetupPage> {
+  final ImagePicker _picker = ImagePicker();
+  File? _image;
+  final Color primaryCyan = const Color(0xFF00E5FF);
+
+  Future<void> _pickImage() async {
+    final picked = await _picker.pickImage(source: ImageSource.gallery);
+
+    if (picked != null) {
+      setState(() {
+        _image = File(picked.path);
+      });
+    }
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return Scaffold(
+      backgroundColor: const Color(0xFF0A192F),
+      appBar: AppBar(backgroundColor: Colors.transparent),
+      body: SingleChildScrollView(
+        padding: const EdgeInsets.all(24),
+        child: Column(
+          children: [
+            const Text(
+              "Complete Your Profile",
+              style: TextStyle(
+                fontSize: 24,
+                color: Colors.white,
+                fontWeight: FontWeight.bold,
+              ),
+            ),
+
+            const SizedBox(height: 30),
+
+            // 🔥 PROFILE IMAGE PICKER
+            GestureDetector(
+              onTap: _pickImage,
+              child: CircleAvatar(
+                radius: 60,
+                backgroundColor: Colors.white10,
+                backgroundImage: _image != null ? FileImage(_image!) : null,
+                child: _image == null
+                    ? Icon(Icons.camera_alt, color: primaryCyan, size: 40)
+                    : null,
+              ),
+            ),
+
+            const SizedBox(height: 10),
+
+            const Text(
+              "Tap to upload profile picture",
+              style: TextStyle(color: Colors.white54),
+            ),
+
+            const SizedBox(height: 30),
+
+            TextFormField(
+              style: const TextStyle(color: Colors.white),
+              decoration: InputDecoration(
+                labelText: "Full Name",
+                prefixIcon: Icon(Icons.person, color: primaryCyan),
+                border: OutlineInputBorder(
+                  borderRadius: BorderRadius.circular(15),
+                ),
+              ),
+            ),
+
+            const SizedBox(height: 20),
+
+            TextFormField(
+              readOnly: true,
+              onTap: () => showDatePicker(
+                context: context,
+                initialDate: DateTime.now(),
+                firstDate: DateTime(1950),
+                lastDate: DateTime.now(),
+              ),
+              style: const TextStyle(color: Colors.white),
+              decoration: InputDecoration(
+                labelText: "Date of Birth",
+                prefixIcon: Icon(Icons.calendar_today, color: primaryCyan),
+                border: OutlineInputBorder(
+                  borderRadius: BorderRadius.circular(15),
+                ),
+              ),
+            ),
+
+            const SizedBox(height: 30),
+
+            ElevatedButton(
+              onPressed: () {},
+              style: ElevatedButton.styleFrom(
+                backgroundColor: primaryCyan,
+                foregroundColor: Colors.black,
+                minimumSize: const Size(double.infinity, 55),
+              ),
+              child: const Text("FINISH REGISTRATION"),
+            ),
+          ],
         ),
-        TextButton(
-          onPressed: () {},
-          child: Text(
-            "Sign In",
-            style: TextStyle(color: primaryCyan, fontWeight: FontWeight.bold),
-          ),
-        ),
-      ],
+      ),
     );
   }
 }
