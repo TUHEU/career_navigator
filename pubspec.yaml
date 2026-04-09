@@ -11,8 +11,10 @@ dependencies:
   flutter:
     sdk: flutter
   cupertino_icons: ^1.0.8
+  http: ^1.2.0
   image_picker: ^1.2.1
   flutter_native_splash: ^2.4.1
+  shared_preferences: ^2.5.5
 
 dev_dependencies:
   flutter_test:
@@ -40,4 +42,7 @@ flutter:
 
   assets:
     - assets/background/bg2.png
+    - assets/background/bg3.png
+    - assets/background/bg6.png
+    - assets/background/bg8.png
     - assets/logo/logo.png
