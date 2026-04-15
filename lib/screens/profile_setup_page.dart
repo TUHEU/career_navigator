@@ -19,6 +19,7 @@ class _ProfileSetupPageState extends State<ProfileSetupPage> {
   final ImagePicker _picker = ImagePicker();
   File? _image;
   DateTime? _selectedDate;
+  String _selectedRole = 'job_seeker'; // default
   final TextEditingController _dobController = TextEditingController();
   final TextEditingController _nameController = TextEditingController();
   bool _loading = false;
@@ -67,6 +68,7 @@ class _ProfileSetupPageState extends State<ProfileSetupPage> {
         token: token,
         fullName: _nameController.text.trim(),
         dob: dob,
+        role: _selectedRole,
       );
       if (!mounted) return;
       Navigator.pushReplacement(
@@ -97,14 +99,12 @@ class _ProfileSetupPageState extends State<ProfileSetupPage> {
       appBar: AppBar(
         backgroundColor: Colors.transparent,
         iconTheme: const IconThemeData(color: Colors.white),
-        title: const Text(
-          'Profile Setup',
-          style: TextStyle(color: Colors.white),
-        ),
+        title: const Text('Profile Setup', style: TextStyle(color: Colors.white)),
       ),
       body: SingleChildScrollView(
         padding: const EdgeInsets.all(24),
         child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
           children: [
             const Text(
               'Complete Your Profile',
@@ -115,68 +115,102 @@ class _ProfileSetupPageState extends State<ProfileSetupPage> {
               ),
             ),
             const SizedBox(height: 30),
-            GestureDetector(
-              onTap: _pickImage,
-              child: Stack(
-                children: [
-                  CircleAvatar(
-                    radius: 62,
-                    backgroundColor: AppColors.primaryCyan.withOpacity(0.2),
-                    backgroundImage:
-                        _image != null ? FileImage(_image!) : null,
-                    child: _image == null
-                        ? const Icon(
-                            Icons.person,
-                            color: AppColors.primaryCyan,
-                            size: 50,
-                          )
-                        : null,
-                  ),
-                  Positioned(
-                    bottom: 4,
-                    right: 4,
-                    child: Container(
-                      padding: const EdgeInsets.all(6),
-                      decoration: const BoxDecoration(
-                        color: AppColors.primaryCyan,
-                        shape: BoxShape.circle,
-                      ),
-                      child: const Icon(
-                        Icons.camera_alt,
-                        color: Colors.black,
-                        size: 16,
+
+            // Avatar picker
+            Center(
+              child: GestureDetector(
+                onTap: _pickImage,
+                child: Stack(
+                  children: [
+                    CircleAvatar(
+                      radius: 62,
+                      backgroundColor: AppColors.primaryCyan.withOpacity(0.2),
+                      backgroundImage: _image != null ? FileImage(_image!) : null,
+                      child: _image == null
+                          ? const Icon(Icons.person,
+                              color: AppColors.primaryCyan, size: 50)
+                          : null,
+                    ),
+                    Positioned(
+                      bottom: 4,
+                      right: 4,
+                      child: Container(
+                        padding: const EdgeInsets.all(6),
+                        decoration: const BoxDecoration(
+                          color: AppColors.primaryCyan,
+                          shape: BoxShape.circle,
+                        ),
+                        child: const Icon(Icons.camera_alt,
+                            color: Colors.black, size: 16),
                       ),
                     ),
-                  ),
-                ],
+                  ],
+                ),
               ),
             ),
-            const SizedBox(height: 10),
-            Text(
-              'Tap to upload profile picture',
-              style: TextStyle(color: Colors.white.withOpacity(0.5)),
+            const SizedBox(height: 8),
+            Center(
+              child: Text(
+                'Tap to upload profile picture',
+                style: TextStyle(color: Colors.white.withOpacity(0.5)),
+              ),
             ),
             const SizedBox(height: 30),
+
+            // Name
             TextFormField(
               controller: _nameController,
               style: const TextStyle(color: Colors.white),
               decoration: buildInputDecoration(
-                icon: Icons.person_outline,
-                label: 'Full Name',
-              ),
+                  icon: Icons.person_outline, label: 'Full Name'),
             ),
             const SizedBox(height: 20),
+
+            // DOB
             TextFormField(
               controller: _dobController,
               readOnly: true,
               onTap: _pickDate,
               style: const TextStyle(color: Colors.white),
               decoration: buildInputDecoration(
-                icon: Icons.calendar_today_outlined,
-                label: 'Date of Birth',
-              ),
+                  icon: Icons.calendar_today_outlined, label: 'Date of Birth'),
             ),
-            const SizedBox(height: 30),
+            const SizedBox(height: 28),
+
+            // Role selection
+            Text(
+              'I am a...',
+              style: TextStyle(
+                  color: Colors.white.withOpacity(0.75),
+                  fontSize: 15,
+                  fontWeight: FontWeight.w600),
+            ),
+            const SizedBox(height: 14),
+            Row(
+              children: [
+                Expanded(
+                  child: _RoleCard(
+                    icon: Icons.search_rounded,
+                    title: 'Job Seeker',
+                    subtitle: 'Looking for opportunities',
+                    selected: _selectedRole == 'job_seeker',
+                    onTap: () => setState(() => _selectedRole = 'job_seeker'),
+                  ),
+                ),
+                const SizedBox(width: 14),
+                Expanded(
+                  child: _RoleCard(
+                    icon: Icons.school_outlined,
+                    title: 'Mentor',
+                    subtitle: 'Guide others in their career',
+                    selected: _selectedRole == 'mentor',
+                    onTap: () => setState(() => _selectedRole = 'mentor'),
+                  ),
+                ),
+              ],
+            ),
+            const SizedBox(height: 36),
+
             ElevatedButton(
               onPressed: _loading ? null : _finish,
               style: ElevatedButton.styleFrom(
@@ -184,8 +218,7 @@ class _ProfileSetupPageState extends State<ProfileSetupPage> {
                 foregroundColor: Colors.black,
                 minimumSize: const Size(double.infinity, 55),
                 shape: RoundedRectangleBorder(
-                  borderRadius: BorderRadius.circular(15),
-                ),
+                    borderRadius: BorderRadius.circular(15)),
                 elevation: 6,
               ),
               child: _loading
@@ -193,17 +226,74 @@ class _ProfileSetupPageState extends State<ProfileSetupPage> {
                       width: 22,
                       height: 22,
                       child: CircularProgressIndicator(
-                        strokeWidth: 2.5,
-                        color: Colors.black,
-                      ),
-                    )
-                  : const Text(
-                      'FINISH REGISTRATION',
+                          strokeWidth: 2.5, color: Colors.black))
+                  : const Text('FINISH REGISTRATION',
                       style: TextStyle(
-                        fontWeight: FontWeight.bold,
-                        fontSize: 16,
-                      ),
-                    ),
+                          fontWeight: FontWeight.bold, fontSize: 16)),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+}
+
+class _RoleCard extends StatelessWidget {
+  final IconData icon;
+  final String title;
+  final String subtitle;
+  final bool selected;
+  final VoidCallback onTap;
+
+  const _RoleCard({
+    required this.icon,
+    required this.title,
+    required this.subtitle,
+    required this.selected,
+    required this.onTap,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    return GestureDetector(
+      onTap: onTap,
+      child: AnimatedContainer(
+        duration: const Duration(milliseconds: 200),
+        padding: const EdgeInsets.symmetric(vertical: 18, horizontal: 14),
+        decoration: BoxDecoration(
+          color: selected
+              ? AppColors.primaryCyan.withOpacity(0.12)
+              : Colors.white.withOpacity(0.05),
+          borderRadius: BorderRadius.circular(18),
+          border: Border.all(
+            color: selected
+                ? AppColors.primaryCyan
+                : Colors.white.withOpacity(0.12),
+            width: selected ? 2 : 1,
+          ),
+        ),
+        child: Column(
+          children: [
+            Icon(icon,
+                color: selected
+                    ? AppColors.primaryCyan
+                    : Colors.white.withOpacity(0.5),
+                size: 32),
+            const SizedBox(height: 10),
+            Text(
+              title,
+              style: TextStyle(
+                color: selected ? Colors.white : Colors.white.withOpacity(0.65),
+                fontWeight: FontWeight.bold,
+                fontSize: 14,
+              ),
+            ),
+            const SizedBox(height: 4),
+            Text(
+              subtitle,
+              textAlign: TextAlign.center,
+              style: TextStyle(
+                  color: Colors.white.withOpacity(0.4), fontSize: 11),
             ),
           ],
         ),
