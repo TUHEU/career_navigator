@@ -3,7 +3,7 @@ import 'package:flutter_native_splash/flutter_native_splash.dart';
 
 import 'screens/splash_screen.dart';
 
-const String kBaseUrl = 'http://38.242.246.126:5000';
+const String kBaseUrl = 'http://192.168.137.29:5000';
 
 void main() async {
   WidgetsBinding widgetsBinding = WidgetsFlutterBinding.ensureInitialized();
