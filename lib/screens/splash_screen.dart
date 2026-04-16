@@ -1,10 +1,13 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_native_splash/flutter_native_splash.dart';
+import 'package:provider/provider.dart';
 
 import '../services/token_store.dart';
+import '../services/api_service.dart';
 import '../theme/app_theme.dart';
 import 'sign_in_page.dart';
-import 'dashboard_page.dart';
+import 'job_seeker_dashboard.dart';
+import 'mentor_dashboard.dart';
 
 class SplashScreen extends StatefulWidget {
   const SplashScreen({super.key});
@@ -15,10 +18,9 @@ class SplashScreen extends StatefulWidget {
 
 class _SplashScreenState extends State<SplashScreen>
     with TickerProviderStateMixin {
-  late AnimationController _logoController;
-  late AnimationController _textController;
-  late AnimationController _progressController;
-
+  late AnimationController _logoCtrl;
+  late AnimationController _textCtrl;
+  late AnimationController _progressCtrl;
   late Animation<double> _fadeAnim;
   late Animation<double> _scaleAnim;
   late Animation<double> _textFadeAnim;
@@ -29,80 +31,116 @@ class _SplashScreenState extends State<SplashScreen>
   void initState() {
     super.initState();
 
-    _logoController = AnimationController(
+    _logoCtrl = AnimationController(
       vsync: this,
       duration: const Duration(milliseconds: 1200),
     );
-    _fadeAnim = Tween<double>(begin: 0, end: 1).animate(
-      CurvedAnimation(parent: _logoController, curve: Curves.easeIn),
-    );
-    _scaleAnim = Tween<double>(begin: 0.6, end: 1.0).animate(
-      CurvedAnimation(parent: _logoController, curve: Curves.elasticOut),
-    );
+    _fadeAnim = Tween<double>(
+      begin: 0,
+      end: 1,
+    ).animate(CurvedAnimation(parent: _logoCtrl, curve: Curves.easeIn));
+    _scaleAnim = Tween<double>(
+      begin: 0.6,
+      end: 1.0,
+    ).animate(CurvedAnimation(parent: _logoCtrl, curve: Curves.elasticOut));
 
-    _textController = AnimationController(
+    _textCtrl = AnimationController(
       vsync: this,
       duration: const Duration(milliseconds: 900),
     );
-    _textFadeAnim = Tween<double>(begin: 0, end: 1).animate(
-      CurvedAnimation(parent: _textController, curve: Curves.easeIn),
-    );
+    _textFadeAnim = Tween<double>(
+      begin: 0,
+      end: 1,
+    ).animate(CurvedAnimation(parent: _textCtrl, curve: Curves.easeIn));
     _textSlideAnim = Tween<Offset>(
       begin: const Offset(0, 0.3),
       end: Offset.zero,
-    ).animate(CurvedAnimation(parent: _textController, curve: Curves.easeOut));
+    ).animate(CurvedAnimation(parent: _textCtrl, curve: Curves.easeOut));
 
-    // Progress fills over 5 seconds total
-    _progressController = AnimationController(
+    _progressCtrl = AnimationController(
       vsync: this,
       duration: const Duration(milliseconds: 5000),
     );
-    _progressAnim = Tween<double>(begin: 0, end: 1).animate(
-      CurvedAnimation(parent: _progressController, curve: Curves.easeInOut),
+    _progressAnim = Tween<double>(
+      begin: 0,
+      end: 1,
+    ).animate(CurvedAnimation(parent: _progressCtrl, curve: Curves.easeInOut));
+
+    _logoCtrl.forward().then((_) {
+      _textCtrl.forward();
+      _progressCtrl.forward();
+    });
+
+    // Navigate after 6 seconds, route based on stored role
+    Future.delayed(const Duration(seconds: 6), _navigate);
+  }
+
+  Future<void> _navigate() async {
+    FlutterNativeSplash.remove();
+    if (!mounted) return;
+
+    final token = await TokenStore.getAccess();
+    if (!mounted) return;
+
+    if (token == null) {
+      _go(const SignInPage());
+      return;
+    }
+
+    // Fetch profile to know the role
+    try {
+      final res = await ApiService.getProfile(token);
+      if (!mounted) return;
+      if (res['success'] == true) {
+        final role = (res['data']['role'] as String?) ?? 'job_seeker';
+        if (role == 'mentor') {
+          _go(const MentorDashboard());
+        } else {
+          _go(const JobSeekerDashboard());
+        }
+      } else {
+        await TokenStore.clear();
+        _go(const SignInPage());
+      }
+    } catch (_) {
+      _go(const SignInPage());
+    }
+  }
+
+  void _go(Widget page) {
+    if (!mounted) return;
+    Navigator.pushReplacement(
+      context,
+      PageRouteBuilder(
+        pageBuilder: (_, __, ___) => page,
+        transitionsBuilder: (_, anim, __, child) =>
+            FadeTransition(opacity: anim, child: child),
+        transitionDuration: const Duration(milliseconds: 600),
+      ),
     );
-
-    _logoController.forward().then((_) {
-      _textController.forward();
-      _progressController.forward();
-    });
-
-    // Total splash = 6 seconds
-    Future.delayed(const Duration(seconds: 6), () async {
-      FlutterNativeSplash.remove();
-      if (!mounted) return;
-      final token = await TokenStore.getAccess();
-      if (!mounted) return;
-      Navigator.pushReplacement(
-        context,
-        PageRouteBuilder(
-          pageBuilder: (_, __, ___) =>
-              token != null ? const DashboardPage() : const SignInPage(),
-          transitionsBuilder: (_, anim, __, child) =>
-              FadeTransition(opacity: anim, child: child),
-          transitionDuration: const Duration(milliseconds: 600),
-        ),
-      );
-    });
   }
 
   @override
   void dispose() {
-    _logoController.dispose();
-    _textController.dispose();
-    _progressController.dispose();
+    _logoCtrl.dispose();
+    _textCtrl.dispose();
+    _progressCtrl.dispose();
     super.dispose();
   }
 
   @override
   Widget build(BuildContext context) {
+    final theme = context.watch<AppThemeProvider>();
     final size = MediaQuery.of(context).size;
+
     return Scaffold(
       body: Stack(
         children: [
           Container(
-            decoration: const BoxDecoration(
+            decoration: BoxDecoration(
+              color: AppColors.darkBackground,
               image: DecorationImage(
-                image: AssetImage('assets/background/bg6.png'),
+                image: AssetImage(theme.backgroundPath),
                 fit: BoxFit.cover,
                 opacity: 0.50,
               ),
@@ -132,14 +170,17 @@ class _SplashScreenState extends State<SplashScreen>
                         ],
                       ),
                       child: ClipOval(
-                        child: Image.asset('assets/logo/logo.png', fit: BoxFit.cover),
+                        child: Image.asset(
+                          'assets/logo/logo.png',
+                          fit: BoxFit.cover,
+                        ),
                       ),
                     ),
                   ),
                 ),
                 const SizedBox(height: 32),
 
-                // Title + subtitle
+                // Title
                 FadeTransition(
                   opacity: _textFadeAnim,
                   child: SlideTransition(
@@ -168,10 +209,9 @@ class _SplashScreenState extends State<SplashScreen>
                     ),
                   ),
                 ),
-
                 const SizedBox(height: 60),
 
-                // Animated progress bar
+                // Progress bar
                 FadeTransition(
                   opacity: _textFadeAnim,
                   child: SizedBox(
@@ -196,7 +236,7 @@ class _SplashScreenState extends State<SplashScreen>
                         AnimatedBuilder(
                           animation: _progressAnim,
                           builder: (_, __) => Text(
-                            _loadingLabel(_progressAnim.value),
+                            _label(_progressAnim.value),
                             style: TextStyle(
                               color: Colors.white.withOpacity(0.45),
                               fontSize: 12,
@@ -216,7 +256,7 @@ class _SplashScreenState extends State<SplashScreen>
     );
   }
 
-  String _loadingLabel(double p) {
+  String _label(double p) {
     if (p < 0.30) return 'Initializing...';
     if (p < 0.60) return 'Loading your profile...';
     if (p < 0.90) return 'Almost ready...';
