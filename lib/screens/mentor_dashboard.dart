@@ -4,6 +4,7 @@ import 'package:provider/provider.dart';
 import '../services/api_service.dart';
 import '../services/token_store.dart';
 import '../theme/app_theme.dart';
+import '../widgets/shared_widgets.dart';
 import 'sign_in_page.dart';
 import 'mentor_profile_page.dart';
 import 'education_form_page.dart';
@@ -93,14 +94,14 @@ class _MentorDashboardState extends State<MentorDashboard> {
           SafeArea(child: pages[_currentIndex]),
         ],
       ),
-      bottomNavigationBar: _BottomNav(
+      bottomNavigationBar: AppBottomNav(
         currentIndex: _currentIndex,
         onTap: (i) => setState(() => _currentIndex = i),
         items: const [
-          _NavItem(Icons.home_outlined, Icons.home, 'Home'),
-          _NavItem(Icons.person_outline, Icons.person, 'My Profile'),
-          _NavItem(Icons.history_edu_outlined, Icons.history_edu, 'History'),
-          _NavItem(Icons.settings_outlined, Icons.settings, 'Settings'),
+          NavItem(Icons.home_outlined, Icons.home, 'Home'),
+          NavItem(Icons.person_outline, Icons.person, 'My Profile'),
+          NavItem(Icons.history_edu_outlined, Icons.history_edu, 'History'),
+          NavItem(Icons.settings_outlined, Icons.settings, 'Settings'),
         ],
       ),
     );
@@ -123,11 +124,10 @@ class _MentorHomePage extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    if (loading) {
+    if (loading)
       return const Center(
         child: CircularProgressIndicator(color: AppColors.primaryCyan),
       );
-    }
 
     final p = profile ?? {};
     final mp = (p['mentor_profile'] as Map<String, dynamic>?) ?? {};
@@ -196,8 +196,7 @@ class _MentorHomePage extends StatelessWidget {
           ),
           const SizedBox(height: 20),
 
-          // Profile card
-          _ProfileCard(
+          ProfileCard(
             name: name,
             headline: headline,
             email: email,
@@ -207,7 +206,7 @@ class _MentorHomePage extends StatelessWidget {
           ),
           const SizedBox(height: 20),
 
-          // Mentor stats row
+          // Mentor stats
           Row(
             children: [
               _MStatBox(
@@ -233,7 +232,7 @@ class _MentorHomePage extends StatelessWidget {
           ),
           const SizedBox(height: 20),
 
-          // Accepting mentees badge
+          // Accepting badge
           Container(
             padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
             decoration: BoxDecoration(
@@ -274,83 +273,47 @@ class _MentorHomePage extends StatelessWidget {
 
           // Expertise chips
           if ((mp['expertise_areas'] as List?)?.isNotEmpty == true) ...[
-            _sectionTitle('Expertise Areas'),
+            const SectionTitle(title: 'Expertise Areas'),
             const SizedBox(height: 10),
             Wrap(
               spacing: 8,
               runSpacing: 8,
               children: (mp['expertise_areas'] as List)
-                  .map((e) => _Chip(label: e.toString()))
+                  .map((e) => ExpertiseChip(label: e.toString()))
                   .toList(),
             ),
             const SizedBox(height: 20),
           ],
 
-          // Career info
-          _sectionTitle('Career Info'),
+          const SectionTitle(title: 'Career Info'),
           const SizedBox(height: 10),
-          _infoTile(Icons.business_outlined, 'Current Company', company),
-          _infoTile(Icons.badge_outlined, 'Job Title', jobTitle),
-          _infoTile(
-            Icons.signal_cellular_alt,
-            'Experience',
-            yoe != null ? '$yoe years' : '—',
+          InfoTile(
+            icon: Icons.business_outlined,
+            label: 'Current Company',
+            value: company,
+          ),
+          InfoTile(
+            icon: Icons.badge_outlined,
+            label: 'Job Title',
+            value: jobTitle,
+          ),
+          InfoTile(
+            icon: Icons.signal_cellular_alt,
+            label: 'Experience',
+            value: yoe != null ? '$yoe years' : '—',
           ),
 
           const SizedBox(height: 20),
-          _ComingSoonBanner(),
+          const ComingSoonBanner(),
           const SizedBox(height: 20),
         ],
       ),
     );
   }
-
-  Widget _sectionTitle(String t) => Text(
-    t,
-    style: const TextStyle(
-      color: AppColors.primaryCyan,
-      fontSize: 12,
-      fontWeight: FontWeight.bold,
-      letterSpacing: 1,
-    ),
-  );
-
-  Widget _infoTile(IconData icon, String label, String value) => Container(
-    margin: const EdgeInsets.only(bottom: 9),
-    padding: const EdgeInsets.symmetric(horizontal: 15, vertical: 13),
-    decoration: BoxDecoration(
-      color: Colors.white.withOpacity(0.04),
-      borderRadius: BorderRadius.circular(13),
-      border: Border.all(color: Colors.white.withOpacity(0.07)),
-    ),
-    child: Row(
-      children: [
-        Icon(icon, color: AppColors.primaryCyan, size: 18),
-        const SizedBox(width: 12),
-        Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            Text(
-              label,
-              style: TextStyle(
-                color: Colors.white.withOpacity(0.38),
-                fontSize: 10,
-              ),
-            ),
-            const SizedBox(height: 2),
-            Text(
-              value,
-              style: const TextStyle(color: Colors.white, fontSize: 14),
-            ),
-          ],
-        ),
-      ],
-    ),
-  );
 }
 
 // ─────────────────────────────────────────────────────────
-// MENTOR PROFILE TAB — edit mentor details
+// MENTOR PROFILE TAB
 // ─────────────────────────────────────────────────────────
 class _MentorProfileTab extends StatelessWidget {
   final Map<String, dynamic> profile;
@@ -359,16 +322,17 @@ class _MentorProfileTab extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final mp = (profile['mentor_profile'] as Map<String, dynamic>?) ?? {};
+
     return ListView(
       padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 16),
       children: [
-        const _PageHeader(
+        const PageHeader(
           title: 'Mentor Profile',
           subtitle: 'Manage your mentor information',
         ),
         const SizedBox(height: 20),
 
-        // Edit mentor profile button
         ElevatedButton.icon(
           onPressed: () => Navigator.push(
             context,
@@ -390,70 +354,50 @@ class _MentorProfileTab extends StatelessWidget {
         ),
         const SizedBox(height: 24),
 
-        // Show mentor profile data
-        const Text(
-          'Mentor Details',
-          style: TextStyle(
-            color: AppColors.primaryCyan,
-            fontSize: 12,
-            fontWeight: FontWeight.bold,
-            letterSpacing: 1,
+        const SectionTitle(title: 'Mentor Details'),
+        const SizedBox(height: 12),
+
+        ...[
+          {'label': 'Headline', 'value': mp['headline'] ?? '—'},
+          {'label': 'Current Company', 'value': mp['current_company'] ?? '—'},
+          {'label': 'Job Title', 'value': mp['current_job_title'] ?? '—'},
+          {'label': 'Location', 'value': mp['location'] ?? '—'},
+          {'label': 'Mentoring Style', 'value': mp['mentoring_style'] ?? '—'},
+          {
+            'label': 'Session Price',
+            'value': mp['session_price'] != null
+                ? '${mp['currency'] ?? 'USD'} ${mp['session_price']}'
+                : 'Free',
+          },
+        ].map(
+          (e) => Container(
+            margin: const EdgeInsets.only(bottom: 9),
+            padding: const EdgeInsets.symmetric(horizontal: 15, vertical: 13),
+            decoration: BoxDecoration(
+              color: Colors.white.withOpacity(0.04),
+              borderRadius: BorderRadius.circular(13),
+              border: Border.all(color: Colors.white.withOpacity(0.07)),
+            ),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(
+                  e['label']!,
+                  style: TextStyle(
+                    color: Colors.white.withOpacity(0.38),
+                    fontSize: 10,
+                  ),
+                ),
+                const SizedBox(height: 2),
+                Text(
+                  e['value']!,
+                  style: const TextStyle(color: Colors.white, fontSize: 14),
+                ),
+              ],
+            ),
           ),
         ),
-        const SizedBox(height: 12),
-        _buildMentorInfo(profile),
       ],
-    );
-  }
-
-  Widget _buildMentorInfo(Map<String, dynamic> p) {
-    final mp = (p['mentor_profile'] as Map<String, dynamic>?) ?? {};
-    final fields = {
-      'Headline': mp['headline'] ?? '—',
-      'Current Company': mp['current_company'] ?? '—',
-      'Job Title': mp['current_job_title'] ?? '—',
-      'Location': mp['location'] ?? '—',
-      'Mentoring Style': mp['mentoring_style'] ?? '—',
-      'Session Price': mp['session_price'] != null
-          ? '${mp['currency'] ?? 'USD'} ${mp['session_price']}'
-          : 'Free',
-    };
-
-    return Column(
-      children: fields.entries.map((e) {
-        return Container(
-          margin: const EdgeInsets.only(bottom: 9),
-          padding: const EdgeInsets.symmetric(horizontal: 15, vertical: 13),
-          decoration: BoxDecoration(
-            color: Colors.white.withOpacity(0.04),
-            borderRadius: BorderRadius.circular(13),
-            border: Border.all(color: Colors.white.withOpacity(0.07)),
-          ),
-          child: Row(
-            children: [
-              Expanded(
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Text(
-                      e.key,
-                      style: TextStyle(
-                        color: Colors.white.withOpacity(0.38),
-                        fontSize: 10,
-                      ),
-                    ),
-                    const SizedBox(height: 2),
-                    Text(
-                      e.value.toString(),
-                      style: const TextStyle(color: Colors.white, fontSize: 14),
-                    ),
-                  ],
-                ),
-              ),
-            ],
-          ),
-        );
-      }).toList(),
     );
   }
 }
@@ -474,24 +418,16 @@ class _MentorHistoryTab extends StatelessWidget {
     return ListView(
       padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 16),
       children: [
-        const _PageHeader(
+        const PageHeader(
           title: 'Background',
           subtitle: 'Education & work history',
         ),
         const SizedBox(height: 20),
 
-        // Education section
-        const Text(
-          'Education',
-          style: TextStyle(
-            color: AppColors.primaryCyan,
-            fontSize: 12,
-            fontWeight: FontWeight.bold,
-            letterSpacing: 1,
-          ),
-        ),
+        // ── Education ────────────────────────────────────
+        const SectionTitle(title: 'Education'),
         const SizedBox(height: 10),
-        _AddButton(
+        AddButton(
           label: 'Add Education',
           onTap: () => Navigator.push(
             context,
@@ -500,14 +436,14 @@ class _MentorHistoryTab extends StatelessWidget {
         ),
         const SizedBox(height: 10),
         if (eduItems.isEmpty)
-          _EmptyState(
+          const EmptyState(
             icon: Icons.school_outlined,
             message: 'No education added yet.',
           )
         else
           ...eduItems.map((e) {
             final item = e as Map<String, dynamic>;
-            return _EducationCard(
+            return EducationCard(
               item: item,
               onEdit: () => Navigator.push(
                 context,
@@ -529,18 +465,10 @@ class _MentorHistoryTab extends StatelessWidget {
 
         const SizedBox(height: 24),
 
-        // Work experience section
-        const Text(
-          'Work Experience',
-          style: TextStyle(
-            color: AppColors.primaryCyan,
-            fontSize: 12,
-            fontWeight: FontWeight.bold,
-            letterSpacing: 1,
-          ),
-        ),
+        // ── Work Experience ──────────────────────────────
+        const SectionTitle(title: 'Work Experience'),
         const SizedBox(height: 10),
-        _AddButton(
+        AddButton(
           label: 'Add Work Experience',
           onTap: () => Navigator.push(
             context,
@@ -549,14 +477,14 @@ class _MentorHistoryTab extends StatelessWidget {
         ),
         const SizedBox(height: 10),
         if (workItems.isEmpty)
-          _EmptyState(
+          const EmptyState(
             icon: Icons.work_outline,
             message: 'No work experience added yet.',
           )
         else
           ...workItems.map((w) {
             final item = w as Map<String, dynamic>;
-            return _WorkCard(
+            return WorkCard(
               item: item,
               onEdit: () => Navigator.push(
                 context,
@@ -582,11 +510,12 @@ class _MentorHistoryTab extends StatelessWidget {
 }
 
 // ─────────────────────────────────────────────────────────
-// Mentor-specific widgets
+// Mentor-only stat box (3 columns)
 // ─────────────────────────────────────────────────────────
 class _MStatBox extends StatelessWidget {
   final IconData icon;
-  final String label, value;
+  final String label;
+  final String value;
   const _MStatBox({
     required this.icon,
     required this.label,
@@ -625,576 +554,6 @@ class _MStatBox extends StatelessWidget {
           ),
         ],
       ),
-    ),
-  );
-}
-
-class _Chip extends StatelessWidget {
-  final String label;
-  const _Chip({required this.label});
-
-  @override
-  Widget build(BuildContext context) => Container(
-    padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
-    decoration: BoxDecoration(
-      color: AppColors.primaryCyan.withOpacity(0.1),
-      borderRadius: BorderRadius.circular(20),
-      border: Border.all(color: AppColors.primaryCyan.withOpacity(0.3)),
-    ),
-    child: Text(
-      label,
-      style: const TextStyle(
-        color: AppColors.primaryCyan,
-        fontSize: 12,
-        fontWeight: FontWeight.w500,
-      ),
-    ),
-  );
-}
-
-class _NavItem {
-  final IconData outlinedIcon, filledIcon;
-  final String label;
-  const _NavItem(this.outlinedIcon, this.filledIcon, this.label);
-}
-
-class _BottomNav extends StatelessWidget {
-  final int currentIndex;
-  final ValueChanged<int> onTap;
-  final List<_NavItem> items;
-
-  const _BottomNav({
-    required this.currentIndex,
-    required this.onTap,
-    required this.items,
-  });
-
-  @override
-  Widget build(BuildContext context) {
-    return Container(
-      decoration: BoxDecoration(
-        color: AppColors.darkSurface,
-        border: Border(top: BorderSide(color: Colors.white.withOpacity(0.08))),
-        boxShadow: [
-          BoxShadow(
-            color: Colors.black.withOpacity(0.4),
-            blurRadius: 20,
-            offset: const Offset(0, -4),
-          ),
-        ],
-      ),
-      child: SafeArea(
-        top: false,
-        child: Padding(
-          padding: const EdgeInsets.symmetric(vertical: 8),
-          child: Row(
-            mainAxisAlignment: MainAxisAlignment.spaceAround,
-            children: List.generate(items.length, (i) {
-              final item = items[i];
-              final selected = i == currentIndex;
-              return GestureDetector(
-                onTap: () => onTap(i),
-                behavior: HitTestBehavior.opaque,
-                child: AnimatedContainer(
-                  duration: const Duration(milliseconds: 200),
-                  padding: const EdgeInsets.symmetric(
-                    horizontal: 16,
-                    vertical: 8,
-                  ),
-                  decoration: BoxDecoration(
-                    color: selected
-                        ? AppColors.primaryCyan.withOpacity(0.12)
-                        : Colors.transparent,
-                    borderRadius: BorderRadius.circular(14),
-                  ),
-                  child: Column(
-                    mainAxisSize: MainAxisSize.min,
-                    children: [
-                      Icon(
-                        selected ? item.filledIcon : item.outlinedIcon,
-                        color: selected
-                            ? AppColors.primaryCyan
-                            : Colors.white54,
-                        size: 22,
-                      ),
-                      const SizedBox(height: 4),
-                      Text(
-                        item.label,
-                        style: TextStyle(
-                          color: selected
-                              ? AppColors.primaryCyan
-                              : Colors.white54,
-                          fontSize: 11,
-                        ),
-                      ),
-                    ],
-                  ),
-                ),
-              );
-            }),
-          ),
-        ),
-      ),
-    );
-  }
-}
-
-class _ProfileCard extends StatelessWidget {
-  final String name, headline, email;
-  final String? pictureUrl;
-  final String badge;
-  final IconData badgeIcon;
-
-  const _ProfileCard({
-    required this.name,
-    required this.headline,
-    required this.email,
-    required this.pictureUrl,
-    required this.badge,
-    required this.badgeIcon,
-  });
-
-  @override
-  Widget build(BuildContext context) {
-    return Container(
-      padding: const EdgeInsets.all(20),
-      decoration: BoxDecoration(
-        color: Colors.white.withOpacity(0.06),
-        borderRadius: BorderRadius.circular(22),
-        border: Border.all(color: AppColors.primaryCyan.withOpacity(0.25)),
-        boxShadow: [
-          BoxShadow(
-            color: AppColors.primaryCyan.withOpacity(0.06),
-            blurRadius: 20,
-          ),
-        ],
-      ),
-      child: Row(
-        children: [
-          CircleAvatar(
-            radius: 38,
-            backgroundColor: AppColors.primaryCyan.withOpacity(0.2),
-            backgroundImage: pictureUrl != null
-                ? NetworkImage(pictureUrl!)
-                : null,
-            child: pictureUrl == null
-                ? const Icon(
-                    Icons.person,
-                    color: AppColors.primaryCyan,
-                    size: 32,
-                  )
-                : null,
-          ),
-          const SizedBox(width: 16),
-          Expanded(
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Text(
-                  name,
-                  style: const TextStyle(
-                    color: Colors.white,
-                    fontSize: 18,
-                    fontWeight: FontWeight.bold,
-                  ),
-                ),
-                const SizedBox(height: 3),
-                Text(
-                  headline,
-                  style: const TextStyle(
-                    color: AppColors.primaryCyan,
-                    fontSize: 13,
-                  ),
-                ),
-                const SizedBox(height: 3),
-                Text(
-                  email,
-                  style: TextStyle(
-                    color: Colors.white.withOpacity(0.4),
-                    fontSize: 12,
-                  ),
-                ),
-                const SizedBox(height: 8),
-                Container(
-                  padding: const EdgeInsets.symmetric(
-                    horizontal: 10,
-                    vertical: 4,
-                  ),
-                  decoration: BoxDecoration(
-                    color: AppColors.primaryCyan.withOpacity(0.12),
-                    borderRadius: BorderRadius.circular(20),
-                    border: Border.all(
-                      color: AppColors.primaryCyan.withOpacity(0.3),
-                    ),
-                  ),
-                  child: Row(
-                    mainAxisSize: MainAxisSize.min,
-                    children: [
-                      Icon(badgeIcon, color: AppColors.primaryCyan, size: 12),
-                      const SizedBox(width: 5),
-                      Text(
-                        badge,
-                        style: const TextStyle(
-                          color: AppColors.primaryCyan,
-                          fontSize: 11,
-                          fontWeight: FontWeight.w600,
-                        ),
-                      ),
-                    ],
-                  ),
-                ),
-              ],
-            ),
-          ),
-        ],
-      ),
-    );
-  }
-}
-
-class _PageHeader extends StatelessWidget {
-  final String title, subtitle;
-  const _PageHeader({required this.title, required this.subtitle});
-
-  @override
-  Widget build(BuildContext context) => Column(
-    crossAxisAlignment: CrossAxisAlignment.start,
-    children: [
-      Text(
-        title,
-        style: const TextStyle(
-          color: Colors.white,
-          fontSize: 24,
-          fontWeight: FontWeight.bold,
-        ),
-      ),
-      const SizedBox(height: 4),
-      Text(
-        subtitle,
-        style: TextStyle(color: Colors.white.withOpacity(0.45), fontSize: 13),
-      ),
-    ],
-  );
-}
-
-class _AddButton extends StatelessWidget {
-  final String label;
-  final VoidCallback onTap;
-  const _AddButton({required this.label, required this.onTap});
-
-  @override
-  Widget build(BuildContext context) => GestureDetector(
-    onTap: onTap,
-    child: Container(
-      padding: const EdgeInsets.symmetric(vertical: 14),
-      decoration: BoxDecoration(
-        color: AppColors.primaryCyan.withOpacity(0.07),
-        borderRadius: BorderRadius.circular(14),
-        border: Border.all(color: AppColors.primaryCyan.withOpacity(0.28)),
-      ),
-      child: Row(
-        mainAxisAlignment: MainAxisAlignment.center,
-        children: [
-          const Icon(
-            Icons.add_circle_outline,
-            color: AppColors.primaryCyan,
-            size: 19,
-          ),
-          const SizedBox(width: 8),
-          Text(
-            label,
-            style: const TextStyle(
-              color: AppColors.primaryCyan,
-              fontWeight: FontWeight.w600,
-              fontSize: 13,
-            ),
-          ),
-        ],
-      ),
-    ),
-  );
-}
-
-class _EmptyState extends StatelessWidget {
-  final IconData icon;
-  final String message;
-  const _EmptyState({required this.icon, required this.message});
-
-  @override
-  Widget build(BuildContext context) => Padding(
-    padding: const EdgeInsets.only(top: 50),
-    child: Column(
-      children: [
-        Icon(icon, color: Colors.white10, size: 52),
-        const SizedBox(height: 14),
-        Text(
-          message,
-          textAlign: TextAlign.center,
-          style: TextStyle(
-            color: Colors.white.withOpacity(0.28),
-            fontSize: 13,
-            height: 1.7,
-          ),
-        ),
-      ],
-    ),
-  );
-}
-
-class _ActionBtns extends StatelessWidget {
-  final VoidCallback onEdit, onDelete;
-  const _ActionBtns({required this.onEdit, required this.onDelete});
-
-  @override
-  Widget build(BuildContext context) => Column(
-    children: [
-      IconButton(
-        icon: const Icon(
-          Icons.edit_outlined,
-          color: AppColors.primaryCyan,
-          size: 17,
-        ),
-        onPressed: onEdit,
-        padding: EdgeInsets.zero,
-        constraints: const BoxConstraints(),
-      ),
-      const SizedBox(height: 6),
-      IconButton(
-        icon: Icon(
-          Icons.delete_outline,
-          color: Colors.redAccent.withOpacity(0.65),
-          size: 17,
-        ),
-        onPressed: onDelete,
-        padding: EdgeInsets.zero,
-        constraints: const BoxConstraints(),
-      ),
-    ],
-  );
-}
-
-class _EducationCard extends StatelessWidget {
-  final Map<String, dynamic> item;
-  final VoidCallback onEdit, onDelete;
-
-  const _EducationCard({
-    required this.item,
-    required this.onEdit,
-    required this.onDelete,
-  });
-
-  @override
-  Widget build(BuildContext context) {
-    final isCurrent = item['is_current'] == 1 || item['is_current'] == true;
-    final endLabel = isCurrent ? 'Present' : '${item['end_year'] ?? ''}';
-
-    return Container(
-      margin: const EdgeInsets.only(bottom: 12),
-      padding: const EdgeInsets.all(16),
-      decoration: BoxDecoration(
-        color: Colors.white.withOpacity(0.04),
-        borderRadius: BorderRadius.circular(16),
-        border: Border.all(color: Colors.white.withOpacity(0.07)),
-      ),
-      child: Row(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          Container(
-            padding: const EdgeInsets.all(10),
-            decoration: BoxDecoration(
-              color: AppColors.primaryCyan.withOpacity(0.1),
-              borderRadius: BorderRadius.circular(12),
-            ),
-            child: const Icon(
-              Icons.school_outlined,
-              color: AppColors.primaryCyan,
-              size: 20,
-            ),
-          ),
-          const SizedBox(width: 12),
-          Expanded(
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Text(
-                  item['institution'] ?? '',
-                  style: const TextStyle(
-                    color: Colors.white,
-                    fontWeight: FontWeight.bold,
-                    fontSize: 14,
-                  ),
-                ),
-                const SizedBox(height: 3),
-                Text(
-                  '${item['degree'] ?? ''} · ${item['field_of_study'] ?? ''}',
-                  style: const TextStyle(
-                    color: AppColors.primaryCyan,
-                    fontSize: 12,
-                  ),
-                ),
-                const SizedBox(height: 3),
-                Text(
-                  '${item['start_year'] ?? ''} – $endLabel',
-                  style: TextStyle(
-                    color: Colors.white.withOpacity(0.4),
-                    fontSize: 11,
-                  ),
-                ),
-              ],
-            ),
-          ),
-          _ActionBtns(onEdit: onEdit, onDelete: onDelete),
-        ],
-      ),
-    );
-  }
-}
-
-class _WorkCard extends StatelessWidget {
-  final Map<String, dynamic> item;
-  final VoidCallback onEdit, onDelete;
-
-  const _WorkCard({
-    required this.item,
-    required this.onEdit,
-    required this.onDelete,
-  });
-
-  @override
-  Widget build(BuildContext context) {
-    final isCurrent = item['is_current'] == 1 || item['is_current'] == true;
-    final endLabel = isCurrent ? 'Present' : '${item['end_date'] ?? ''}';
-    final empType = (item['employment_type'] as String? ?? '')
-        .replaceAll('_', ' ')
-        .toUpperCase();
-
-    return Container(
-      margin: const EdgeInsets.only(bottom: 12),
-      padding: const EdgeInsets.all(16),
-      decoration: BoxDecoration(
-        color: Colors.white.withOpacity(0.04),
-        borderRadius: BorderRadius.circular(16),
-        border: Border.all(color: Colors.white.withOpacity(0.07)),
-      ),
-      child: Row(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          Container(
-            padding: const EdgeInsets.all(10),
-            decoration: BoxDecoration(
-              color: AppColors.primaryCyan.withOpacity(0.1),
-              borderRadius: BorderRadius.circular(12),
-            ),
-            child: const Icon(
-              Icons.business_center_outlined,
-              color: AppColors.primaryCyan,
-              size: 20,
-            ),
-          ),
-          const SizedBox(width: 12),
-          Expanded(
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Text(
-                  item['job_title'] ?? '',
-                  style: const TextStyle(
-                    color: Colors.white,
-                    fontWeight: FontWeight.bold,
-                    fontSize: 14,
-                  ),
-                ),
-                const SizedBox(height: 3),
-                Text(
-                  item['company'] ?? '',
-                  style: const TextStyle(
-                    color: AppColors.primaryCyan,
-                    fontSize: 12,
-                  ),
-                ),
-                const SizedBox(height: 3),
-                Row(
-                  children: [
-                    Text(
-                      '${item['start_date'] ?? ''} – $endLabel',
-                      style: TextStyle(
-                        color: Colors.white.withOpacity(0.4),
-                        fontSize: 11,
-                      ),
-                    ),
-                    if (empType.isNotEmpty) ...[
-                      const SizedBox(width: 6),
-                      Container(
-                        padding: const EdgeInsets.symmetric(
-                          horizontal: 5,
-                          vertical: 2,
-                        ),
-                        decoration: BoxDecoration(
-                          color: Colors.white.withOpacity(0.07),
-                          borderRadius: BorderRadius.circular(5),
-                        ),
-                        child: Text(
-                          empType,
-                          style: TextStyle(
-                            color: Colors.white.withOpacity(0.4),
-                            fontSize: 10,
-                          ),
-                        ),
-                      ),
-                    ],
-                  ],
-                ),
-              ],
-            ),
-          ),
-          _ActionBtns(onEdit: onEdit, onDelete: onDelete),
-        ],
-      ),
-    );
-  }
-}
-
-class _ComingSoonBanner extends StatelessWidget {
-  @override
-  Widget build(BuildContext context) => Container(
-    padding: const EdgeInsets.all(16),
-    decoration: BoxDecoration(
-      color: AppColors.primaryCyan.withOpacity(0.06),
-      borderRadius: BorderRadius.circular(14),
-      border: Border.all(color: AppColors.primaryCyan.withOpacity(0.15)),
-    ),
-    child: Row(
-      children: [
-        const Icon(
-          Icons.rocket_launch_outlined,
-          color: AppColors.primaryCyan,
-          size: 20,
-        ),
-        const SizedBox(width: 12),
-        Expanded(
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              const Text(
-                'More features coming soon',
-                style: TextStyle(
-                  color: Colors.white,
-                  fontWeight: FontWeight.w600,
-                  fontSize: 13,
-                ),
-              ),
-              const SizedBox(height: 3),
-              Text(
-                'Job listings, AI match & more.',
-                style: TextStyle(
-                  color: Colors.white.withOpacity(0.45),
-                  fontSize: 12,
-                ),
-              ),
-            ],
-          ),
-        ),
-      ],
     ),
   );
 }

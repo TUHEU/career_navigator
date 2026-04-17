@@ -90,9 +90,7 @@ class _EmailVerificationPageState extends State<EmailVerificationPage> {
               ),
             ),
           ),
-          Container(
-            color: AppColors.darkBackground.withOpacity(0.72),
-          ),
+          Container(color: AppColors.darkBackground.withOpacity(0.72)),
           SafeArea(
             child: Center(
               child: SingleChildScrollView(
@@ -204,11 +202,13 @@ class _EmailVerificationPageState extends State<EmailVerificationPage> {
                             ),
                             onChanged: (val) {
                               if (val.isNotEmpty && i < 5) {
-                                FocusScope.of(context)
-                                    .requestFocus(_focusNodes[i + 1]);
+                                FocusScope.of(
+                                  context,
+                                ).requestFocus(_focusNodes[i + 1]);
                               } else if (val.isEmpty && i > 0) {
-                                FocusScope.of(context)
-                                    .requestFocus(_focusNodes[i - 1]);
+                                FocusScope.of(
+                                  context,
+                                ).requestFocus(_focusNodes[i - 1]);
                               }
                               if (_fullCode.length == 6) _verify();
                             },
