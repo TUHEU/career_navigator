@@ -1,11 +1,13 @@
 import 'dart:ui';
 import 'package:flutter/material.dart';
+import 'package:provider/provider.dart';
 
 import '../services/api_service.dart';
 import '../services/token_store.dart';
 import '../theme/app_theme.dart';
 import 'registration_page.dart';
-import 'dashboard_page.dart';
+import 'job_seeker_dashboard.dart';
+import 'mentor_dashboard.dart';
 
 class SignInPage extends StatefulWidget {
   const SignInPage({super.key});
@@ -14,18 +16,38 @@ class SignInPage extends StatefulWidget {
   State<SignInPage> createState() => _SignInPageState();
 }
 
-class _SignInPageState extends State<SignInPage> {
+class _SignInPageState extends State<SignInPage>
+    with SingleTickerProviderStateMixin {
   final _formKey = GlobalKey<FormState>();
   final _emailCtrl = TextEditingController();
   final _passCtrl = TextEditingController();
-  bool _obscurePassword = true;
-  bool _rememberMe = false;
+  bool _obscure = true;
   bool _loading = false;
+  // Which role the user is logging in as — affects routing after login
+  String _loginRole = 'job_seeker';
+
+  late AnimationController _slideCtrl;
+  late Animation<Offset> _slideAnim;
+
+  @override
+  void initState() {
+    super.initState();
+    _slideCtrl = AnimationController(
+      vsync: this,
+      duration: const Duration(milliseconds: 300),
+    );
+    _slideAnim = Tween<Offset>(
+      begin: const Offset(-0.08, 0),
+      end: Offset.zero,
+    ).animate(CurvedAnimation(parent: _slideCtrl, curve: Curves.easeOut));
+    _slideCtrl.forward();
+  }
 
   @override
   void dispose() {
     _emailCtrl.dispose();
     _passCtrl.dispose();
+    _slideCtrl.dispose();
     super.dispose();
   }
 
@@ -38,55 +60,79 @@ class _SignInPageState extends State<SignInPage> {
         _passCtrl.text,
       );
       if (!mounted) return;
+
       if (res['success'] == true) {
         final data = res['data'] as Map<String, dynamic>;
         await TokenStore.save(data['access_token'], data['refresh_token']);
-        Navigator.pushReplacement(
-          context,
-          MaterialPageRoute(builder: (_) => const DashboardPage()),
-        );
+
+        // Use the role returned by backend (source of truth)
+        final serverRole = data['role'] as String? ?? _loginRole;
+        if (!mounted) return;
+
+        if (serverRole == 'mentor') {
+          Navigator.pushReplacement(
+            context,
+            MaterialPageRoute(builder: (_) => const MentorDashboard()),
+          );
+        } else {
+          Navigator.pushReplacement(
+            context,
+            MaterialPageRoute(builder: (_) => const JobSeekerDashboard()),
+          );
+        }
       } else {
-        _showSnack(res['message'] ?? 'Login failed');
+        _snack(res['message'] ?? 'Login failed');
       }
     } catch (e) {
-      _showSnack('Network error. Check your connection.');
+      _snack('Network error. Check your connection.');
     } finally {
       if (mounted) setState(() => _loading = false);
     }
   }
 
+  void _snack(String msg) =>
+      ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text(msg)));
+
   @override
   Widget build(BuildContext context) {
+    final theme = context.watch<AppThemeProvider>();
     return Scaffold(
       body: Stack(
         children: [
+          // themed background
           Container(
-            decoration: const BoxDecoration(
+            decoration: BoxDecoration(
+              color: AppColors.darkBackground,
               image: DecorationImage(
-                image: AssetImage('assets/background/bg2.png'),
+                image: AssetImage(theme.backgroundPath),
                 fit: BoxFit.cover,
-                opacity: 0.45,
+                opacity: 0.35,
               ),
             ),
           ),
-          Container(color: Colors.black.withOpacity(0.45)),
+          Container(color: Colors.black.withOpacity(0.50)),
+
           SafeArea(
             child: Center(
               child: SingleChildScrollView(
-                padding: const EdgeInsets.symmetric(horizontal: 24),
-                child: Column(
-                  children: [
-                    _buildHeader(),
-                    const SizedBox(height: 36),
-                    _buildGlassCard(),
-                    const SizedBox(height: 24),
-                    _buildDivider(),
-                    const SizedBox(height: 20),
-                    _buildSocialButtons(),
-                    const SizedBox(height: 28),
-                    _buildSignUpRow(),
-                    const SizedBox(height: 20),
-                  ],
+                padding: const EdgeInsets.symmetric(
+                  horizontal: 24,
+                  vertical: 20,
+                ),
+                child: SlideTransition(
+                  position: _slideAnim,
+                  child: Column(
+                    children: [
+                      _buildHeader(),
+                      const SizedBox(height: 28),
+                      _buildRoleToggle(),
+                      const SizedBox(height: 28),
+                      _buildGlassCard(),
+                      const SizedBox(height: 28),
+                      _buildSignUpRow(),
+                      const SizedBox(height: 20),
+                    ],
+                  ),
                 ),
               ),
             ),
@@ -96,17 +142,19 @@ class _SignInPageState extends State<SignInPage> {
     );
   }
 
+  // ── Logo + title ────────────────────────────────────────
   Widget _buildHeader() => Column(
     children: [
       Container(
-        width: 80,
-        height: 80,
+        width: 84,
+        height: 84,
         decoration: BoxDecoration(
           shape: BoxShape.circle,
           boxShadow: [
             BoxShadow(
-              color: AppColors.primaryCyan.withOpacity(0.35),
-              blurRadius: 20,
+              color: AppColors.primaryCyan.withOpacity(0.4),
+              blurRadius: 24,
+              spreadRadius: 4,
             ),
           ],
         ),
@@ -127,42 +175,104 @@ class _SignInPageState extends State<SignInPage> {
       const SizedBox(height: 6),
       Text(
         'Sign in to continue your journey',
-        style: TextStyle(color: Colors.white.withOpacity(0.65), fontSize: 14),
+        style: TextStyle(color: Colors.white.withOpacity(0.55), fontSize: 14),
       ),
     ],
   );
 
+  // ── Job Seeker / Mentor toggle ──────────────────────────
+  Widget _buildRoleToggle() {
+    return Container(
+      padding: const EdgeInsets.all(5),
+      decoration: BoxDecoration(
+        color: Colors.white.withOpacity(0.07),
+        borderRadius: BorderRadius.circular(16),
+        border: Border.all(color: Colors.white.withOpacity(0.12)),
+      ),
+      child: Row(
+        children: [
+          _roleTab('job_seeker', Icons.search_rounded, 'Job Seeker'),
+          _roleTab('mentor', Icons.school_outlined, 'Mentor'),
+        ],
+      ),
+    );
+  }
+
+  Widget _roleTab(String role, IconData icon, String label) {
+    final selected = _loginRole == role;
+    return Expanded(
+      child: GestureDetector(
+        onTap: () => setState(() => _loginRole = role),
+        child: AnimatedContainer(
+          duration: const Duration(milliseconds: 220),
+          padding: const EdgeInsets.symmetric(vertical: 12),
+          decoration: BoxDecoration(
+            color: selected
+                ? AppColors.primaryCyan.withOpacity(0.18)
+                : Colors.transparent,
+            borderRadius: BorderRadius.circular(12),
+            border: selected
+                ? Border.all(color: AppColors.primaryCyan.withOpacity(0.5))
+                : Border.all(color: Colors.transparent),
+          ),
+          child: Row(
+            mainAxisAlignment: MainAxisAlignment.center,
+            children: [
+              Icon(
+                icon,
+                size: 18,
+                color: selected ? AppColors.primaryCyan : Colors.white38,
+              ),
+              const SizedBox(width: 8),
+              Text(
+                label,
+                style: TextStyle(
+                  color: selected ? AppColors.primaryCyan : Colors.white38,
+                  fontWeight: selected ? FontWeight.bold : FontWeight.normal,
+                  fontSize: 14,
+                ),
+              ),
+            ],
+          ),
+        ),
+      ),
+    );
+  }
+
+  // ── Glass form card ─────────────────────────────────────
   Widget _buildGlassCard() => ClipRRect(
     borderRadius: BorderRadius.circular(28),
     child: BackdropFilter(
-      filter: ImageFilter.blur(sigmaX: 12, sigmaY: 12),
+      filter: ImageFilter.blur(sigmaX: 14, sigmaY: 14),
       child: Container(
         padding: const EdgeInsets.all(24),
         decoration: BoxDecoration(
-          color: Colors.white.withOpacity(0.08),
+          color: Colors.white.withOpacity(0.07),
           borderRadius: BorderRadius.circular(28),
-          border: Border.all(color: Colors.white.withOpacity(0.15)),
+          border: Border.all(color: Colors.white.withOpacity(0.13)),
         ),
         child: Form(
           key: _formKey,
           child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
             children: [
+              // Email
               TextFormField(
                 controller: _emailCtrl,
                 keyboardType: TextInputType.emailAddress,
                 style: const TextStyle(color: Colors.white),
-                validator: (v) =>
-                    v == null || !v.contains('@') ? 'Enter a valid email' : null,
+                validator: (v) => v == null || !v.contains('@')
+                    ? 'Enter a valid email'
+                    : null,
                 decoration: buildInputDecoration(
                   icon: Icons.email_outlined,
                   label: 'Email Address',
                 ),
               ),
               const SizedBox(height: 16),
+              // Password
               TextFormField(
                 controller: _passCtrl,
-                obscureText: _obscurePassword,
+                obscureText: _obscure,
                 style: const TextStyle(color: Colors.white),
                 validator: (v) =>
                     v == null || v.length < 6 ? 'Min 6 characters' : null,
@@ -171,53 +281,33 @@ class _SignInPageState extends State<SignInPage> {
                   label: 'Password',
                   suffix: IconButton(
                     icon: Icon(
-                      _obscurePassword
+                      _obscure
                           ? Icons.visibility_off_outlined
                           : Icons.visibility_outlined,
                       color: AppColors.primaryCyan,
                     ),
-                    onPressed: () =>
-                        setState(() => _obscurePassword = !_obscurePassword),
+                    onPressed: () => setState(() => _obscure = !_obscure),
                   ),
                 ),
               ),
-              const SizedBox(height: 12),
-              Row(
-                mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                children: [
-                  Row(
-                    children: [
-                      Transform.scale(
-                        scale: 0.85,
-                        child: Switch(
-                          value: _rememberMe,
-                          activeColor: AppColors.primaryCyan,
-                          onChanged: (v) => setState(() => _rememberMe = v),
-                        ),
-                      ),
-                      Text(
-                        'Remember me',
-                        style: TextStyle(
-                          color: Colors.white.withOpacity(0.7),
-                          fontSize: 13,
-                        ),
-                      ),
-                    ],
-                  ),
-                  GestureDetector(
-                    onTap: () => _showForgotPasswordSheet(context),
-                    child: const Text(
-                      'Forgot Password?',
-                      style: TextStyle(
-                        color: AppColors.primaryCyan,
-                        fontSize: 13,
-                        fontWeight: FontWeight.w600,
-                      ),
+              const SizedBox(height: 10),
+              // Forgot password
+              Align(
+                alignment: Alignment.centerRight,
+                child: GestureDetector(
+                  onTap: () => _showForgotSheet(),
+                  child: const Text(
+                    'Forgot Password?',
+                    style: TextStyle(
+                      color: AppColors.primaryCyan,
+                      fontSize: 13,
+                      fontWeight: FontWeight.w600,
                     ),
                   ),
-                ],
+                ),
               ),
               const SizedBox(height: 20),
+              // Sign in button
               ElevatedButton(
                 onPressed: _loading ? null : _signIn,
                 style: ElevatedButton.styleFrom(
@@ -228,7 +318,7 @@ class _SignInPageState extends State<SignInPage> {
                     borderRadius: BorderRadius.circular(15),
                   ),
                   elevation: 6,
-                  shadowColor: AppColors.primaryCyan.withOpacity(0.5),
+                  shadowColor: AppColors.primaryCyan.withOpacity(0.4),
                 ),
                 child: _loading
                     ? const SizedBox(
@@ -239,11 +329,13 @@ class _SignInPageState extends State<SignInPage> {
                           color: Colors.black,
                         ),
                       )
-                    : const Text(
-                        'SIGN IN',
-                        style: TextStyle(
+                    : Text(
+                        _loginRole == 'mentor'
+                            ? 'SIGN IN AS MENTOR'
+                            : 'SIGN IN AS JOB SEEKER',
+                        style: const TextStyle(
                           fontWeight: FontWeight.bold,
-                          fontSize: 16,
+                          fontSize: 15,
                         ),
                       ),
               ),
@@ -254,77 +346,12 @@ class _SignInPageState extends State<SignInPage> {
     ),
   );
 
-  Widget _buildDivider() => Row(
-    children: [
-      Expanded(child: Divider(color: Colors.white.withOpacity(0.25))),
-      Padding(
-        padding: const EdgeInsets.symmetric(horizontal: 12),
-        child: Text(
-          'or continue with',
-          style: TextStyle(color: Colors.white.withOpacity(0.55), fontSize: 13),
-        ),
-      ),
-      Expanded(child: Divider(color: Colors.white.withOpacity(0.25))),
-    ],
-  );
-
-  Widget _buildSocialButtons() => Column(
-    children: [
-      _buildSocialButton(
-        onTap: () => _showSnack('Google Sign-In coming soon'),
-        icon: Icons.g_mobiledata,
-        iconColor: Colors.redAccent,
-        label: 'Continue with Google',
-      ),
-      const SizedBox(height: 12),
-      _buildSocialButton(
-        onTap: () => _showSnack('Apple Sign-In coming soon'),
-        icon: Icons.apple,
-        iconColor: Colors.white,
-        label: 'Continue with Apple',
-      ),
-    ],
-  );
-
-  Widget _buildSocialButton({
-    required VoidCallback onTap,
-    required IconData icon,
-    required Color iconColor,
-    required String label,
-  }) => GestureDetector(
-    onTap: onTap,
-    child: Container(
-      width: double.infinity,
-      padding: const EdgeInsets.symmetric(vertical: 14, horizontal: 20),
-      decoration: BoxDecoration(
-        color: Colors.white.withOpacity(0.06),
-        borderRadius: BorderRadius.circular(15),
-        border: Border.all(color: Colors.white.withOpacity(0.15)),
-      ),
-      child: Row(
-        mainAxisAlignment: MainAxisAlignment.center,
-        children: [
-          Icon(icon, color: iconColor, size: 24),
-          const SizedBox(width: 12),
-          Text(
-            label,
-            style: const TextStyle(
-              color: Colors.white,
-              fontWeight: FontWeight.w500,
-              fontSize: 15,
-            ),
-          ),
-        ],
-      ),
-    ),
-  );
-
   Widget _buildSignUpRow() => Row(
     mainAxisAlignment: MainAxisAlignment.center,
     children: [
       Text(
         "Don't have an account? ",
-        style: TextStyle(color: Colors.white.withOpacity(0.65)),
+        style: TextStyle(color: Colors.white.withOpacity(0.60)),
       ),
       GestureDetector(
         onTap: () => Navigator.push(
@@ -343,18 +370,15 @@ class _SignInPageState extends State<SignInPage> {
     ],
   );
 
-  void _showSnack(String msg) =>
-      ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text(msg)));
-
-  void _showForgotPasswordSheet(BuildContext ctx) {
+  void _showForgotSheet() {
     showModalBottomSheet(
-      context: ctx,
+      context: context,
       isScrollControlled: true,
-      backgroundColor: const Color(0xFF0D2137),
+      backgroundColor: AppColors.darkSurface,
       shape: const RoundedRectangleBorder(
         borderRadius: BorderRadius.vertical(top: Radius.circular(28)),
       ),
-      builder: (_) => Padding(
+      builder: (ctx) => Padding(
         padding: EdgeInsets.only(
           left: 24,
           right: 24,
@@ -376,7 +400,7 @@ class _SignInPageState extends State<SignInPage> {
             const SizedBox(height: 8),
             Text(
               "Enter your email and we'll send a reset link.",
-              style: TextStyle(color: Colors.white.withOpacity(0.6)),
+              style: TextStyle(color: Colors.white.withOpacity(0.55)),
             ),
             const SizedBox(height: 20),
             TextField(
@@ -391,7 +415,7 @@ class _SignInPageState extends State<SignInPage> {
             ElevatedButton(
               onPressed: () {
                 Navigator.pop(ctx);
-                _showSnack('Reset link sent!');
+                _snack('Reset link sent!');
               },
               style: ElevatedButton.styleFrom(
                 backgroundColor: AppColors.primaryCyan,
