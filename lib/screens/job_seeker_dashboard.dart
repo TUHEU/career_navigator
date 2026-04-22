@@ -9,6 +9,9 @@ import 'sign_in_page.dart';
 import 'education_form_page.dart';
 import 'work_experience_form_page.dart';
 import 'settings_page.dart';
+import 'notifications_page.dart';
+import 'chat_page.dart';
+import 'search_page.dart';
 
 class JobSeekerDashboard extends StatefulWidget {
   const JobSeekerDashboard({super.key});
@@ -107,11 +110,14 @@ class _JobSeekerDashboardState extends State<JobSeekerDashboard> {
   }
 }
 
-// ── HOME TAB ──────────────────────────────────────────────
+// ─────────────────────────────────────────────────────────
+// HOME TAB
+// ─────────────────────────────────────────────────────────
 class _JSHomePage extends StatelessWidget {
   final Map<String, dynamic>? profile;
   final bool loading;
   final VoidCallback onRefresh;
+
   const _JSHomePage({
     required this.profile,
     required this.loading,
@@ -130,13 +136,16 @@ class _JSHomePage extends StatelessWidget {
         (p['full_name'] as String?) ?? (p['email'] as String?) ?? 'User';
     final email = (p['email'] as String?) ?? '';
     final headline = (p['headline'] as String?) ?? 'Job Seeker';
-    final pictureUrl = p['profile_picture'] as String?;
+    final pictureUrl =
+        (p['profile_picture_url'] as String?) ??
+        (p['profile_picture'] as String?);
     final dob = (p['date_of_birth'] as String?) ?? '—';
     final location = (p['location'] as String?) ?? '—';
     final currentJob = (p['current_job_title'] as String?) ?? '—';
     final desiredJob = (p['desired_job_title'] as String?) ?? '—';
     final yoe = p['years_of_experience'];
     final avail = (p['availability'] as String?) ?? '—';
+    final unread = (p['unread_notifications'] as int?) ?? 0;
 
     return RefreshIndicator(
       onRefresh: () async => onRefresh(),
@@ -144,9 +153,11 @@ class _JSHomePage extends StatelessWidget {
       child: ListView(
         padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 16),
         children: [
+          // ── Top bar with action icons ─────────────────────
           Row(
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: [
+              // Title
               Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
@@ -169,23 +180,76 @@ class _JSHomePage extends StatelessWidget {
                   ),
                 ],
               ),
-              CircleAvatar(
-                radius: 22,
-                backgroundColor: AppColors.primaryCyan.withOpacity(0.2),
-                backgroundImage: pictureUrl != null
-                    ? NetworkImage(pictureUrl)
-                    : null,
-                child: pictureUrl == null
-                    ? const Icon(
-                        Icons.person,
-                        color: AppColors.primaryCyan,
-                        size: 20,
-                      )
-                    : null,
+
+              // Action icons
+              Row(
+                children: [
+                  // Search
+                  IconButton(
+                    icon: const Icon(
+                      Icons.search,
+                      color: Colors.white70,
+                      size: 22,
+                    ),
+                    onPressed: () => Navigator.push(
+                      context,
+                      MaterialPageRoute(builder: (_) => const SearchPage()),
+                    ),
+                  ),
+
+                  // Notifications with badge
+                  Stack(
+                    children: [
+                      IconButton(
+                        icon: const Icon(
+                          Icons.notifications_outlined,
+                          color: Colors.white70,
+                          size: 22,
+                        ),
+                        onPressed: () => Navigator.push(
+                          context,
+                          MaterialPageRoute(
+                            builder: (_) => const NotificationsPage(),
+                          ),
+                        ).then((_) => onRefresh()),
+                      ),
+                      if (unread > 0)
+                        Positioned(
+                          right: 8,
+                          top: 8,
+                          child: Container(
+                            width: 8,
+                            height: 8,
+                            decoration: const BoxDecoration(
+                              color: Colors.redAccent,
+                              shape: BoxShape.circle,
+                            ),
+                          ),
+                        ),
+                    ],
+                  ),
+
+                  // Chat
+                  IconButton(
+                    icon: const Icon(
+                      Icons.chat_bubble_outline,
+                      color: Colors.white70,
+                      size: 22,
+                    ),
+                    onPressed: () => Navigator.push(
+                      context,
+                      MaterialPageRoute(
+                        builder: (_) => const ConversationsPage(),
+                      ),
+                    ),
+                  ),
+                ],
               ),
             ],
           ),
-          const SizedBox(height: 20),
+          const SizedBox(height: 16),
+
+          // ── Profile card ──────────────────────────────────
           ProfileCard(
             name: name,
             headline: headline,
@@ -195,6 +259,8 @@ class _JSHomePage extends StatelessWidget {
             badgeIcon: Icons.search_rounded,
           ),
           const SizedBox(height: 20),
+
+          // ── Stats ─────────────────────────────────────────
           Row(
             children: [
               StatBox(
@@ -211,6 +277,8 @@ class _JSHomePage extends StatelessWidget {
             ],
           ),
           const SizedBox(height: 20),
+
+          // ── Personal info ─────────────────────────────────
           const SectionTitle(title: 'Personal Info'),
           const SizedBox(height: 10),
           InfoTile(
@@ -225,6 +293,8 @@ class _JSHomePage extends StatelessWidget {
           ),
           InfoTile(icon: Icons.email_outlined, label: 'Email', value: email),
           const SizedBox(height: 20),
+
+          // ── Career info ───────────────────────────────────
           const SectionTitle(title: 'Career Info'),
           const SizedBox(height: 10),
           InfoTile(
@@ -238,6 +308,7 @@ class _JSHomePage extends StatelessWidget {
             value: desiredJob,
           ),
           const SizedBox(height: 20),
+
           const ComingSoonBanner(),
           const SizedBox(height: 20),
         ],
@@ -246,7 +317,9 @@ class _JSHomePage extends StatelessWidget {
   }
 }
 
-// ── EDUCATION TAB ─────────────────────────────────────────
+// ─────────────────────────────────────────────────────────
+// EDUCATION TAB
+// ─────────────────────────────────────────────────────────
 class _EducationPage extends StatelessWidget {
   final Map<String, dynamic> profile;
   final VoidCallback onRefresh;
@@ -307,7 +380,9 @@ class _EducationPage extends StatelessWidget {
   }
 }
 
-// ── EXPERIENCE TAB ────────────────────────────────────────
+// ─────────────────────────────────────────────────────────
+// EXPERIENCE TAB
+// ─────────────────────────────────────────────────────────
 class _ExperiencePage extends StatelessWidget {
   final Map<String, dynamic> profile;
   final VoidCallback onRefresh;

@@ -10,6 +10,9 @@ import 'mentor_profile_page.dart';
 import 'education_form_page.dart';
 import 'work_experience_form_page.dart';
 import 'settings_page.dart';
+import 'notifications_page.dart';
+import 'chat_page.dart';
+import 'search_page.dart';
 
 class MentorDashboard extends StatefulWidget {
   const MentorDashboard({super.key});
@@ -32,7 +35,10 @@ class _MentorDashboardState extends State<MentorDashboard> {
   Future<void> _loadProfile() async {
     try {
       final token = await TokenStore.getAccess();
-      if (token == null) { _logout(); return; }
+      if (token == null) {
+        _logout();
+        return;
+      }
       final res = await ApiService.getProfile(token);
       if (mounted) {
         if (res['success'] == true) {
@@ -52,8 +58,11 @@ class _MentorDashboardState extends State<MentorDashboard> {
   Future<void> _logout() async {
     await TokenStore.clear();
     if (mounted)
-      Navigator.pushAndRemoveUntil(context,
-          MaterialPageRoute(builder: (_) => const SignInPage()), (_) => false);
+      Navigator.pushAndRemoveUntil(
+        context,
+        MaterialPageRoute(builder: (_) => const SignInPage()),
+        (_) => false,
+      );
   }
 
   @override
@@ -61,7 +70,10 @@ class _MentorDashboardState extends State<MentorDashboard> {
     final theme = context.watch<AppThemeProvider>();
     final pages = [
       _MentorHomePage(
-          profile: _profile, loading: _loading, onRefresh: _loadProfile),
+        profile: _profile,
+        loading: _loading,
+        onRefresh: _loadProfile,
+      ),
       _MentorProfileTab(profile: _profile ?? {}, onRefresh: _loadProfile),
       _MentorHistoryTab(profile: _profile ?? {}, onRefresh: _loadProfile),
       const SettingsPage(),
@@ -89,10 +101,10 @@ class _MentorDashboardState extends State<MentorDashboard> {
         currentIndex: _currentIndex,
         onTap: (i) => setState(() => _currentIndex = i),
         items: const [
-          NavItem(Icons.home_outlined,        Icons.home,        'Home'),
-          NavItem(Icons.person_outline,       Icons.person,      'My Profile'),
+          NavItem(Icons.home_outlined, Icons.home, 'Home'),
+          NavItem(Icons.person_outline, Icons.person, 'My Profile'),
           NavItem(Icons.history_edu_outlined, Icons.history_edu, 'History'),
-          NavItem(Icons.settings_outlined,    Icons.settings,    'Settings'),
+          NavItem(Icons.settings_outlined, Icons.settings, 'Settings'),
         ],
       ),
     );
@@ -107,33 +119,38 @@ class _MentorHomePage extends StatelessWidget {
   final bool loading;
   final VoidCallback onRefresh;
 
-  const _MentorHomePage(
-      {required this.profile,
-      required this.loading,
-      required this.onRefresh});
+  const _MentorHomePage({
+    required this.profile,
+    required this.loading,
+    required this.onRefresh,
+  });
 
   @override
   Widget build(BuildContext context) {
     if (loading)
       return const Center(
-          child: CircularProgressIndicator(color: AppColors.primaryCyan));
+        child: CircularProgressIndicator(color: AppColors.primaryCyan),
+      );
 
-    final p          = profile ?? {};
-    final mp         = (p['mentor_profile'] as Map<String, dynamic>?) ?? {};
-    final name       = (p['full_name']     as String?) ??
-        (p['email'] as String?) ?? 'Mentor';
-    final email      = (p['email']         as String?) ?? '';
-    final headline   = (mp['headline']     as String?) ??
-        (p['headline']     as String?) ?? 'Mentor';
-    final pictureUrl = p['profile_picture'] as String?;
-    final company    = (mp['current_company']   as String?) ?? '—';
-    final jobTitle   = (mp['current_job_title'] as String?) ?? '—';
-    final yoe        = mp['years_of_experience'];
-    final price      = mp['session_price'];
-    final currency   = (mp['currency'] as String?) ?? 'USD';
-    final accepting  = mp['is_accepting_mentees'] != 0;
-    final totalSess  = mp['total_sessions']  ?? 0;
-    final rating     = mp['rating'];
+    final p = profile ?? {};
+    final mp = (p['mentor_profile'] as Map<String, dynamic>?) ?? {};
+    final name =
+        (p['full_name'] as String?) ?? (p['email'] as String?) ?? 'Mentor';
+    final email = (p['email'] as String?) ?? '';
+    final headline =
+        (mp['headline'] as String?) ?? (p['headline'] as String?) ?? 'Mentor';
+    final pictureUrl =
+        (p['profile_picture_url'] as String?) ??
+        (p['profile_picture'] as String?);
+    final company = (mp['current_company'] as String?) ?? '—';
+    final jobTitle = (mp['current_job_title'] as String?) ?? '—';
+    final yoe = mp['years_of_experience'];
+    final price = mp['session_price'];
+    final currency = (mp['currency'] as String?) ?? 'USD';
+    final accepting = mp['is_accepting_mentees'] != 0;
+    final totalSess = mp['total_sessions'] ?? 0;
+    final rating = mp['rating'];
+    final unread = (p['unread_notifications'] as int?) ?? 0;
 
     return RefreshIndicator(
       onRefresh: () async => onRefresh(),
@@ -141,36 +158,103 @@ class _MentorHomePage extends StatelessWidget {
       child: ListView(
         padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 16),
         children: [
-          // Top bar
+          // ── Top bar with action icons ─────────────────────
           Row(
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: [
-              Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
-                const Text('CAREER NAVIGATOR',
+              // Title
+              Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  const Text(
+                    'CAREER NAVIGATOR',
                     style: TextStyle(
-                        color: AppColors.primaryCyan,
-                        fontSize: 11,
-                        letterSpacing: 2,
-                        fontWeight: FontWeight.bold)),
-                const SizedBox(height: 2),
-                Text('Mentor Dashboard',
+                      color: AppColors.primaryCyan,
+                      fontSize: 11,
+                      letterSpacing: 2,
+                      fontWeight: FontWeight.bold,
+                    ),
+                  ),
+                  const SizedBox(height: 2),
+                  Text(
+                    'Mentor Dashboard',
                     style: TextStyle(
-                        color: Colors.white.withOpacity(0.5), fontSize: 12)),
-              ]),
-              CircleAvatar(
-                radius: 22,
-                backgroundColor: AppColors.primaryCyan.withOpacity(0.2),
-                backgroundImage:
-                    pictureUrl != null ? NetworkImage(pictureUrl) : null,
-                child: pictureUrl == null
-                    ? const Icon(Icons.person,
-                        color: AppColors.primaryCyan, size: 20)
-                    : null,
+                      color: Colors.white.withOpacity(0.5),
+                      fontSize: 12,
+                    ),
+                  ),
+                ],
+              ),
+
+              // Action icons
+              Row(
+                children: [
+                  // Search
+                  IconButton(
+                    icon: const Icon(
+                      Icons.search,
+                      color: Colors.white70,
+                      size: 22,
+                    ),
+                    onPressed: () => Navigator.push(
+                      context,
+                      MaterialPageRoute(builder: (_) => const SearchPage()),
+                    ),
+                  ),
+
+                  // Notifications with badge
+                  Stack(
+                    children: [
+                      IconButton(
+                        icon: const Icon(
+                          Icons.notifications_outlined,
+                          color: Colors.white70,
+                          size: 22,
+                        ),
+                        onPressed: () => Navigator.push(
+                          context,
+                          MaterialPageRoute(
+                            builder: (_) => const NotificationsPage(),
+                          ),
+                        ).then((_) => onRefresh()),
+                      ),
+                      if (unread > 0)
+                        Positioned(
+                          right: 8,
+                          top: 8,
+                          child: Container(
+                            width: 8,
+                            height: 8,
+                            decoration: const BoxDecoration(
+                              color: Colors.redAccent,
+                              shape: BoxShape.circle,
+                            ),
+                          ),
+                        ),
+                    ],
+                  ),
+
+                  // Chat
+                  IconButton(
+                    icon: const Icon(
+                      Icons.chat_bubble_outline,
+                      color: Colors.white70,
+                      size: 22,
+                    ),
+                    onPressed: () => Navigator.push(
+                      context,
+                      MaterialPageRoute(
+                        builder: (_) => const ConversationsPage(),
+                      ),
+                    ),
+                  ),
+                ],
               ),
             ],
           ),
-          const SizedBox(height: 20),
+          const SizedBox(height: 16),
 
+          // ── Profile card ──────────────────────────────────
           ProfileCard(
             name: name,
             headline: headline,
@@ -181,28 +265,33 @@ class _MentorHomePage extends StatelessWidget {
           ),
           const SizedBox(height: 20),
 
-          // Mentor stats
-          Row(children: [
-            _MStatBox(
+          // ── Mentor stats ──────────────────────────────────
+          Row(
+            children: [
+              _MStatBox(
                 icon: Icons.star_outline,
                 label: 'Rating',
-                value: rating != null ? rating.toString() : 'New'),
-            const SizedBox(width: 10),
-            _MStatBox(
+                value: rating != null ? rating.toString() : 'New',
+              ),
+              const SizedBox(width: 10),
+              _MStatBox(
                 icon: Icons.people_outline,
                 label: 'Sessions',
-                value: '$totalSess'),
-            const SizedBox(width: 10),
-            _MStatBox(
+                value: '$totalSess',
+              ),
+              const SizedBox(width: 10),
+              _MStatBox(
                 icon: Icons.attach_money,
                 label: 'Per session',
                 value: price != null && price != 0
                     ? '$currency $price'
-                    : 'Free'),
-          ]),
+                    : 'Free',
+              ),
+            ],
+          ),
           const SizedBox(height: 20),
 
-          // Accepting badge
+          // ── Accepting mentees status ──────────────────────
           Container(
             padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
             decoration: BoxDecoration(
@@ -211,35 +300,37 @@ class _MentorHomePage extends StatelessWidget {
                   : Colors.redAccent.withOpacity(0.08),
               borderRadius: BorderRadius.circular(14),
               border: Border.all(
-                  color: accepting
-                      ? Colors.greenAccent.withOpacity(0.3)
-                      : Colors.redAccent.withOpacity(0.3)),
+                color: accepting
+                    ? Colors.greenAccent.withOpacity(0.3)
+                    : Colors.redAccent.withOpacity(0.3),
+              ),
             ),
-            child: Row(children: [
-              Icon(
+            child: Row(
+              children: [
+                Icon(
                   accepting
                       ? Icons.check_circle_outline
                       : Icons.cancel_outlined,
-                  color: accepting
-                      ? Colors.greenAccent
-                      : Colors.redAccent,
-                  size: 18),
-              const SizedBox(width: 10),
-              Text(
+                  color: accepting ? Colors.greenAccent : Colors.redAccent,
+                  size: 18,
+                ),
+                const SizedBox(width: 10),
+                Text(
                   accepting
                       ? 'Currently accepting new mentees'
                       : 'Not accepting mentees right now',
                   style: TextStyle(
-                      color: accepting
-                          ? Colors.greenAccent
-                          : Colors.redAccent,
-                      fontSize: 13,
-                      fontWeight: FontWeight.w500)),
-            ]),
+                    color: accepting ? Colors.greenAccent : Colors.redAccent,
+                    fontSize: 13,
+                    fontWeight: FontWeight.w500,
+                  ),
+                ),
+              ],
+            ),
           ),
           const SizedBox(height: 20),
 
-          // Expertise chips
+          // ── Expertise chips ───────────────────────────────
           if ((mp['expertise_areas'] as List?)?.isNotEmpty == true) ...[
             const SectionTitle(title: 'Expertise Areas'),
             const SizedBox(height: 10),
@@ -253,14 +344,24 @@ class _MentorHomePage extends StatelessWidget {
             const SizedBox(height: 20),
           ],
 
+          // ── Career info ───────────────────────────────────
           const SectionTitle(title: 'Career Info'),
           const SizedBox(height: 10),
-          InfoTile(icon: Icons.business_outlined,
-              label: 'Current Company', value: company),
-          InfoTile(icon: Icons.badge_outlined,
-              label: 'Job Title', value: jobTitle),
-          InfoTile(icon: Icons.signal_cellular_alt, label: 'Experience',
-              value: yoe != null ? '$yoe years' : '—'),
+          InfoTile(
+            icon: Icons.business_outlined,
+            label: 'Current Company',
+            value: company,
+          ),
+          InfoTile(
+            icon: Icons.badge_outlined,
+            label: 'Job Title',
+            value: jobTitle,
+          ),
+          InfoTile(
+            icon: Icons.signal_cellular_alt,
+            label: 'Experience',
+            value: yoe != null ? '$yoe years' : '—',
+          ),
 
           const SizedBox(height: 20),
           const ComingSoonBanner(),
@@ -277,8 +378,7 @@ class _MentorHomePage extends StatelessWidget {
 class _MentorProfileTab extends StatelessWidget {
   final Map<String, dynamic> profile;
   final VoidCallback onRefresh;
-  const _MentorProfileTab(
-      {required this.profile, required this.onRefresh});
+  const _MentorProfileTab({required this.profile, required this.onRefresh});
 
   @override
   Widget build(BuildContext context) {
@@ -288,16 +388,19 @@ class _MentorProfileTab extends StatelessWidget {
       padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 16),
       children: [
         const PageHeader(
-            title: 'Mentor Profile',
-            subtitle: 'Manage your mentor information'),
+          title: 'Mentor Profile',
+          subtitle: 'Manage your mentor information',
+        ),
         const SizedBox(height: 20),
 
+        // Edit button
         ElevatedButton.icon(
-          onPressed: () => Navigator.push(context,
-                  MaterialPageRoute(
-                      builder: (_) =>
-                          MentorProfilePage(profile: profile)))
-              .then((_) => onRefresh()),
+          onPressed: () => Navigator.push(
+            context,
+            MaterialPageRoute(
+              builder: (_) => MentorProfilePage(profile: profile),
+            ),
+          ).then((_) => onRefresh()),
           icon: const Icon(Icons.edit_outlined, size: 18),
           label: const Text('Edit Mentor Profile'),
           style: ElevatedButton.styleFrom(
@@ -306,7 +409,8 @@ class _MentorProfileTab extends StatelessWidget {
             side: const BorderSide(color: AppColors.primaryCyan),
             minimumSize: const Size(double.infinity, 50),
             shape: RoundedRectangleBorder(
-                borderRadius: BorderRadius.circular(14)),
+              borderRadius: BorderRadius.circular(14),
+            ),
           ),
         ),
         const SizedBox(height: 24),
@@ -315,34 +419,45 @@ class _MentorProfileTab extends StatelessWidget {
         const SizedBox(height: 12),
 
         ...[
-          {'label': 'Headline',        'value': mp['headline']          ?? '—'},
-          {'label': 'Current Company', 'value': mp['current_company']   ?? '—'},
-          {'label': 'Job Title',       'value': mp['current_job_title'] ?? '—'},
-          {'label': 'Location',        'value': mp['location']          ?? '—'},
-          {'label': 'Mentoring Style', 'value': mp['mentoring_style']   ?? '—'},
+          {'label': 'Headline', 'value': mp['headline'] ?? '—'},
+          {'label': 'Current Company', 'value': mp['current_company'] ?? '—'},
+          {'label': 'Job Title', 'value': mp['current_job_title'] ?? '—'},
+          {'label': 'Location', 'value': mp['location'] ?? '—'},
+          {'label': 'Mentoring Style', 'value': mp['mentoring_style'] ?? '—'},
           {
             'label': 'Session Price',
             'value': mp['session_price'] != null
                 ? '${mp['currency'] ?? 'USD'} ${mp['session_price']}'
-                : 'Free'
+                : 'Free',
           },
-        ].map((e) => Container(
-          margin: const EdgeInsets.only(bottom: 9),
-          padding: const EdgeInsets.symmetric(horizontal: 15, vertical: 13),
-          decoration: BoxDecoration(
-            color: Colors.white.withOpacity(0.04),
-            borderRadius: BorderRadius.circular(13),
-            border: Border.all(color: Colors.white.withOpacity(0.07)),
+        ].map(
+          (e) => Container(
+            margin: const EdgeInsets.only(bottom: 9),
+            padding: const EdgeInsets.symmetric(horizontal: 15, vertical: 13),
+            decoration: BoxDecoration(
+              color: Colors.white.withOpacity(0.04),
+              borderRadius: BorderRadius.circular(13),
+              border: Border.all(color: Colors.white.withOpacity(0.07)),
+            ),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(
+                  e['label']!,
+                  style: TextStyle(
+                    color: Colors.white.withOpacity(0.38),
+                    fontSize: 10,
+                  ),
+                ),
+                const SizedBox(height: 2),
+                Text(
+                  e['value']!,
+                  style: const TextStyle(color: Colors.white, fontSize: 14),
+                ),
+              ],
+            ),
           ),
-          child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
-            Text(e['label']!,
-                style: TextStyle(
-                    color: Colors.white.withOpacity(0.38), fontSize: 10)),
-            const SizedBox(height: 2),
-            Text(e['value']!,
-                style: const TextStyle(color: Colors.white, fontSize: 14)),
-          ]),
-        )),
+        ),
       ],
     );
   }
@@ -354,51 +469,56 @@ class _MentorProfileTab extends StatelessWidget {
 class _MentorHistoryTab extends StatelessWidget {
   final Map<String, dynamic> profile;
   final VoidCallback onRefresh;
-  const _MentorHistoryTab(
-      {required this.profile, required this.onRefresh});
+  const _MentorHistoryTab({required this.profile, required this.onRefresh});
 
   @override
   Widget build(BuildContext context) {
-    final eduItems  = (profile['education']       as List<dynamic>?) ?? [];
+    final eduItems = (profile['education'] as List<dynamic>?) ?? [];
     final workItems = (profile['work_experience'] as List<dynamic>?) ?? [];
 
     return ListView(
       padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 16),
       children: [
         const PageHeader(
-            title: 'Background', subtitle: 'Education & work history'),
+          title: 'Background',
+          subtitle: 'Education & work history',
+        ),
         const SizedBox(height: 20),
 
-        // ── Education ────────────────────────────────────
+        // ── Education ─────────────────────────────────────
         const SectionTitle(title: 'Education'),
         const SizedBox(height: 10),
         AddButton(
           label: 'Add Education',
-          onTap: () => Navigator.push(context,
-                  MaterialPageRoute(
-                      builder: (_) => const EducationFormPage()))
-              .then((_) => onRefresh()),
+          onTap: () => Navigator.push(
+            context,
+            MaterialPageRoute(builder: (_) => const EducationFormPage()),
+          ).then((_) => onRefresh()),
         ),
         const SizedBox(height: 10),
         if (eduItems.isEmpty)
           const EmptyState(
-              icon: Icons.school_outlined,
-              message: 'No education added yet.')
+            icon: Icons.school_outlined,
+            message: 'No education added yet.',
+          )
         else
           ...eduItems.map((e) {
             final item = e as Map<String, dynamic>;
             return EducationCard(
               item: item,
-              onEdit: () => Navigator.push(context,
-                      MaterialPageRoute(
-                          builder: (_) =>
-                              EducationFormPage(existing: item)))
-                  .then((_) => onRefresh()),
+              onEdit: () => Navigator.push(
+                context,
+                MaterialPageRoute(
+                  builder: (_) => EducationFormPage(existing: item),
+                ),
+              ).then((_) => onRefresh()),
               onDelete: () async {
                 final token = await TokenStore.getAccess();
                 if (token == null) return;
                 await ApiService.deleteEducation(
-                    token: token, id: item['id'] as int);
+                  token: token,
+                  id: item['id'] as int,
+                );
                 onRefresh();
               },
             );
@@ -406,36 +526,40 @@ class _MentorHistoryTab extends StatelessWidget {
 
         const SizedBox(height: 24),
 
-        // ── Work Experience ──────────────────────────────
+        // ── Work Experience ───────────────────────────────
         const SectionTitle(title: 'Work Experience'),
         const SizedBox(height: 10),
         AddButton(
           label: 'Add Work Experience',
-          onTap: () => Navigator.push(context,
-                  MaterialPageRoute(
-                      builder: (_) => const WorkExperienceFormPage()))
-              .then((_) => onRefresh()),
+          onTap: () => Navigator.push(
+            context,
+            MaterialPageRoute(builder: (_) => const WorkExperienceFormPage()),
+          ).then((_) => onRefresh()),
         ),
         const SizedBox(height: 10),
         if (workItems.isEmpty)
           const EmptyState(
-              icon: Icons.work_outline,
-              message: 'No work experience added yet.')
+            icon: Icons.work_outline,
+            message: 'No work experience added yet.',
+          )
         else
           ...workItems.map((w) {
             final item = w as Map<String, dynamic>;
             return WorkCard(
               item: item,
-              onEdit: () => Navigator.push(context,
-                      MaterialPageRoute(
-                          builder: (_) =>
-                              WorkExperienceFormPage(existing: item)))
-                  .then((_) => onRefresh()),
+              onEdit: () => Navigator.push(
+                context,
+                MaterialPageRoute(
+                  builder: (_) => WorkExperienceFormPage(existing: item),
+                ),
+              ).then((_) => onRefresh()),
               onDelete: () async {
                 final token = await TokenStore.getAccess();
                 if (token == null) return;
                 await ApiService.deleteWorkExperience(
-                    token: token, id: item['id'] as int);
+                  token: token,
+                  id: item['id'] as int,
+                );
                 onRefresh();
               },
             );
@@ -447,14 +571,17 @@ class _MentorHistoryTab extends StatelessWidget {
 }
 
 // ─────────────────────────────────────────────────────────
-// Mentor-only stat box (3 columns)
+// Mentor stat box — 3 columns
 // ─────────────────────────────────────────────────────────
 class _MStatBox extends StatelessWidget {
   final IconData icon;
   final String label;
   final String value;
-  const _MStatBox(
-      {required this.icon, required this.label, required this.value});
+  const _MStatBox({
+    required this.icon,
+    required this.label,
+    required this.value,
+  });
 
   @override
   Widget build(BuildContext context) => Expanded(
@@ -465,20 +592,29 @@ class _MStatBox extends StatelessWidget {
         borderRadius: BorderRadius.circular(14),
         border: Border.all(color: Colors.white.withOpacity(0.07)),
       ),
-      child: Column(children: [
-        Icon(icon, color: AppColors.primaryCyan, size: 18),
-        const SizedBox(height: 6),
-        Text(value,
+      child: Column(
+        children: [
+          Icon(icon, color: AppColors.primaryCyan, size: 18),
+          const SizedBox(height: 6),
+          Text(
+            value,
             style: const TextStyle(
-                color: Colors.white,
-                fontWeight: FontWeight.bold,
-                fontSize: 14)),
-        const SizedBox(height: 2),
-        Text(label,
+              color: Colors.white,
+              fontWeight: FontWeight.bold,
+              fontSize: 14,
+            ),
+          ),
+          const SizedBox(height: 2),
+          Text(
+            label,
             textAlign: TextAlign.center,
             style: TextStyle(
-                color: Colors.white.withOpacity(0.38), fontSize: 10)),
-      ]),
+              color: Colors.white.withOpacity(0.38),
+              fontSize: 10,
+            ),
+          ),
+        ],
+      ),
     ),
   );
 }
