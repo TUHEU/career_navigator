@@ -1,9 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
-// ─────────────────────────────────────────────────────────
-// App Colors — always constant
-// ─────────────────────────────────────────────────────────
 class AppColors {
   static const Color primaryCyan = Color(0xFF00E5FF);
   static const Color darkBackground = Color(0xFF0A192F);
@@ -11,20 +8,19 @@ class AppColors {
   static const Color darkCard = Color(0xFF112240);
 }
 
-// ─────────────────────────────────────────────────────────
-// Theme backgrounds the user can pick
-// ─────────────────────────────────────────────────────────
-enum AppBackground { bg4, bg7, bg8 }
+enum AppBackground { bg4, bg6, bg8, bg9 }
 
 extension AppBackgroundExt on AppBackground {
   String get assetPath {
     switch (this) {
       case AppBackground.bg4:
         return 'assets/background/bg4.png';
-      case AppBackground.bg7:
-        return 'assets/background/bg7.png';
+      case AppBackground.bg6:
+        return 'assets/background/bg6.png';
       case AppBackground.bg8:
         return 'assets/background/bg8.png';
+      case AppBackground.bg9:
+        return 'assets/background/bg9.png';
     }
   }
 
@@ -32,10 +28,12 @@ extension AppBackgroundExt on AppBackground {
     switch (this) {
       case AppBackground.bg4:
         return 'Ocean Deep';
-      case AppBackground.bg7:
-        return 'Night City';
+      case AppBackground.bg6:
+        return 'Aurora';
       case AppBackground.bg8:
         return 'Cosmos';
+      case AppBackground.bg9:
+        return 'Nebula';
     }
   }
 
@@ -43,17 +41,16 @@ extension AppBackgroundExt on AppBackground {
     switch (this) {
       case AppBackground.bg4:
         return 'bg4';
-      case AppBackground.bg7:
-        return 'bg7';
+      case AppBackground.bg6:
+        return 'bg6';
       case AppBackground.bg8:
         return 'bg8';
+      case AppBackground.bg9:
+        return 'bg9';
     }
   }
 }
 
-// ─────────────────────────────────────────────────────────
-// Theme Provider — ChangeNotifier
-// ─────────────────────────────────────────────────────────
 class AppThemeProvider extends ChangeNotifier {
   AppBackground _background = AppBackground.bg8;
 
@@ -82,9 +79,6 @@ class AppThemeProvider extends ChangeNotifier {
   }
 }
 
-// ─────────────────────────────────────────────────────────
-// Shared InputDecoration helper
-// ─────────────────────────────────────────────────────────
 InputDecoration buildInputDecoration({
   required IconData icon,
   required String label,
@@ -110,39 +104,3 @@ InputDecoration buildInputDecoration({
   ),
   suffixIcon: suffix,
 );
-
-// ─────────────────────────────────────────────────────────
-// Themed background widget — use everywhere
-// ─────────────────────────────────────────────────────────
-class ThemedBackground extends StatelessWidget {
-  final AppThemeProvider themeProvider;
-  final Widget child;
-  final double opacity;
-
-  const ThemedBackground({
-    super.key,
-    required this.themeProvider,
-    required this.child,
-    this.opacity = 0.20,
-  });
-
-  @override
-  Widget build(BuildContext context) {
-    return Stack(
-      children: [
-        Container(
-          decoration: BoxDecoration(
-            color: AppColors.darkBackground,
-            image: DecorationImage(
-              image: AssetImage(themeProvider.backgroundPath),
-              fit: BoxFit.cover,
-              opacity: opacity,
-            ),
-          ),
-        ),
-        Container(color: AppColors.darkBackground.withOpacity(0.78)),
-        child,
-      ],
-    );
-  }
-}
