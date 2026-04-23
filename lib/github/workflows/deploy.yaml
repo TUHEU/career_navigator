@@ -1,0 +1,60 @@
+name: Build APK and Deploy to VPS
+
+on:
+  push:
+    branches:
+      - main
+
+jobs:
+  build_and_deploy:
+    name: Build APK and Upload
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      # 1. Setup Flutter environment
+      - name: Setup Flutter
+        uses: subosito/flutter-action@v2
+        with:
+          flutter-version: '3.x' # Or your specific version
+          channel: 'stable'
+
+      # 2. Get dependencies and build APK
+      - name: Build APK
+        run: |
+          flutter pub get
+          flutter build apk --release
+
+      # 3. Upload the APK to your Contabo VPS
+      - name: Upload APK to VPS
+        uses: appleboy/scp-action@v0.1.7
+        with:
+          host: ${{ secrets.VPS_HOST }}
+          username: ${{ secrets.VPS_USER }}
+          key: ${{ secrets.VPS_SSH_KEY }}
+          port: ${{ secrets.VPS_PORT }}
+          # Path to the generated APK
+          source: "build/app/outputs/flutter-apk/app-release.apk"
+          # Where to put it on your website so it's downloadable
+          target: "/var/www/Download-Web-Career-Navigator"
+          strip_components: 4
+
+      # 4. Optional: Run a script to rename the file or fix permissions
+      - name: Finalize Deployment
+        uses: appleboy/ssh-action@v1.0.3
+        with:
+          host: ${{ secrets.VPS_HOST }}
+          username: ${{ secrets.VPS_USER }}
+          key: ${{ secrets.VPS_SSH_KEY }}
+          port: ${{ secrets.VPS_PORT }}
+          script: |
+            # Ensure the directory exists
+            mkdir -p /var/www/Download-Web-Career-Navigator
+            
+            # Set permissions so users can download it
+            chown -R www-data:www-data /var/www/Download-Web-Career-Navigator
+            chmod 644 /var/www/Download-Web-Career-Navigator/app-release.apk
+            
+            echo "✅ APK is now available at yoursites-ip:5500/downloads/app-release.apk"

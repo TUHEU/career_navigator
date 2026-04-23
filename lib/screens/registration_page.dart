@@ -33,9 +33,9 @@ class _RegistrationPageState extends State<RegistrationPage> {
   Future<void> _register() async {
     if (!_formKey.currentState!.validate()) return;
     if (_passCtrl.text != _confCtrl.text) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('Passwords do not match')),
-      );
+      ScaffoldMessenger.of(
+        context,
+      ).showSnackBar(const SnackBar(content: Text('Passwords do not match')));
       return;
     }
     setState(() => _loading = true);
@@ -59,9 +59,9 @@ class _RegistrationPageState extends State<RegistrationPage> {
         );
       }
     } catch (e) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('Network error.')),
-      );
+      ScaffoldMessenger.of(
+        context,
+      ).showSnackBar(const SnackBar(content: Text('Network error.')));
     } finally {
       if (mounted) setState(() => _loading = false);
     }
