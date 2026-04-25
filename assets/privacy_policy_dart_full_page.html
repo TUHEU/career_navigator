@@ -1,0 +1,203 @@
+
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=DM+Mono:wght@400;500&family=Sora:wght@300;400;500;600&display=swap');
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  .pp-root { background: #0d0f14; color: #e2e4ea; font-family: 'Sora', sans-serif; padding: 0 0 80px; }
+  .pp-hero { background: #111520; border-bottom: 0.5px solid #1e2230; padding: 48px 40px 36px; position: relative; overflow: hidden; }
+  .pp-hero::before { content: ''; position: absolute; top: -40px; right: -40px; width: 220px; height: 220px; background: radial-gradient(circle, rgba(83,74,183,0.15) 0%, transparent 70%); border-radius: 50%; }
+  .pp-badge { display: inline-flex; align-items: center; gap: 6px; font-family: 'DM Mono', monospace; font-size: 11px; color: #7f77dd; background: rgba(83,74,183,0.12); border: 0.5px solid rgba(83,74,183,0.3); border-radius: 20px; padding: 4px 12px; margin-bottom: 20px; letter-spacing: 0.05em; }
+  .pp-dot { width: 6px; height: 6px; background: #7f77dd; border-radius: 50%; }
+  .pp-title { font-size: 32px; font-weight: 600; color: #f0f1f5; line-height: 1.2; margin-bottom: 10px; letter-spacing: -0.02em; }
+  .pp-meta { font-size: 13px; color: #5f6475; font-weight: 300; }
+  .pp-meta span { color: #888fa3; }
+  .pp-body { padding: 40px 40px 0; display: flex; flex-direction: column; gap: 36px; }
+  .pp-section {}
+  .pp-section-header { display: flex; align-items: center; gap: 14px; margin-bottom: 18px; }
+  .pp-section-icon { width: 34px; height: 34px; border-radius: 8px; display: flex; align-items: center; justify-content: center; font-size: 15px; flex-shrink: 0; }
+  .icon-purple { background: rgba(83,74,183,0.15); }
+  .icon-teal { background: rgba(29,158,117,0.12); }
+  .icon-coral { background: rgba(216,90,48,0.12); }
+  .icon-blue { background: rgba(55,138,221,0.12); }
+  .icon-amber { background: rgba(186,117,23,0.12); }
+  .icon-pink { background: rgba(212,83,126,0.12); }
+  .pp-section-title { font-size: 16px; font-weight: 500; color: #c9cbde; }
+  .pp-section-num { font-family: 'DM Mono', monospace; font-size: 10px; color: #3d4258; margin-left: auto; }
+  .pp-divider { width: 100%; height: 0.5px; background: #1e2230; margin-bottom: 18px; }
+  p.pp-text { font-size: 13.5px; line-height: 1.8; color: #8892a8; font-weight: 300; margin-bottom: 14px; }
+  p.pp-text:last-child { margin-bottom: 0; }
+  ul.pp-list { list-style: none; display: flex; flex-direction: column; gap: 10px; margin-bottom: 14px; }
+  ul.pp-list li { display: flex; gap: 10px; font-size: 13.5px; color: #8892a8; font-weight: 300; line-height: 1.65; }
+  .pp-bullet { width: 4px; height: 4px; background: #3d4258; border-radius: 50%; margin-top: 9px; flex-shrink: 0; }
+  strong.pp-em { color: #c9cbde; font-weight: 500; }
+  .pp-highlight { background: rgba(83,74,183,0.08); border-left: 2px solid #534ab7; border-radius: 0 6px 6px 0; padding: 12px 16px; margin: 14px 0; font-size: 13px; color: #9f9bc8; line-height: 1.7; }
+  .pp-footer { margin: 48px 40px 0; padding: 24px; background: #13161f; border: 0.5px solid #1e2230; border-radius: 12px; text-align: center; }
+  .pp-footer p { font-size: 12.5px; color: #4a5066; line-height: 1.7; }
+  .pp-contact-pill { display: inline-flex; align-items: center; gap: 6px; margin-top: 14px; background: rgba(83,74,183,0.1); border: 0.5px solid rgba(83,74,183,0.25); border-radius: 20px; padding: 6px 16px; font-size: 12px; color: #7f77dd; font-family: 'DM Mono', monospace; }
+</style>
+
+<div class="pp-root">
+  <div class="pp-hero">
+    <div class="pp-badge"><div class="pp-dot"></div>Legal Document</div>
+    <h1 class="pp-title">Privacy Policy</h1>
+    <p class="pp-meta">Last updated: <span>April 25, 2026</span> &nbsp;·&nbsp; Effective: <span>April 25, 2026</span></p>
+  </div>
+
+  <div class="pp-body">
+
+    <div class="pp-section">
+      <div class="pp-section-header">
+        <div class="pp-section-icon icon-purple">📦</div>
+        <span class="pp-section-title">Information we collect</span>
+        <span class="pp-section-num">01</span>
+      </div>
+      <div class="pp-divider"></div>
+      <p class="pp-text">When you use our app, we may collect the following types of information to provide and improve our services:</p>
+      <ul class="pp-list">
+        <li><div class="pp-bullet"></div><div><strong class="pp-em">Account data</strong> — Your name, email address, and password when you register an account with us.</div></li>
+        <li><div class="pp-bullet"></div><div><strong class="pp-em">Device information</strong> — Device model, operating system version, unique device identifiers, and crash reports to help us diagnose issues.</div></li>
+        <li><div class="pp-bullet"></div><div><strong class="pp-em">Usage data</strong> — Features used, in-app actions, session duration, and interaction patterns to help us understand how our app is used.</div></li>
+        <li><div class="pp-bullet"></div><div><strong class="pp-em">Location data</strong> — Approximate or precise location data, collected only when you explicitly grant the app permission to do so.</div></li>
+        <li><div class="pp-bullet"></div><div><strong class="pp-em">Camera & media</strong> — Access to your camera or photo library, only when required by a feature you choose to use.</div></li>
+      </ul>
+      <div class="pp-highlight">We do not collect information from children under the age of 13. If we become aware that such data has been collected inadvertently, it will be deleted immediately.</div>
+    </div>
+
+    <div class="pp-section">
+      <div class="pp-section-header">
+        <div class="pp-section-icon icon-teal">⚙️</div>
+        <span class="pp-section-title">How we use your data</span>
+        <span class="pp-section-num">02</span>
+      </div>
+      <div class="pp-divider"></div>
+      <p class="pp-text">We use the data we collect strictly to operate and improve the app experience. This includes the following purposes:</p>
+      <ul class="pp-list">
+        <li><div class="pp-bullet"></div><div>Authenticating your identity and securely managing your account.</div></li>
+        <li><div class="pp-bullet"></div><div>Personalizing your in-app experience, recommendations, and content.</div></li>
+        <li><div class="pp-bullet"></div><div>Sending transactional notifications, security alerts, and important product updates.</div></li>
+        <li><div class="pp-bullet"></div><div>Analyzing usage patterns to improve app performance, stability, and new features.</div></li>
+        <li><div class="pp-bullet"></div><div>Detecting, investigating, and preventing fraudulent or unauthorized activity.</div></li>
+        <li><div class="pp-bullet"></div><div>Complying with legal obligations that apply to our services.</div></li>
+      </ul>
+      <p class="pp-text">We do not use your personal data for advertising purposes without your explicit, informed consent. You can withdraw consent at any time from the app settings.</p>
+    </div>
+
+    <div class="pp-section">
+      <div class="pp-section-header">
+        <div class="pp-section-icon icon-coral">🔗</div>
+        <span class="pp-section-title">Data sharing & disclosure</span>
+        <span class="pp-section-num">03</span>
+      </div>
+      <div class="pp-divider"></div>
+      <p class="pp-text">We do not sell, trade, or rent your personal data to third parties. We may share data only in the following limited circumstances:</p>
+      <ul class="pp-list">
+        <li><div class="pp-bullet"></div><div><strong class="pp-em">Service providers</strong> — Trusted third-party vendors who assist us in operating the app (such as cloud hosting, analytics, and customer support). All are bound by confidentiality agreements and may not use your data for their own purposes.</div></li>
+        <li><div class="pp-bullet"></div><div><strong class="pp-em">Legal requirements</strong> — When required to comply with applicable law, regulation, legal process, or enforceable governmental request.</div></li>
+        <li><div class="pp-bullet"></div><div><strong class="pp-em">Safety & protection</strong> — When disclosure is necessary to protect the rights, property, or safety of our company, users, or the public.</div></li>
+        <li><div class="pp-bullet"></div><div><strong class="pp-em">Business transfers</strong> — In connection with a merger, acquisition, or sale of assets, your data may be transferred. We will notify you before your data becomes subject to a different privacy policy.</div></li>
+      </ul>
+      <div class="pp-highlight">Any third parties we engage are required to process your data in compliance with this policy and applicable data protection laws, including GDPR where applicable.</div>
+    </div>
+
+    <div class="pp-section">
+      <div class="pp-section-header">
+        <div class="pp-section-icon icon-blue">🔒</div>
+        <span class="pp-section-title">Data retention & security</span>
+        <span class="pp-section-num">04</span>
+      </div>
+      <div class="pp-divider"></div>
+      <p class="pp-text">We retain your personal data for as long as your account remains active or as needed to deliver our services. When you delete your account, we will delete or anonymize your data within 30 days, unless we are legally required to retain certain records.</p>
+      <p class="pp-text">We implement industry-standard security practices to protect your data, including:</p>
+      <ul class="pp-list">
+        <li><div class="pp-bullet"></div><div>Encryption of data in transit using TLS and at rest using AES-256.</div></li>
+        <li><div class="pp-bullet"></div><div>Secure authentication, token management, and session expiry controls.</div></li>
+        <li><div class="pp-bullet"></div><div>Regular security audits, penetration testing, and vulnerability assessments.</div></li>
+        <li><div class="pp-bullet"></div><div>Strict internal access controls — only authorized personnel can access personal data.</div></li>
+      </ul>
+      <p class="pp-text">No method of electronic transmission or storage is 100% secure. While we take every reasonable precaution, we cannot guarantee absolute security and encourage you to use a strong, unique password for your account.</p>
+    </div>
+
+    <div class="pp-section">
+      <div class="pp-section-header">
+        <div class="pp-section-icon icon-amber">⚖️</div>
+        <span class="pp-section-title">Your rights</span>
+        <span class="pp-section-num">05</span>
+      </div>
+      <div class="pp-divider"></div>
+      <p class="pp-text">Depending on your country or region, you may have the following rights in relation to your personal data. You can exercise these rights by contacting us directly:</p>
+      <ul class="pp-list">
+        <li><div class="pp-bullet"></div><div><strong class="pp-em">Right to access</strong> — Request a copy of the personal data we hold about you and how it is used.</div></li>
+        <li><div class="pp-bullet"></div><div><strong class="pp-em">Right to correction</strong> — Request that we correct any inaccurate or incomplete personal data.</div></li>
+        <li><div class="pp-bullet"></div><div><strong class="pp-em">Right to deletion</strong> — Request that we delete your personal data, subject to certain legal exceptions.</div></li>
+        <li><div class="pp-bullet"></div><div><strong class="pp-em">Right to portability</strong> — Request your data in a structured, commonly used, machine-readable format.</div></li>
+        <li><div class="pp-bullet"></div><div><strong class="pp-em">Right to object</strong> — Object to processing of your data for certain purposes such as direct marketing.</div></li>
+        <li><div class="pp-bullet"></div><div><strong class="pp-em">Right to restrict processing</strong> — Request that we limit how we use your data in certain circumstances.</div></li>
+        <li><div class="pp-bullet"></div><div><strong class="pp-em">Right to withdraw consent</strong> — Where processing is based on consent, you may withdraw it at any time without affecting the lawfulness of prior processing.</div></li>
+      </ul>
+      <p class="pp-text">We will respond to all verified requests within 30 days. We may need to verify your identity before processing certain requests.</p>
+    </div>
+
+    <div class="pp-section">
+      <div class="pp-section-header">
+        <div class="pp-section-icon icon-teal">🍪</div>
+        <span class="pp-section-title">Cookies & tracking</span>
+        <span class="pp-section-num">06</span>
+      </div>
+      <div class="pp-divider"></div>
+      <p class="pp-text">Our app may use cookies, local storage, and similar tracking technologies to maintain sessions, remember preferences, and gather analytics. These are categorized as:</p>
+      <ul class="pp-list">
+        <li><div class="pp-bullet"></div><div><strong class="pp-em">Essential</strong> — Required for the app to function correctly. Cannot be disabled.</div></li>
+        <li><div class="pp-bullet"></div><div><strong class="pp-em">Analytics</strong> — Help us understand how users interact with the app. Can be opted out of in settings.</div></li>
+        <li><div class="pp-bullet"></div><div><strong class="pp-em">Preferences</strong> — Store your settings and customizations across sessions.</div></li>
+      </ul>
+      <p class="pp-text">You can manage or clear tracking data at any time through your device settings or within the app's privacy settings menu.</p>
+    </div>
+
+    <div class="pp-section">
+      <div class="pp-section-header">
+        <div class="pp-section-icon icon-purple">🌍</div>
+        <span class="pp-section-title">International data transfers</span>
+        <span class="pp-section-num">07</span>
+      </div>
+      <div class="pp-divider"></div>
+      <p class="pp-text">Our services are operated from [Your Country]. If you access our app from outside this jurisdiction, please be aware that your data may be transferred to, stored, and processed in a country with different data protection laws.</p>
+      <p class="pp-text">Where required by applicable law, we implement appropriate safeguards — such as Standard Contractual Clauses — to ensure your data receives adequate protection regardless of where it is processed.</p>
+    </div>
+
+    <div class="pp-section">
+      <div class="pp-section-header">
+        <div class="pp-section-icon icon-coral">🔄</div>
+        <span class="pp-section-title">Changes to this policy</span>
+        <span class="pp-section-num">08</span>
+      </div>
+      <div class="pp-divider"></div>
+      <p class="pp-text">We may update this Privacy Policy from time to time to reflect changes in our practices, technology, legal requirements, or other factors. When we make significant changes, we will notify you via:</p>
+      <ul class="pp-list">
+        <li><div class="pp-bullet"></div><div>An in-app notification or banner when you next open the app.</div></li>
+        <li><div class="pp-bullet"></div><div>An email to the address associated with your account.</div></li>
+      </ul>
+      <p class="pp-text">The "Last updated" date at the top of this page always reflects the most recent revision. Your continued use of the app after any changes constitutes your acceptance of the updated policy. If you do not agree with the revised policy, you should discontinue use of the app and request account deletion.</p>
+    </div>
+
+    <div class="pp-section">
+      <div class="pp-section-header">
+        <div class="pp-section-icon icon-pink">✉️</div>
+        <span class="pp-section-title">Contact us</span>
+        <span class="pp-section-num">09</span>
+      </div>
+      <div class="pp-divider"></div>
+      <p class="pp-text">If you have any questions, concerns, or requests regarding this Privacy Policy or the way we handle your personal data, please do not hesitate to reach out:</p>
+      <ul class="pp-list">
+        <li><div class="pp-bullet"></div><div><strong class="pp-em">Email</strong> — privacy@yourapp.com</div></li>
+        <li><div class="pp-bullet"></div><div><strong class="pp-em">Mailing address</strong> — Your Company Name, 123 Street, City, Country</div></li>
+        <li><div class="pp-bullet"></div><div><strong class="pp-em">Response time</strong> — We aim to respond to all privacy-related inquiries within 5 business days.</div></li>
+      </ul>
+      <p class="pp-text">If you believe your data protection rights have been violated and we have not adequately addressed your concern, you have the right to lodge a complaint with your local data protection authority.</p>
+    </div>
+
+  </div>
+
+  <div class="pp-footer">
+    <p>This policy was last updated on April 25, 2026. By using our app, you acknowledge that you have read and understood this Privacy Policy.</p>
+    <div class="pp-contact-pill">privacy@yourapp.com</div>
+  </div>
+</div>
