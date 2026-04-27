@@ -5,11 +5,12 @@ import 'package:provider/provider.dart';
 import 'screens/splash_screen.dart';
 import 'theme/app_theme.dart';
 
-const String kBaseUrl = 'http://38.242.246.126:5000';
+const String kBaseUrl = 'http://10.11.12.21:5000'; // Change to your backend IP
 
 void main() async {
   WidgetsBinding widgetsBinding = WidgetsFlutterBinding.ensureInitialized();
   FlutterNativeSplash.preserve(widgetsBinding: widgetsBinding);
+
   runApp(
     ChangeNotifierProvider(
       create: (_) => AppThemeProvider(),

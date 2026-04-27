@@ -23,7 +23,6 @@ class _SignInPageState extends State<SignInPage>
   final _passCtrl = TextEditingController();
   bool _obscure = true;
   bool _loading = false;
-  // Which role the user is logging in as — affects routing after login
   String _loginRole = 'job_seeker';
 
   late AnimationController _slideCtrl;
@@ -65,9 +64,7 @@ class _SignInPageState extends State<SignInPage>
         final data = res['data'] as Map<String, dynamic>;
         await TokenStore.save(data['access_token'], data['refresh_token']);
 
-        // Use the role returned by backend (source of truth)
         final serverRole = data['role'] as String? ?? _loginRole;
-        if (!mounted) return;
 
         if (serverRole == 'mentor') {
           Navigator.pushReplacement(
@@ -99,7 +96,6 @@ class _SignInPageState extends State<SignInPage>
     return Scaffold(
       body: Stack(
         children: [
-          // themed background
           Container(
             decoration: BoxDecoration(
               color: AppColors.darkBackground,
@@ -111,7 +107,6 @@ class _SignInPageState extends State<SignInPage>
             ),
           ),
           Container(color: Colors.black.withOpacity(0.50)),
-
           SafeArea(
             child: Center(
               child: SingleChildScrollView(
@@ -142,7 +137,6 @@ class _SignInPageState extends State<SignInPage>
     );
   }
 
-  // ── Logo + title ────────────────────────────────────────
   Widget _buildHeader() => Column(
     children: [
       Container(
@@ -159,7 +153,18 @@ class _SignInPageState extends State<SignInPage>
           ],
         ),
         child: ClipOval(
-          child: Image.asset('assets/logo/logo.png', fit: BoxFit.cover),
+          child: Image.asset(
+            'assets/logo/logo.png',
+            fit: BoxFit.cover,
+            errorBuilder: (_, __, ___) => Container(
+              color: AppColors.primaryCyan.withOpacity(0.2),
+              child: const Icon(
+                Icons.person,
+                color: AppColors.primaryCyan,
+                size: 40,
+              ),
+            ),
+          ),
         ),
       ),
       const SizedBox(height: 16),
@@ -180,7 +185,6 @@ class _SignInPageState extends State<SignInPage>
     ],
   );
 
-  // ── Job Seeker / Mentor toggle ──────────────────────────
   Widget _buildRoleToggle() {
     return Container(
       padding: const EdgeInsets.all(5),
@@ -239,7 +243,6 @@ class _SignInPageState extends State<SignInPage>
     );
   }
 
-  // ── Glass form card ─────────────────────────────────────
   Widget _buildGlassCard() => ClipRRect(
     borderRadius: BorderRadius.circular(28),
     child: BackdropFilter(
@@ -255,7 +258,6 @@ class _SignInPageState extends State<SignInPage>
           key: _formKey,
           child: Column(
             children: [
-              // Email
               TextFormField(
                 controller: _emailCtrl,
                 keyboardType: TextInputType.emailAddress,
@@ -269,7 +271,6 @@ class _SignInPageState extends State<SignInPage>
                 ),
               ),
               const SizedBox(height: 16),
-              // Password
               TextFormField(
                 controller: _passCtrl,
                 obscureText: _obscure,
@@ -291,7 +292,6 @@ class _SignInPageState extends State<SignInPage>
                 ),
               ),
               const SizedBox(height: 10),
-              // Forgot password
               Align(
                 alignment: Alignment.centerRight,
                 child: GestureDetector(
@@ -307,7 +307,6 @@ class _SignInPageState extends State<SignInPage>
                 ),
               ),
               const SizedBox(height: 20),
-              // Sign in button
               ElevatedButton(
                 onPressed: _loading ? null : _signIn,
                 style: ElevatedButton.styleFrom(
@@ -371,6 +370,7 @@ class _SignInPageState extends State<SignInPage>
   );
 
   void _showForgotSheet() {
+    final emailCtrl = TextEditingController();
     showModalBottomSheet(
       context: context,
       isScrollControlled: true,
@@ -378,60 +378,82 @@ class _SignInPageState extends State<SignInPage>
       shape: const RoundedRectangleBorder(
         borderRadius: BorderRadius.vertical(top: Radius.circular(28)),
       ),
-      builder: (ctx) => Padding(
-        padding: EdgeInsets.only(
-          left: 24,
-          right: 24,
-          top: 28,
-          bottom: MediaQuery.of(ctx).viewInsets.bottom + 28,
-        ),
-        child: Column(
-          mainAxisSize: MainAxisSize.min,
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            const Text(
-              'Reset Password',
-              style: TextStyle(
-                color: Colors.white,
-                fontSize: 22,
-                fontWeight: FontWeight.bold,
-              ),
+      builder: (ctx) => StatefulBuilder(
+        builder: (ctx, setSheetState) {
+          bool sending = false;
+          return Padding(
+            padding: EdgeInsets.only(
+              left: 24,
+              right: 24,
+              top: 28,
+              bottom: MediaQuery.of(ctx).viewInsets.bottom + 28,
             ),
-            const SizedBox(height: 8),
-            Text(
-              "Enter your email and we'll send a reset link.",
-              style: TextStyle(color: Colors.white.withOpacity(0.55)),
-            ),
-            const SizedBox(height: 20),
-            TextField(
-              style: const TextStyle(color: Colors.white),
-              keyboardType: TextInputType.emailAddress,
-              decoration: buildInputDecoration(
-                icon: Icons.email_outlined,
-                label: 'Email Address',
-              ),
-            ),
-            const SizedBox(height: 20),
-            ElevatedButton(
-              onPressed: () {
-                Navigator.pop(ctx);
-                _snack('Reset link sent!');
-              },
-              style: ElevatedButton.styleFrom(
-                backgroundColor: AppColors.primaryCyan,
-                foregroundColor: Colors.black,
-                minimumSize: const Size(double.infinity, 52),
-                shape: RoundedRectangleBorder(
-                  borderRadius: BorderRadius.circular(15),
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                const Text(
+                  'Reset Password',
+                  style: TextStyle(
+                    color: Colors.white,
+                    fontSize: 22,
+                    fontWeight: FontWeight.bold,
+                  ),
                 ),
-              ),
-              child: const Text(
-                'SEND RESET LINK',
-                style: TextStyle(fontWeight: FontWeight.bold),
-              ),
+                const SizedBox(height: 8),
+                Text(
+                  "Enter your email and we'll send a reset code.",
+                  style: TextStyle(color: Colors.white.withOpacity(0.55)),
+                ),
+                const SizedBox(height: 20),
+                TextField(
+                  controller: emailCtrl,
+                  style: const TextStyle(color: Colors.white),
+                  keyboardType: TextInputType.emailAddress,
+                  decoration: buildInputDecoration(
+                    icon: Icons.email_outlined,
+                    label: 'Email Address',
+                  ),
+                ),
+                const SizedBox(height: 20),
+                ElevatedButton(
+                  onPressed: sending
+                      ? null
+                      : () async {
+                          setSheetState(() => sending = true);
+                          final res = await ApiService.forgotPassword(
+                            emailCtrl.text.trim(),
+                          );
+                          setSheetState(() => sending = false);
+                          Navigator.pop(ctx);
+                          _snack(res['message'] ?? 'Reset code sent!');
+                        },
+                  style: ElevatedButton.styleFrom(
+                    backgroundColor: AppColors.primaryCyan,
+                    foregroundColor: Colors.black,
+                    minimumSize: const Size(double.infinity, 52),
+                    shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(15),
+                    ),
+                  ),
+                  child: sending
+                      ? const SizedBox(
+                          width: 22,
+                          height: 22,
+                          child: CircularProgressIndicator(
+                            strokeWidth: 2.5,
+                            color: Colors.black,
+                          ),
+                        )
+                      : const Text(
+                          'SEND RESET CODE',
+                          style: TextStyle(fontWeight: FontWeight.bold),
+                        ),
+                ),
+              ],
             ),
-          ],
-        ),
+          );
+        },
       ),
     );
   }

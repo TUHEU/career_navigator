@@ -11,6 +11,7 @@ import 'mentor_dashboard.dart';
 
 class ProfileSetupPage extends StatefulWidget {
   const ProfileSetupPage({super.key});
+
   @override
   State<ProfileSetupPage> createState() => _ProfileSetupPageState();
 }
@@ -265,6 +266,7 @@ class _RoleCard extends StatelessWidget {
   final String title, subtitle;
   final bool selected;
   final VoidCallback onTap;
+
   const _RoleCard({
     required this.icon,
     required this.title,

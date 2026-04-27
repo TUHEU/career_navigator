@@ -17,6 +17,8 @@ class _SearchPageState extends State<SearchPage> {
   List<dynamic> _seekers = [];
   bool _loading = false;
   bool _searched = false;
+  bool _sendingRequest = false;
+  int? _sendingTo;
 
   Future<void> _search(String q) async {
     if (q.trim().length < 2) return;
@@ -41,6 +43,48 @@ class _SearchPageState extends State<SearchPage> {
     }
   }
 
+  Future<void> _sendInvite(String role, int userId, String name) async {
+    if (role != 'mentor') {
+      _showSnack('You can only send invites to mentors');
+      return;
+    }
+
+    setState(() {
+      _sendingRequest = true;
+      _sendingTo = userId;
+    });
+
+    try {
+      final token = await TokenStore.getAccess();
+      if (token == null) return;
+
+      final res = await ApiService.sendMentorRequest(
+        token: token,
+        mentorId: userId,
+        message: 'I would like to connect with you as my mentor.',
+      );
+
+      if (res['success'] == true) {
+        _showSnack('Invite sent to $name!');
+      } else {
+        _showSnack(res['message'] ?? 'Failed to send invite');
+      }
+    } catch (e) {
+      _showSnack('Network error. Please try again.');
+    } finally {
+      if (mounted) {
+        setState(() {
+          _sendingRequest = false;
+          _sendingTo = null;
+        });
+      }
+    }
+  }
+
+  void _showSnack(String msg) {
+    ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text(msg)));
+  }
+
   @override
   void dispose() {
     _ctrl.dispose();
@@ -54,11 +98,13 @@ class _SearchPageState extends State<SearchPage> {
       appBar: AppBar(
         backgroundColor: Colors.transparent,
         iconTheme: const IconThemeData(color: Colors.white),
-        title: const Text('Search', style: TextStyle(color: Colors.white)),
+        title: const Text(
+          'Search & Connect',
+          style: TextStyle(color: Colors.white),
+        ),
       ),
       body: Column(
         children: [
-          // Search bar
           Padding(
             padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 10),
             child: TextField(
@@ -66,7 +112,7 @@ class _SearchPageState extends State<SearchPage> {
               style: const TextStyle(color: Colors.white),
               onSubmitted: _search,
               decoration: InputDecoration(
-                hintText: 'Search mentors, job seekers...',
+                hintText: 'Search mentors, professionals...',
                 hintStyle: TextStyle(color: Colors.white.withOpacity(0.35)),
                 prefixIcon: const Icon(
                   Icons.search,
@@ -108,7 +154,6 @@ class _SearchPageState extends State<SearchPage> {
               ),
             ),
           ),
-
           Expanded(
             child: _loading
                 ? const Center(
@@ -128,7 +173,7 @@ class _SearchPageState extends State<SearchPage> {
                         ),
                         const SizedBox(height: 14),
                         Text(
-                          'Search for mentors and job seekers',
+                          'Search for mentors and professionals',
                           style: TextStyle(
                             color: Colors.white.withOpacity(0.3),
                             fontSize: 14,
@@ -160,6 +205,12 @@ class _SearchPageState extends State<SearchPage> {
                           (m) => _UserCard(
                             user: m as Map<String, dynamic>,
                             isMentor: true,
+                            onInvite: () => _sendInvite(
+                              'mentor',
+                              m['id'],
+                              m['full_name'] ?? 'User',
+                            ),
+                            isSending: _sendingRequest && _sendingTo == m['id'],
                           ),
                         ),
                         const SizedBox(height: 20),
@@ -171,6 +222,8 @@ class _SearchPageState extends State<SearchPage> {
                           (s) => _UserCard(
                             user: s as Map<String, dynamic>,
                             isMentor: false,
+                            onInvite: null,
+                            isSending: false,
                           ),
                         ),
                       ],
@@ -196,7 +249,15 @@ class _SearchPageState extends State<SearchPage> {
 class _UserCard extends StatelessWidget {
   final Map<String, dynamic> user;
   final bool isMentor;
-  const _UserCard({required this.user, required this.isMentor});
+  final VoidCallback? onInvite;
+  final bool isSending;
+
+  const _UserCard({
+    required this.user,
+    required this.isMentor,
+    this.onInvite,
+    required this.isSending,
+  });
 
   @override
   Widget build(BuildContext context) {
@@ -266,21 +327,58 @@ class _UserCard extends StatelessWidget {
               ],
             ),
           ),
-          Container(
-            padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
-            decoration: BoxDecoration(
-              color: AppColors.primaryCyan.withOpacity(0.1),
-              borderRadius: BorderRadius.circular(10),
-            ),
-            child: Text(
-              isMentor ? 'Mentor' : 'Seeker',
-              style: const TextStyle(
-                color: AppColors.primaryCyan,
-                fontSize: 10,
-                fontWeight: FontWeight.w600,
+          if (isMentor && onInvite != null)
+            Container(
+              margin: const EdgeInsets.only(left: 8),
+              child: isSending
+                  ? const SizedBox(
+                      width: 32,
+                      height: 32,
+                      child: CircularProgressIndicator(
+                        strokeWidth: 2,
+                        color: AppColors.primaryCyan,
+                      ),
+                    )
+                  : ElevatedButton(
+                      onPressed: onInvite,
+                      style: ElevatedButton.styleFrom(
+                        backgroundColor: AppColors.primaryCyan,
+                        foregroundColor: Colors.black,
+                        padding: const EdgeInsets.symmetric(
+                          horizontal: 12,
+                          vertical: 8,
+                        ),
+                        minimumSize: Size.zero,
+                        tapTargetSize: MaterialTapTargetSize.shrinkWrap,
+                        shape: RoundedRectangleBorder(
+                          borderRadius: BorderRadius.circular(20),
+                        ),
+                      ),
+                      child: const Text(
+                        'Invite',
+                        style: TextStyle(
+                          fontSize: 12,
+                          fontWeight: FontWeight.bold,
+                        ),
+                      ),
+                    ),
+            )
+          else if (!isMentor)
+            Container(
+              padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+              decoration: BoxDecoration(
+                color: AppColors.primaryCyan.withOpacity(0.1),
+                borderRadius: BorderRadius.circular(10),
+              ),
+              child: const Text(
+                'Seeker',
+                style: TextStyle(
+                  color: AppColors.primaryCyan,
+                  fontSize: 10,
+                  fontWeight: FontWeight.w600,
+                ),
               ),
             ),
-          ),
         ],
       ),
     );

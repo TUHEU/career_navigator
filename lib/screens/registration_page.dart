@@ -145,7 +145,18 @@ class _RegistrationPageState extends State<RegistrationPage> {
           ],
         ),
         child: ClipOval(
-          child: Image.asset('assets/logo/logo.png', fit: BoxFit.cover),
+          child: Image.asset(
+            'assets/logo/logo.png',
+            fit: BoxFit.cover,
+            errorBuilder: (_, __, ___) => Container(
+              color: AppColors.primaryCyan.withOpacity(0.2),
+              child: const Icon(
+                Icons.person,
+                color: AppColors.primaryCyan,
+                size: 40,
+              ),
+            ),
+          ),
         ),
       ),
       const SizedBox(height: 16),

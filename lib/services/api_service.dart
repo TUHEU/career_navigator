@@ -2,10 +2,11 @@ import 'dart:convert';
 import 'package:http/http.dart' as http;
 import '../main.dart';
 
-/// All HTTP communication with the Flask backend.
-/// Each method maps 1-to-1 with a backend route.
 class ApiService {
-  // ── Auth ─────────────────────────────────────────────────
+  // =============================================
+  // AUTH ENDPOINTS
+  // =============================================
+
   static Future<Map<String, dynamic>> register(
     String email,
     String password,
@@ -73,7 +74,18 @@ class ApiService {
     return _decode(res);
   }
 
-  // ── Profile ──────────────────────────────────────────────
+  static Future<Map<String, dynamic>> deleteAccount(String token) async {
+    final res = await http.delete(
+      Uri.parse('$kBaseUrl/auth/delete-account'),
+      headers: _auth(token),
+    );
+    return _decode(res);
+  }
+
+  // =============================================
+  // PROFILE ENDPOINTS
+  // =============================================
+
   static Future<Map<String, dynamic>> getProfile(String token) async {
     final res = await http.get(
       Uri.parse('$kBaseUrl/profile/me'),
@@ -136,7 +148,10 @@ class ApiService {
     return _decode(res);
   }
 
-  // ── Education ─────────────────────────────────────────────
+  // =============================================
+  // EDUCATION ENDPOINTS
+  // =============================================
+
   static Future<Map<String, dynamic>> getEducation(String token) async {
     final res = await http.get(
       Uri.parse('$kBaseUrl/profile/education'),
@@ -181,7 +196,10 @@ class ApiService {
     return _decode(res);
   }
 
-  // ── Work Experience ───────────────────────────────────────
+  // =============================================
+  // WORK EXPERIENCE ENDPOINTS
+  // =============================================
+
   static Future<Map<String, dynamic>> getWorkExperience(String token) async {
     final res = await http.get(
       Uri.parse('$kBaseUrl/profile/work-experience'),
@@ -226,7 +244,10 @@ class ApiService {
     return _decode(res);
   }
 
-  // ── Mentors ───────────────────────────────────────────────
+  // =============================================
+  // MENTOR ENDPOINTS
+  // =============================================
+
   static Future<Map<String, dynamic>> listMentors({
     required String token,
     String expertise = '',
@@ -264,7 +285,10 @@ class ApiService {
     return _decode(res);
   }
 
-  // ── Mentor Requests ───────────────────────────────────────
+  // =============================================
+  // MENTOR REQUESTS (INVITES)
+  // =============================================
+
   static Future<Map<String, dynamic>> sendMentorRequest({
     required String token,
     required int mentorId,
@@ -289,7 +313,7 @@ class ApiService {
   static Future<Map<String, dynamic>> respondToRequest({
     required String token,
     required int requestId,
-    required String action, // 'accept' or 'reject'
+    required String action,
   }) async {
     final res = await http.put(
       Uri.parse('$kBaseUrl/requests/$requestId/respond'),
@@ -299,7 +323,99 @@ class ApiService {
     return _decode(res);
   }
 
-  // ── Notifications ─────────────────────────────────────────
+  // =============================================
+  // JOB LISTING ENDPOINTS
+  // =============================================
+
+  static Future<Map<String, dynamic>> getJobs({
+    String? location,
+    String? employmentType,
+    String? search,
+    int page = 1,
+  }) async {
+    final Map<String, String> queryParams = {'page': '$page'};
+    if (location != null && location.isNotEmpty && location != 'All')
+      queryParams['location'] = location;
+    if (employmentType != null &&
+        employmentType.isNotEmpty &&
+        employmentType != 'All')
+      queryParams['employment_type'] = employmentType;
+    if (search != null && search.isNotEmpty) queryParams['search'] = search;
+
+    final uri = Uri.parse(
+      '$kBaseUrl/jobs',
+    ).replace(queryParameters: queryParams);
+    final res = await http.get(uri);
+    return _decode(res);
+  }
+
+  static Future<Map<String, dynamic>> getJobDetail(int jobId) async {
+    final res = await http.get(Uri.parse('$kBaseUrl/jobs/$jobId'));
+    return _decode(res);
+  }
+
+  static Future<Map<String, dynamic>> createJob({
+    required String token,
+    required Map<String, dynamic> data,
+  }) async {
+    final res = await http.post(
+      Uri.parse('$kBaseUrl/jobs'),
+      headers: _auth(token),
+      body: jsonEncode(data),
+    );
+    return _decode(res);
+  }
+
+  static Future<Map<String, dynamic>> updateJob({
+    required String token,
+    required int jobId,
+    required Map<String, dynamic> data,
+  }) async {
+    final res = await http.put(
+      Uri.parse('$kBaseUrl/jobs/$jobId'),
+      headers: _auth(token),
+      body: jsonEncode(data),
+    );
+    return _decode(res);
+  }
+
+  static Future<Map<String, dynamic>> deleteJob({
+    required String token,
+    required int jobId,
+  }) async {
+    final res = await http.delete(
+      Uri.parse('$kBaseUrl/jobs/$jobId'),
+      headers: _auth(token),
+    );
+    return _decode(res);
+  }
+
+  static Future<Map<String, dynamic>> applyForJob({
+    required String token,
+    required int jobId,
+    String? coverLetter,
+    String? resumeUrl,
+  }) async {
+    final res = await http.post(
+      Uri.parse('$kBaseUrl/jobs/$jobId/apply'),
+      headers: _auth(token),
+      body: jsonEncode({'cover_letter': coverLetter, 'resume_url': resumeUrl}),
+    );
+    return _decode(res);
+  }
+
+  static Future<Map<String, dynamic>> getMyApplications(String token) async {
+    final res = await http.get(
+      Uri.parse('$kBaseUrl/jobs/applications/my'),
+      headers: _auth(token),
+    );
+    return _decode(res);
+  }
+
+  // =============================================
+  // NOTIFICATION ENDPOINTS
+  // =============================================
+
   static Future<Map<String, dynamic>> getNotifications(
     String token, {
     int page = 1,
@@ -323,7 +439,10 @@ class ApiService {
     return _decode(res);
   }
 
-  // ── Chat ──────────────────────────────────────────────────
+  // =============================================
+  // CHAT ENDPOINTS
+  // =============================================
+
   static Future<Map<String, dynamic>> getConversations(String token) async {
     final res = await http.get(
       Uri.parse('$kBaseUrl/chat/conversations'),
@@ -357,7 +476,10 @@ class ApiService {
     return _decode(res);
   }
 
-  // ── Search ────────────────────────────────────────────────
+  // =============================================
+  // SEARCH ENDPOINT
+  // =============================================
+
   static Future<Map<String, dynamic>> search({
     required String token,
     required String query,
@@ -371,7 +493,10 @@ class ApiService {
     return _decode(res);
   }
 
-  // ── Helpers ───────────────────────────────────────────────
+  // =============================================
+  // HELPERS
+  // =============================================
+
   static const Map<String, String> _json = {'Content-Type': 'application/json'};
 
   static Map<String, String> _auth(String token) => {

@@ -12,6 +12,7 @@ import 'settings_page.dart';
 import 'notifications_page.dart';
 import 'chat_page.dart';
 import 'search_page.dart';
+import 'job_listings_page.dart';
 
 class JobSeekerDashboard extends StatefulWidget {
   const JobSeekerDashboard({super.key});
@@ -56,12 +57,13 @@ class _JobSeekerDashboardState extends State<JobSeekerDashboard> {
 
   Future<void> _logout() async {
     await TokenStore.clear();
-    if (mounted)
+    if (mounted) {
       Navigator.pushAndRemoveUntil(
         context,
         MaterialPageRoute(builder: (_) => const SignInPage()),
         (_) => false,
       );
+    }
   }
 
   @override
@@ -75,6 +77,7 @@ class _JobSeekerDashboardState extends State<JobSeekerDashboard> {
       ),
       _EducationPage(profile: _profile ?? {}, onRefresh: _loadProfile),
       _ExperiencePage(profile: _profile ?? {}, onRefresh: _loadProfile),
+      const JobListingsPage(),
       const SettingsPage(),
     ];
 
@@ -99,10 +102,11 @@ class _JobSeekerDashboardState extends State<JobSeekerDashboard> {
       bottomNavigationBar: AppBottomNav(
         currentIndex: _currentIndex,
         onTap: (i) => setState(() => _currentIndex = i),
-        items: const [
+        items: [
           NavItem(Icons.home_outlined, Icons.home, 'Home'),
           NavItem(Icons.school_outlined, Icons.school, 'Education'),
           NavItem(Icons.work_outline, Icons.work, 'Experience'),
+          NavItem(Icons.work_outline, Icons.work, 'Jobs'),
           NavItem(Icons.settings_outlined, Icons.settings, 'Settings'),
         ],
       ),
@@ -110,9 +114,6 @@ class _JobSeekerDashboardState extends State<JobSeekerDashboard> {
   }
 }
 
-// ─────────────────────────────────────────────────────────
-// HOME TAB
-// ─────────────────────────────────────────────────────────
 class _JSHomePage extends StatelessWidget {
   final Map<String, dynamic>? profile;
   final bool loading;
@@ -126,19 +127,21 @@ class _JSHomePage extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    if (loading)
+    if (loading) {
       return const Center(
         child: CircularProgressIndicator(color: AppColors.primaryCyan),
       );
+    }
 
     final p = profile ?? {};
     final name =
         (p['full_name'] as String?) ?? (p['email'] as String?) ?? 'User';
     final email = (p['email'] as String?) ?? '';
-    final headline = (p['headline'] as String?) ?? 'Job Seeker';
-    final pictureUrl =
-        (p['profile_picture_url'] as String?) ??
-        (p['profile_picture'] as String?);
+    final headline =
+        (p['headline'] as String?) ??
+        (p['seeker_headline'] as String?) ??
+        'Job Seeker';
+    final pictureUrl = p['profile_picture_url'] as String?;
     final dob = (p['date_of_birth'] as String?) ?? '—';
     final location = (p['location'] as String?) ?? '—';
     final currentJob = (p['current_job_title'] as String?) ?? '—';
@@ -153,11 +156,9 @@ class _JSHomePage extends StatelessWidget {
       child: ListView(
         padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 16),
         children: [
-          // ── Top bar with action icons ─────────────────────
           Row(
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: [
-              // Title
               Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
@@ -180,11 +181,8 @@ class _JSHomePage extends StatelessWidget {
                   ),
                 ],
               ),
-
-              // Action icons
               Row(
                 children: [
-                  // Search
                   IconButton(
                     icon: const Icon(
                       Icons.search,
@@ -196,8 +194,6 @@ class _JSHomePage extends StatelessWidget {
                       MaterialPageRoute(builder: (_) => const SearchPage()),
                     ),
                   ),
-
-                  // Notifications with badge
                   Stack(
                     children: [
                       IconButton(
@@ -228,8 +224,6 @@ class _JSHomePage extends StatelessWidget {
                         ),
                     ],
                   ),
-
-                  // Chat
                   IconButton(
                     icon: const Icon(
                       Icons.chat_bubble_outline,
@@ -248,8 +242,6 @@ class _JSHomePage extends StatelessWidget {
             ],
           ),
           const SizedBox(height: 16),
-
-          // ── Profile card ──────────────────────────────────
           ProfileCard(
             name: name,
             headline: headline,
@@ -259,8 +251,6 @@ class _JSHomePage extends StatelessWidget {
             badgeIcon: Icons.search_rounded,
           ),
           const SizedBox(height: 20),
-
-          // ── Stats ─────────────────────────────────────────
           Row(
             children: [
               StatBox(
@@ -277,8 +267,6 @@ class _JSHomePage extends StatelessWidget {
             ],
           ),
           const SizedBox(height: 20),
-
-          // ── Personal info ─────────────────────────────────
           const SectionTitle(title: 'Personal Info'),
           const SizedBox(height: 10),
           InfoTile(
@@ -293,8 +281,6 @@ class _JSHomePage extends StatelessWidget {
           ),
           InfoTile(icon: Icons.email_outlined, label: 'Email', value: email),
           const SizedBox(height: 20),
-
-          // ── Career info ───────────────────────────────────
           const SectionTitle(title: 'Career Info'),
           const SizedBox(height: 10),
           InfoTile(
@@ -308,7 +294,6 @@ class _JSHomePage extends StatelessWidget {
             value: desiredJob,
           ),
           const SizedBox(height: 20),
-
           const ComingSoonBanner(),
           const SizedBox(height: 20),
         ],
@@ -317,12 +302,10 @@ class _JSHomePage extends StatelessWidget {
   }
 }
 
-// ─────────────────────────────────────────────────────────
-// EDUCATION TAB
-// ─────────────────────────────────────────────────────────
 class _EducationPage extends StatelessWidget {
   final Map<String, dynamic> profile;
   final VoidCallback onRefresh;
+
   const _EducationPage({required this.profile, required this.onRefresh});
 
   @override
@@ -380,12 +363,10 @@ class _EducationPage extends StatelessWidget {
   }
 }
 
-// ─────────────────────────────────────────────────────────
-// EXPERIENCE TAB
-// ─────────────────────────────────────────────────────────
 class _ExperiencePage extends StatelessWidget {
   final Map<String, dynamic> profile;
   final VoidCallback onRefresh;
+
   const _ExperiencePage({required this.profile, required this.onRefresh});
 
   @override
