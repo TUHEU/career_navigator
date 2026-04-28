@@ -6,6 +6,7 @@ import '../theme/app_theme.dart';
 
 class EducationFormPage extends StatefulWidget {
   final Map<String, dynamic>? existing;
+
   const EducationFormPage({super.key, this.existing});
 
   @override
@@ -13,15 +14,15 @@ class EducationFormPage extends StatefulWidget {
 }
 
 class _EducationFormPageState extends State<EducationFormPage> {
-  final _formKey        = GlobalKey<FormState>();
+  final _formKey = GlobalKey<FormState>();
   final _institutionCtrl = TextEditingController();
-  final _degreeCtrl      = TextEditingController();
-  final _fieldCtrl       = TextEditingController();
-  final _startCtrl       = TextEditingController();
-  final _endCtrl         = TextEditingController();
-  final _descCtrl        = TextEditingController();
+  final _degreeCtrl = TextEditingController();
+  final _fieldCtrl = TextEditingController();
+  final _startCtrl = TextEditingController();
+  final _endCtrl = TextEditingController();
+  final _descCtrl = TextEditingController();
   bool _isCurrent = false;
-  bool _loading   = false;
+  bool _loading = false;
 
   bool get _isEdit => widget.existing != null;
 
@@ -31,11 +32,11 @@ class _EducationFormPageState extends State<EducationFormPage> {
     final e = widget.existing;
     if (e != null) {
       _institutionCtrl.text = e['institution'] ?? '';
-      _degreeCtrl.text      = e['degree'] ?? '';
-      _fieldCtrl.text       = e['field_of_study'] ?? '';
-      _startCtrl.text       = '${e['start_year'] ?? ''}';
-      _endCtrl.text         = '${e['end_year'] ?? ''}';
-      _descCtrl.text        = e['description'] ?? '';
+      _degreeCtrl.text = e['degree'] ?? '';
+      _fieldCtrl.text = e['field_of_study'] ?? '';
+      _startCtrl.text = '${e['start_year'] ?? ''}';
+      _endCtrl.text = '${e['end_year'] ?? ''}';
+      _descCtrl.text = e['description'] ?? '';
       _isCurrent = e['is_current'] == 1 || e['is_current'] == true;
     }
   }
@@ -59,18 +60,21 @@ class _EducationFormPageState extends State<EducationFormPage> {
       if (token == null) return;
 
       final data = {
-        'institution':    _institutionCtrl.text.trim(),
-        'degree':         _degreeCtrl.text.trim(),
+        'institution': _institutionCtrl.text.trim(),
+        'degree': _degreeCtrl.text.trim(),
         'field_of_study': _fieldCtrl.text.trim(),
-        'start_year':     int.tryParse(_startCtrl.text.trim()),
-        'end_year':       _isCurrent ? null : int.tryParse(_endCtrl.text.trim()),
-        'is_current':     _isCurrent ? 1 : 0,
-        'description':    _descCtrl.text.trim(),
+        'start_year': int.tryParse(_startCtrl.text.trim()),
+        'end_year': _isCurrent ? null : int.tryParse(_endCtrl.text.trim()),
+        'is_current': _isCurrent ? 1 : 0,
+        'description': _descCtrl.text.trim(),
       };
 
       if (_isEdit) {
         await ApiService.updateEducation(
-            token: token, id: widget.existing!['id'] as int, data: data);
+          token: token,
+          id: widget.existing!['id'] as int,
+          data: data,
+        );
       } else {
         await ApiService.addEducation(token: token, data: data);
       }
@@ -79,7 +83,8 @@ class _EducationFormPageState extends State<EducationFormPage> {
     } catch (e) {
       if (mounted)
         ScaffoldMessenger.of(context).showSnackBar(
-            const SnackBar(content: Text('Failed to save. Try again.')));
+          const SnackBar(content: Text('Failed to save. Try again.')),
+        );
     } finally {
       if (mounted) setState(() => _loading = false);
     }
@@ -92,8 +97,10 @@ class _EducationFormPageState extends State<EducationFormPage> {
       appBar: AppBar(
         backgroundColor: Colors.transparent,
         iconTheme: const IconThemeData(color: Colors.white),
-        title: Text(_isEdit ? 'Edit Education' : 'Add Education',
-            style: const TextStyle(color: Colors.white)),
+        title: Text(
+          _isEdit ? 'Edit Education' : 'Add Education',
+          style: const TextStyle(color: Colors.white),
+        ),
       ),
       body: SingleChildScrollView(
         padding: const EdgeInsets.all(24),
@@ -101,37 +108,57 @@ class _EducationFormPageState extends State<EducationFormPage> {
           key: _formKey,
           child: Column(
             children: [
-              _field(_institutionCtrl, Icons.account_balance_outlined,
-                  'Institution / University',
-                  validator: (v) => v == null || v.isEmpty ? 'Required' : null),
+              _field(
+                _institutionCtrl,
+                Icons.account_balance_outlined,
+                'Institution / University',
+                validator: (v) => v == null || v.isEmpty ? 'Required' : null,
+              ),
               const SizedBox(height: 16),
-              _field(_degreeCtrl, Icons.military_tech_outlined, 'Degree (e.g. BSc, MBA)',
-                  validator: (v) => v == null || v.isEmpty ? 'Required' : null),
+              _field(
+                _degreeCtrl,
+                Icons.military_tech_outlined,
+                'Degree (e.g. BSc, MBA)',
+                validator: (v) => v == null || v.isEmpty ? 'Required' : null,
+              ),
               const SizedBox(height: 16),
-              _field(_fieldCtrl, Icons.book_outlined, 'Field of Study',
-                  validator: (v) => v == null || v.isEmpty ? 'Required' : null),
+              _field(
+                _fieldCtrl,
+                Icons.book_outlined,
+                'Field of Study',
+                validator: (v) => v == null || v.isEmpty ? 'Required' : null,
+              ),
               const SizedBox(height: 16),
               Row(
                 children: [
                   Expanded(
-                    child: _field(_startCtrl, Icons.calendar_today_outlined,
-                        'Start Year',
-                        keyboardType: TextInputType.number,
-                        validator: (v) => v == null || v.isEmpty ? 'Required' : null),
+                    child: _field(
+                      _startCtrl,
+                      Icons.calendar_today_outlined,
+                      'Start Year',
+                      keyboardType: TextInputType.number,
+                      validator: (v) =>
+                          v == null || v.isEmpty ? 'Required' : null,
+                    ),
                   ),
                   const SizedBox(width: 12),
                   Expanded(
-                    child: _field(_endCtrl, Icons.calendar_month_outlined,
-                        _isCurrent ? 'End Year (Present)' : 'End Year',
-                        keyboardType: TextInputType.number,
-                        enabled: !_isCurrent),
+                    child: _field(
+                      _endCtrl,
+                      Icons.calendar_month_outlined,
+                      _isCurrent ? 'End Year (Present)' : 'End Year',
+                      keyboardType: TextInputType.number,
+                      enabled: !_isCurrent,
+                    ),
                   ),
                 ],
               ),
               const SizedBox(height: 12),
-              // Currently studying switch
               Container(
-                padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 10),
+                padding: const EdgeInsets.symmetric(
+                  horizontal: 16,
+                  vertical: 10,
+                ),
                 decoration: BoxDecoration(
                   color: Colors.white.withOpacity(0.04),
                   borderRadius: BorderRadius.circular(14),
@@ -140,9 +167,13 @@ class _EducationFormPageState extends State<EducationFormPage> {
                 child: Row(
                   mainAxisAlignment: MainAxisAlignment.spaceBetween,
                   children: [
-                    Text('Currently studying here',
-                        style: TextStyle(
-                            color: Colors.white.withOpacity(0.75), fontSize: 14)),
+                    Text(
+                      'Currently studying here',
+                      style: TextStyle(
+                        color: Colors.white.withOpacity(0.75),
+                        fontSize: 14,
+                      ),
+                    ),
                     Switch(
                       value: _isCurrent,
                       activeColor: AppColors.primaryCyan,
@@ -152,8 +183,12 @@ class _EducationFormPageState extends State<EducationFormPage> {
                 ),
               ),
               const SizedBox(height: 16),
-              _field(_descCtrl, Icons.notes_outlined, 'Description (optional)',
-                  maxLines: 3),
+              _field(
+                _descCtrl,
+                Icons.notes_outlined,
+                'Description (optional)',
+                maxLines: 3,
+              ),
               const SizedBox(height: 30),
               ElevatedButton(
                 onPressed: _loading ? null : _save,
@@ -162,17 +197,25 @@ class _EducationFormPageState extends State<EducationFormPage> {
                   foregroundColor: Colors.black,
                   minimumSize: const Size(double.infinity, 52),
                   shape: RoundedRectangleBorder(
-                      borderRadius: BorderRadius.circular(14)),
+                    borderRadius: BorderRadius.circular(14),
+                  ),
                 ),
                 child: _loading
                     ? const SizedBox(
                         width: 20,
                         height: 20,
                         child: CircularProgressIndicator(
-                            strokeWidth: 2.5, color: Colors.black))
-                    : Text(_isEdit ? 'UPDATE' : 'ADD EDUCATION',
+                          strokeWidth: 2.5,
+                          color: Colors.black,
+                        ),
+                      )
+                    : Text(
+                        _isEdit ? 'UPDATE' : 'ADD EDUCATION',
                         style: const TextStyle(
-                            fontWeight: FontWeight.bold, fontSize: 15)),
+                          fontWeight: FontWeight.bold,
+                          fontSize: 15,
+                        ),
+                      ),
               ),
             ],
           ),
@@ -189,14 +232,13 @@ class _EducationFormPageState extends State<EducationFormPage> {
     String? Function(String?)? validator,
     int maxLines = 1,
     bool enabled = true,
-  }) =>
-      TextFormField(
-        controller: ctrl,
-        keyboardType: keyboardType,
-        validator: validator,
-        maxLines: maxLines,
-        enabled: enabled,
-        style: const TextStyle(color: Colors.white),
-        decoration: buildInputDecoration(icon: icon, label: label),
-      );
+  }) => TextFormField(
+    controller: ctrl,
+    keyboardType: keyboardType,
+    validator: validator,
+    maxLines: maxLines,
+    enabled: enabled,
+    style: const TextStyle(color: Colors.white),
+    decoration: buildInputDecoration(icon: icon, label: label),
+  );
 }

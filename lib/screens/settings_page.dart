@@ -43,14 +43,10 @@ class SettingsPage extends StatelessWidget {
                   ),
                 ),
                 const SizedBox(height: 24),
-
-                // ── App Theme ────────────────────────────────
                 _label('App Theme'),
                 const SizedBox(height: 12),
                 _ThemePicker(theme: theme),
                 const SizedBox(height: 28),
-
-                // ── Account ──────────────────────────────────
                 _label('Account'),
                 const SizedBox(height: 12),
                 _Tile(
@@ -71,31 +67,9 @@ class SettingsPage extends StatelessWidget {
                     ),
                   ),
                 ),
-                _Tile(
-                  icon: Icons.notifications_outlined,
-                  label: 'Notifications',
-                  onTap: () => _snack(context, 'Coming soon'),
-                ),
-                _Tile(
-                  icon: Icons.privacy_tip_outlined,
-                  label: 'Privacy & Security',
-                  onTap: () => _snack(context, 'Coming soon'),
-                ),
                 const SizedBox(height: 28),
-
-                // ── Support ───────────────────────────────────
                 _label('Support'),
                 const SizedBox(height: 12),
-                _Tile(
-                  icon: Icons.help_outline,
-                  label: 'Help & FAQ',
-                  onTap: () => _snack(context, 'Coming soon'),
-                ),
-                _Tile(
-                  icon: Icons.feedback_outlined,
-                  label: 'Send Feedback',
-                  onTap: () => _snack(context, 'Coming soon'),
-                ),
                 _Tile(
                   icon: Icons.info_outline,
                   label: 'About Us',
@@ -105,8 +79,6 @@ class SettingsPage extends StatelessWidget {
                   ),
                 ),
                 const SizedBox(height: 28),
-
-                // ── Danger zone ───────────────────────────────
                 _label('Account Actions'),
                 const SizedBox(height: 12),
                 _Tile(
@@ -165,16 +137,18 @@ class SettingsPage extends StatelessWidget {
 
   Future<void> _logout(BuildContext context) async {
     await TokenStore.clear();
-    if (context.mounted)
+    if (context.mounted) {
       Navigator.pushAndRemoveUntil(
         context,
         MaterialPageRoute(builder: (_) => const SignInPage()),
         (_) => false,
       );
+    }
   }
 
-  void _snack(BuildContext context, String msg) =>
-      ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text(msg)));
+  void _snack(BuildContext context, String msg) {
+    ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text(msg)));
+  }
 
   void _confirmDelete(BuildContext context) {
     showDialog(
@@ -198,9 +172,27 @@ class SettingsPage extends StatelessWidget {
             ),
           ),
           TextButton(
-            onPressed: () {
+            onPressed: () async {
               Navigator.pop(context);
-              _snack(context, 'Coming soon');
+              final token = await TokenStore.getAccess();
+              if (token != null) {
+                final res = await ApiService.deleteAccount(token);
+                if (res['success'] == true) {
+                  await TokenStore.clear();
+                  if (context.mounted) {
+                    ScaffoldMessenger.of(context).showSnackBar(
+                      const SnackBar(content: Text('Account deleted')),
+                    );
+                    Navigator.pushAndRemoveUntil(
+                      context,
+                      MaterialPageRoute(builder: (_) => const SignInPage()),
+                      (_) => false,
+                    );
+                  }
+                } else {
+                  _snack(context, res['message'] ?? 'Failed to delete account');
+                }
+              }
             },
             child: const Text(
               'Delete',
@@ -213,11 +205,9 @@ class SettingsPage extends StatelessWidget {
   }
 }
 
-// ─────────────────────────────────────────────────────────
-// Theme Picker
-// ─────────────────────────────────────────────────────────
 class _ThemePicker extends StatelessWidget {
   final AppThemeProvider theme;
+
   const _ThemePicker({required this.theme});
 
   @override
@@ -282,14 +272,12 @@ class _ThemePicker extends StatelessWidget {
   );
 }
 
-// ─────────────────────────────────────────────────────────
-// Settings Tile
-// ─────────────────────────────────────────────────────────
 class _Tile extends StatelessWidget {
   final IconData icon;
   final String label;
   final VoidCallback onTap;
   final Color? color;
+
   const _Tile({
     required this.icon,
     required this.label,
@@ -329,11 +317,9 @@ class _Tile extends StatelessWidget {
   }
 }
 
-// ─────────────────────────────────────────────────────────
-// Change Password Page
-// ─────────────────────────────────────────────────────────
 class ChangePasswordPage extends StatefulWidget {
   const ChangePasswordPage({super.key});
+
   @override
   State<ChangePasswordPage> createState() => _ChangePasswordPageState();
 }
@@ -368,7 +354,7 @@ class _ChangePasswordPageState extends State<ChangePasswordPage> {
           _codeSent = true;
           _loading = false;
         });
-        _snack(res['message'] ?? 'Code sent!');
+        _snack(res['message'] ?? 'Code sent! Check your email.');
       }
     } catch (_) {
       if (mounted) {
@@ -397,12 +383,13 @@ class _ChangePasswordPageState extends State<ChangePasswordPage> {
       if (res['success'] == true) {
         _snack('Password changed! Please log in.');
         await TokenStore.clear();
-        if (mounted)
+        if (mounted) {
           Navigator.pushAndRemoveUntil(
             context,
             MaterialPageRoute(builder: (_) => const SignInPage()),
             (_) => false,
           );
+        }
       } else {
         _snack(res['message'] ?? 'Failed');
       }

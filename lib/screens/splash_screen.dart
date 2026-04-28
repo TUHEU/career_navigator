@@ -71,7 +71,6 @@ class _SplashScreenState extends State<SplashScreen>
       _progressCtrl.forward();
     });
 
-    // Navigate after 6 seconds, route based on stored role
     Future.delayed(const Duration(seconds: 6), _navigate);
   }
 
@@ -87,7 +86,6 @@ class _SplashScreenState extends State<SplashScreen>
       return;
     }
 
-    // Fetch profile to know the role
     try {
       final res = await ApiService.getProfile(token);
       if (!mounted) return;
@@ -151,7 +149,6 @@ class _SplashScreenState extends State<SplashScreen>
             child: Column(
               mainAxisSize: MainAxisSize.min,
               children: [
-                // Logo
                 FadeTransition(
                   opacity: _fadeAnim,
                   child: ScaleTransition(
@@ -173,14 +170,20 @@ class _SplashScreenState extends State<SplashScreen>
                         child: Image.asset(
                           'assets/logo/logo.png',
                           fit: BoxFit.cover,
+                          errorBuilder: (_, __, ___) => Container(
+                            color: AppColors.primaryCyan.withOpacity(0.2),
+                            child: const Icon(
+                              Icons.school,
+                              color: AppColors.primaryCyan,
+                              size: 60,
+                            ),
+                          ),
                         ),
                       ),
                     ),
                   ),
                 ),
                 const SizedBox(height: 32),
-
-                // Title
                 FadeTransition(
                   opacity: _textFadeAnim,
                   child: SlideTransition(
@@ -210,8 +213,6 @@ class _SplashScreenState extends State<SplashScreen>
                   ),
                 ),
                 const SizedBox(height: 60),
-
-                // Progress bar
                 FadeTransition(
                   opacity: _textFadeAnim,
                   child: SizedBox(

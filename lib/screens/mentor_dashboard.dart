@@ -13,6 +13,7 @@ import 'settings_page.dart';
 import 'notifications_page.dart';
 import 'chat_page.dart';
 import 'search_page.dart';
+import 'job_listings_page.dart';
 
 class MentorDashboard extends StatefulWidget {
   const MentorDashboard({super.key});
@@ -57,12 +58,13 @@ class _MentorDashboardState extends State<MentorDashboard> {
 
   Future<void> _logout() async {
     await TokenStore.clear();
-    if (mounted)
+    if (mounted) {
       Navigator.pushAndRemoveUntil(
         context,
         MaterialPageRoute(builder: (_) => const SignInPage()),
         (_) => false,
       );
+    }
   }
 
   @override
@@ -76,6 +78,7 @@ class _MentorDashboardState extends State<MentorDashboard> {
       ),
       _MentorProfileTab(profile: _profile ?? {}, onRefresh: _loadProfile),
       _MentorHistoryTab(profile: _profile ?? {}, onRefresh: _loadProfile),
+      const JobListingsPage(),
       const SettingsPage(),
     ];
 
@@ -100,10 +103,14 @@ class _MentorDashboardState extends State<MentorDashboard> {
       bottomNavigationBar: AppBottomNav(
         currentIndex: _currentIndex,
         onTap: (i) => setState(() => _currentIndex = i),
-        items: const [
+        // REMOVED 'const' keyword from this list
+        items: [
           NavItem(Icons.home_outlined, Icons.home, 'Home'),
           NavItem(Icons.person_outline, Icons.person, 'My Profile'),
-          NavItem(Icons.history_edu_outlined, Icons.history_edu, 'History'),
+          // FIXED: Changed Icons.history_edu_outlined to Icons.history_outlined
+          NavItem(Icons.history_outlined, Icons.history, 'History'),
+          // FIXED: Changed Icons.briefcase_outlined to Icons.work_outline
+          NavItem(Icons.work_outline, Icons.work, 'Jobs'),
           NavItem(Icons.settings_outlined, Icons.settings, 'Settings'),
         ],
       ),
@@ -111,9 +118,6 @@ class _MentorDashboardState extends State<MentorDashboard> {
   }
 }
 
-// ─────────────────────────────────────────────────────────
-// MENTOR HOME TAB
-// ─────────────────────────────────────────────────────────
 class _MentorHomePage extends StatelessWidget {
   final Map<String, dynamic>? profile;
   final bool loading;
@@ -127,10 +131,11 @@ class _MentorHomePage extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    if (loading)
+    if (loading) {
       return const Center(
         child: CircularProgressIndicator(color: AppColors.primaryCyan),
       );
+    }
 
     final p = profile ?? {};
     final mp = (p['mentor_profile'] as Map<String, dynamic>?) ?? {};
@@ -139,9 +144,7 @@ class _MentorHomePage extends StatelessWidget {
     final email = (p['email'] as String?) ?? '';
     final headline =
         (mp['headline'] as String?) ?? (p['headline'] as String?) ?? 'Mentor';
-    final pictureUrl =
-        (p['profile_picture_url'] as String?) ??
-        (p['profile_picture'] as String?);
+    final pictureUrl = p['profile_picture_url'] as String?;
     final company = (mp['current_company'] as String?) ?? '—';
     final jobTitle = (mp['current_job_title'] as String?) ?? '—';
     final yoe = mp['years_of_experience'];
@@ -158,11 +161,9 @@ class _MentorHomePage extends StatelessWidget {
       child: ListView(
         padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 16),
         children: [
-          // ── Top bar with action icons ─────────────────────
           Row(
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: [
-              // Title
               Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
@@ -185,11 +186,8 @@ class _MentorHomePage extends StatelessWidget {
                   ),
                 ],
               ),
-
-              // Action icons
               Row(
                 children: [
-                  // Search
                   IconButton(
                     icon: const Icon(
                       Icons.search,
@@ -201,8 +199,6 @@ class _MentorHomePage extends StatelessWidget {
                       MaterialPageRoute(builder: (_) => const SearchPage()),
                     ),
                   ),
-
-                  // Notifications with badge
                   Stack(
                     children: [
                       IconButton(
@@ -233,8 +229,6 @@ class _MentorHomePage extends StatelessWidget {
                         ),
                     ],
                   ),
-
-                  // Chat
                   IconButton(
                     icon: const Icon(
                       Icons.chat_bubble_outline,
@@ -253,8 +247,6 @@ class _MentorHomePage extends StatelessWidget {
             ],
           ),
           const SizedBox(height: 16),
-
-          // ── Profile card ──────────────────────────────────
           ProfileCard(
             name: name,
             headline: headline,
@@ -264,8 +256,6 @@ class _MentorHomePage extends StatelessWidget {
             badgeIcon: Icons.school_outlined,
           ),
           const SizedBox(height: 20),
-
-          // ── Mentor stats ──────────────────────────────────
           Row(
             children: [
               _MStatBox(
@@ -290,8 +280,6 @@ class _MentorHomePage extends StatelessWidget {
             ],
           ),
           const SizedBox(height: 20),
-
-          // ── Accepting mentees status ──────────────────────
           Container(
             padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
             decoration: BoxDecoration(
@@ -329,8 +317,6 @@ class _MentorHomePage extends StatelessWidget {
             ),
           ),
           const SizedBox(height: 20),
-
-          // ── Expertise chips ───────────────────────────────
           if ((mp['expertise_areas'] as List?)?.isNotEmpty == true) ...[
             const SectionTitle(title: 'Expertise Areas'),
             const SizedBox(height: 10),
@@ -343,8 +329,6 @@ class _MentorHomePage extends StatelessWidget {
             ),
             const SizedBox(height: 20),
           ],
-
-          // ── Career info ───────────────────────────────────
           const SectionTitle(title: 'Career Info'),
           const SizedBox(height: 10),
           InfoTile(
@@ -362,7 +346,6 @@ class _MentorHomePage extends StatelessWidget {
             label: 'Experience',
             value: yoe != null ? '$yoe years' : '—',
           ),
-
           const SizedBox(height: 20),
           const ComingSoonBanner(),
           const SizedBox(height: 20),
@@ -372,12 +355,10 @@ class _MentorHomePage extends StatelessWidget {
   }
 }
 
-// ─────────────────────────────────────────────────────────
-// MENTOR PROFILE TAB
-// ─────────────────────────────────────────────────────────
 class _MentorProfileTab extends StatelessWidget {
   final Map<String, dynamic> profile;
   final VoidCallback onRefresh;
+
   const _MentorProfileTab({required this.profile, required this.onRefresh});
 
   @override
@@ -392,8 +373,6 @@ class _MentorProfileTab extends StatelessWidget {
           subtitle: 'Manage your mentor information',
         ),
         const SizedBox(height: 20),
-
-        // Edit button
         ElevatedButton.icon(
           onPressed: () => Navigator.push(
             context,
@@ -414,10 +393,8 @@ class _MentorProfileTab extends StatelessWidget {
           ),
         ),
         const SizedBox(height: 24),
-
         const SectionTitle(title: 'Mentor Details'),
         const SizedBox(height: 12),
-
         ...[
           {'label': 'Headline', 'value': mp['headline'] ?? '—'},
           {'label': 'Current Company', 'value': mp['current_company'] ?? '—'},
@@ -463,12 +440,10 @@ class _MentorProfileTab extends StatelessWidget {
   }
 }
 
-// ─────────────────────────────────────────────────────────
-// MENTOR HISTORY TAB — education + work experience
-// ─────────────────────────────────────────────────────────
 class _MentorHistoryTab extends StatelessWidget {
   final Map<String, dynamic> profile;
   final VoidCallback onRefresh;
+
   const _MentorHistoryTab({required this.profile, required this.onRefresh});
 
   @override
@@ -484,8 +459,6 @@ class _MentorHistoryTab extends StatelessWidget {
           subtitle: 'Education & work history',
         ),
         const SizedBox(height: 20),
-
-        // ── Education ─────────────────────────────────────
         const SectionTitle(title: 'Education'),
         const SizedBox(height: 10),
         AddButton(
@@ -523,10 +496,7 @@ class _MentorHistoryTab extends StatelessWidget {
               },
             );
           }),
-
         const SizedBox(height: 24),
-
-        // ── Work Experience ───────────────────────────────
         const SectionTitle(title: 'Work Experience'),
         const SizedBox(height: 10),
         AddButton(
@@ -570,13 +540,11 @@ class _MentorHistoryTab extends StatelessWidget {
   }
 }
 
-// ─────────────────────────────────────────────────────────
-// Mentor stat box — 3 columns
-// ─────────────────────────────────────────────────────────
 class _MStatBox extends StatelessWidget {
   final IconData icon;
   final String label;
   final String value;
+
   const _MStatBox({
     required this.icon,
     required this.label,

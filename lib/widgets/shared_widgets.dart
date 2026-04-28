@@ -1,12 +1,13 @@
 import 'package:flutter/material.dart';
 import '../theme/app_theme.dart';
 
-// ─────────────────────────────────────────────────────────
-// Page Header
-// ─────────────────────────────────────────────────────────
+// =============================================
+// PAGE HEADER
+// =============================================
 class PageHeader extends StatelessWidget {
   final String title;
   final String subtitle;
+
   const PageHeader({super.key, required this.title, required this.subtitle});
 
   @override
@@ -30,9 +31,9 @@ class PageHeader extends StatelessWidget {
   );
 }
 
-// ─────────────────────────────────────────────────────────
-// Profile Card
-// ─────────────────────────────────────────────────────────
+// =============================================
+// PROFILE CARD
+// =============================================
 class ProfileCard extends StatelessWidget {
   final String name;
   final String headline;
@@ -122,12 +123,13 @@ class ProfileCard extends StatelessWidget {
   }
 }
 
-// ─────────────────────────────────────────────────────────
-// Role Badge
-// ─────────────────────────────────────────────────────────
+// =============================================
+// ROLE BADGE
+// =============================================
 class RoleBadge extends StatelessWidget {
   final String label;
   final IconData icon;
+
   const RoleBadge({super.key, required this.label, required this.icon});
 
   @override
@@ -156,9 +158,9 @@ class RoleBadge extends StatelessWidget {
   );
 }
 
-// ─────────────────────────────────────────────────────────
-// Coming Soon Banner
-// ─────────────────────────────────────────────────────────
+// =============================================
+// COMING SOON BANNER
+// =============================================
 class ComingSoonBanner extends StatelessWidget {
   const ComingSoonBanner({super.key});
 
@@ -206,12 +208,13 @@ class ComingSoonBanner extends StatelessWidget {
   );
 }
 
-// ─────────────────────────────────────────────────────────
-// Add Button
-// ─────────────────────────────────────────────────────────
+// =============================================
+// ADD BUTTON
+// =============================================
 class AddButton extends StatelessWidget {
   final String label;
   final VoidCallback onTap;
+
   const AddButton({super.key, required this.label, required this.onTap});
 
   @override
@@ -247,12 +250,13 @@ class AddButton extends StatelessWidget {
   );
 }
 
-// ─────────────────────────────────────────────────────────
-// Empty State
-// ─────────────────────────────────────────────────────────
+// =============================================
+// EMPTY STATE
+// =============================================
 class EmptyState extends StatelessWidget {
   final IconData icon;
   final String message;
+
   const EmptyState({super.key, required this.icon, required this.message});
 
   @override
@@ -276,12 +280,13 @@ class EmptyState extends StatelessWidget {
   );
 }
 
-// ─────────────────────────────────────────────────────────
-// Action Buttons (edit + delete)
-// ─────────────────────────────────────────────────────────
+// =============================================
+// ACTION BUTTONS
+// =============================================
 class ActionButtons extends StatelessWidget {
   final VoidCallback onEdit;
   final VoidCallback onDelete;
+
   const ActionButtons({
     super.key,
     required this.onEdit,
@@ -316,13 +321,14 @@ class ActionButtons extends StatelessWidget {
   );
 }
 
-// ─────────────────────────────────────────────────────────
-// Education Card
-// ─────────────────────────────────────────────────────────
+// =============================================
+// EDUCATION CARD
+// =============================================
 class EducationCard extends StatelessWidget {
   final Map<String, dynamic> item;
   final VoidCallback onEdit;
   final VoidCallback onDelete;
+
   const EducationCard({
     super.key,
     required this.item,
@@ -396,13 +402,14 @@ class EducationCard extends StatelessWidget {
   }
 }
 
-// ─────────────────────────────────────────────────────────
-// Work Experience Card
-// ─────────────────────────────────────────────────────────
+// =============================================
+// WORK CARD
+// =============================================
 class WorkCard extends StatelessWidget {
   final Map<String, dynamic> item;
   final VoidCallback onEdit;
   final VoidCallback onDelete;
+
   const WorkCard({
     super.key,
     required this.item,
@@ -503,13 +510,14 @@ class WorkCard extends StatelessWidget {
   }
 }
 
-// ─────────────────────────────────────────────────────────
-// Stat Box
-// ─────────────────────────────────────────────────────────
+// =============================================
+// STAT BOX
+// =============================================
 class StatBox extends StatelessWidget {
   final String label;
   final String value;
   final IconData icon;
+
   const StatBox({
     super.key,
     required this.label,
@@ -553,13 +561,14 @@ class StatBox extends StatelessWidget {
   );
 }
 
-// ─────────────────────────────────────────────────────────
-// Info Tile
-// ─────────────────────────────────────────────────────────
+// =============================================
+// INFO TILE
+// =============================================
 class InfoTile extends StatelessWidget {
   final IconData icon;
   final String label;
   final String value;
+
   const InfoTile({
     super.key,
     required this.icon,
@@ -604,11 +613,12 @@ class InfoTile extends StatelessWidget {
   );
 }
 
-// ─────────────────────────────────────────────────────────
-// Section Title
-// ─────────────────────────────────────────────────────────
+// =============================================
+// SECTION TITLE
+// =============================================
 class SectionTitle extends StatelessWidget {
   final String title;
+
   const SectionTitle({super.key, required this.title});
 
   @override
@@ -623,19 +633,21 @@ class SectionTitle extends StatelessWidget {
   );
 }
 
-// ─────────────────────────────────────────────────────────
-// Bottom Nav Item data class
-// ─────────────────────────────────────────────────────────
+// =============================================
+// BOTTOM NAV ITEM (FIXED - NO CONST CONSTRUCTOR)
+// =============================================
 class NavItem {
   final IconData outlinedIcon;
   final IconData filledIcon;
   final String label;
-  const NavItem(this.outlinedIcon, this.filledIcon, this.label);
+
+  // REMOVED 'const' - this fixes the error
+  NavItem(this.outlinedIcon, this.filledIcon, this.label);
 }
 
-// ─────────────────────────────────────────────────────────
-// Bottom Navigation Bar
-// ─────────────────────────────────────────────────────────
+// =============================================
+// BOTTOM NAVIGATION BAR
+// =============================================
 class AppBottomNav extends StatelessWidget {
   final int currentIndex;
   final ValueChanged<int> onTap;
@@ -715,11 +727,12 @@ class AppBottomNav extends StatelessWidget {
   }
 }
 
-// ─────────────────────────────────────────────────────────
-// Expertise Chip
-// ─────────────────────────────────────────────────────────
+// =============================================
+// EXPERTISE CHIP
+// =============================================
 class ExpertiseChip extends StatelessWidget {
   final String label;
+
   const ExpertiseChip({super.key, required this.label});
 
   @override
@@ -739,4 +752,166 @@ class ExpertiseChip extends StatelessWidget {
       ),
     ),
   );
+}
+
+// =============================================
+// JOB CARD
+// =============================================
+class JobCard extends StatelessWidget {
+  final Map<String, dynamic> job;
+  final VoidCallback? onApply;
+
+  const JobCard({super.key, required this.job, this.onApply});
+
+  @override
+  Widget build(BuildContext context) {
+    final title = job['title'] ?? 'Position';
+    final company = job['company'] ?? 'Company';
+    final location = job['location'] ?? 'Location';
+    final employmentType = (job['employment_type'] ?? 'full_time')
+        .toString()
+        .replaceAll('_', ' ')
+        .toUpperCase();
+    final salaryMin = job['salary_min'];
+    final salaryMax = job['salary_max'];
+    final currency = job['salary_currency'] ?? 'USD';
+
+    String salaryText = 'Salary not specified';
+    if (salaryMin != null || salaryMax != null) {
+      if (salaryMin != null && salaryMax != null) {
+        salaryText =
+            '$currency ${salaryMin.toString()} - ${salaryMax.toString()}';
+      } else if (salaryMin != null) {
+        salaryText = '$currency ${salaryMin.toString()}+';
+      } else if (salaryMax != null) {
+        salaryText = 'Up to $currency ${salaryMax.toString()}';
+      }
+    }
+
+    return Container(
+      margin: const EdgeInsets.only(bottom: 12),
+      padding: const EdgeInsets.all(16),
+      decoration: BoxDecoration(
+        color: Colors.white.withOpacity(0.04),
+        borderRadius: BorderRadius.circular(16),
+        border: Border.all(color: Colors.white.withOpacity(0.07)),
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Row(
+            children: [
+              Container(
+                width: 48,
+                height: 48,
+                decoration: BoxDecoration(
+                  color: AppColors.primaryCyan.withOpacity(0.1),
+                  borderRadius: BorderRadius.circular(12),
+                ),
+                child: const Icon(
+                  Icons.business_center,
+                  color: AppColors.primaryCyan,
+                  size: 24,
+                ),
+              ),
+              const SizedBox(width: 12),
+              Expanded(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text(
+                      title,
+                      style: const TextStyle(
+                        color: Colors.white,
+                        fontWeight: FontWeight.bold,
+                        fontSize: 16,
+                      ),
+                      maxLines: 1,
+                      overflow: TextOverflow.ellipsis,
+                    ),
+                    const SizedBox(height: 4),
+                    Text(
+                      company,
+                      style: const TextStyle(
+                        color: AppColors.primaryCyan,
+                        fontSize: 13,
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+              Container(
+                padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+                decoration: BoxDecoration(
+                  color: AppColors.primaryCyan.withOpacity(0.1),
+                  borderRadius: BorderRadius.circular(12),
+                ),
+                child: Text(
+                  employmentType,
+                  style: const TextStyle(
+                    color: AppColors.primaryCyan,
+                    fontSize: 10,
+                    fontWeight: FontWeight.w600,
+                  ),
+                ),
+              ),
+            ],
+          ),
+          const SizedBox(height: 12),
+          Row(
+            children: [
+              Icon(
+                Icons.location_on_outlined,
+                color: Colors.white.withOpacity(0.4),
+                size: 14,
+              ),
+              const SizedBox(width: 4),
+              Text(
+                location,
+                style: TextStyle(
+                  color: Colors.white.withOpacity(0.5),
+                  fontSize: 12,
+                ),
+              ),
+              const SizedBox(width: 16),
+              Icon(
+                Icons.attach_money,
+                color: Colors.white.withOpacity(0.4),
+                size: 14,
+              ),
+              const SizedBox(width: 4),
+              Text(
+                salaryText,
+                style: TextStyle(
+                  color: Colors.white.withOpacity(0.5),
+                  fontSize: 12,
+                ),
+              ),
+            ],
+          ),
+          if (onApply != null) ...[
+            const SizedBox(height: 12),
+            SizedBox(
+              width: double.infinity,
+              child: ElevatedButton(
+                onPressed: onApply,
+                style: ElevatedButton.styleFrom(
+                  backgroundColor: AppColors.primaryCyan,
+                  foregroundColor: Colors.black,
+                  padding: const EdgeInsets.symmetric(vertical: 10),
+                  shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(10),
+                  ),
+                ),
+                child: const Text(
+                  'Apply Now',
+                  style: TextStyle(fontWeight: FontWeight.bold, fontSize: 13),
+                ),
+              ),
+            ),
+          ],
+        ],
+      ),
+    );
+  }
 }

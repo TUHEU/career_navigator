@@ -32,7 +32,6 @@ class _NotificationsPageState extends State<NotificationsPage> {
           _notifs = (data['notifications'] as List<dynamic>?) ?? [];
           _loading = false;
         });
-        // Mark all as read
         await ApiService.markNotificationsRead(token: token);
       }
     } catch (_) {
@@ -50,6 +49,8 @@ class _NotificationsPageState extends State<NotificationsPage> {
         return Icons.cancel_outlined;
       case 'new_message':
         return Icons.chat_bubble_outline;
+      case 'job_alert':
+        return Icons.work_off_outlined;
       default:
         return Icons.notifications_outlined;
     }
@@ -63,6 +64,8 @@ class _NotificationsPageState extends State<NotificationsPage> {
         return Colors.redAccent;
       case 'new_message':
         return AppColors.primaryCyan;
+      case 'job_alert':
+        return Colors.amber;
       default:
         return Colors.orangeAccent;
     }

@@ -83,7 +83,6 @@ class _EditProfilePageState extends State<EditProfilePage> {
       final token = await TokenStore.getAccess();
       if (token == null) return;
 
-      // Update basic user info
       await ApiService.setupProfile(
         token: token,
         fullName: name,
@@ -91,7 +90,6 @@ class _EditProfilePageState extends State<EditProfilePage> {
         role: _role,
       );
 
-      // Update role-specific info
       final fields = {
         'phone': _phoneCtrl.text.trim(),
         'location': _locationCtrl.text.trim(),
@@ -171,7 +169,6 @@ class _EditProfilePageState extends State<EditProfilePage> {
               padding: const EdgeInsets.all(24),
               child: Column(
                 children: [
-                  // Profile picture
                   GestureDetector(
                     onTap: _pickAndUploadPicture,
                     child: Stack(
@@ -223,7 +220,6 @@ class _EditProfilePageState extends State<EditProfilePage> {
                     ),
                   ),
                   const SizedBox(height: 28),
-
                   _field(_nameCtrl, Icons.person_outline, 'Full Name'),
                   const SizedBox(height: 16),
                   _field(_phoneCtrl, Icons.phone_outlined, 'Phone'),
@@ -234,7 +230,6 @@ class _EditProfilePageState extends State<EditProfilePage> {
                   const SizedBox(height: 16),
                   _field(_bioCtrl, Icons.notes_outlined, 'Bio', maxLines: 4),
                   const SizedBox(height: 36),
-
                   ElevatedButton(
                     onPressed: _saving ? null : _save,
                     style: ElevatedButton.styleFrom(

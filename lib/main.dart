@@ -10,6 +10,7 @@ const String kBaseUrl = 'http://38.242.246.126:5000';
 void main() async {
   WidgetsBinding widgetsBinding = WidgetsFlutterBinding.ensureInitialized();
   FlutterNativeSplash.preserve(widgetsBinding: widgetsBinding);
+
   runApp(
     ChangeNotifierProvider(
       create: (_) => AppThemeProvider(),

@@ -4,9 +4,6 @@ import '../services/api_service.dart';
 import '../services/token_store.dart';
 import '../theme/app_theme.dart';
 
-// ─────────────────────────────────────────────────────────
-// Conversations list page
-// ─────────────────────────────────────────────────────────
 class ConversationsPage extends StatefulWidget {
   const ConversationsPage({super.key});
 
@@ -73,7 +70,7 @@ class _ConversationsPageState extends State<ConversationsPage> {
                   ),
                   const SizedBox(height: 8),
                   Text(
-                    'Accept a mentorship request to start chatting.',
+                    'Send an invite to a mentor or accept a request to start chatting.',
                     textAlign: TextAlign.center,
                     style: TextStyle(
                       color: Colors.white.withOpacity(0.2),
@@ -188,9 +185,6 @@ class _ConversationsPageState extends State<ConversationsPage> {
   }
 }
 
-// ─────────────────────────────────────────────────────────
-// Chat page (one conversation)
-// ─────────────────────────────────────────────────────────
 class ChatPage extends StatefulWidget {
   final int conversationId;
   final int recipientId;
@@ -278,12 +272,13 @@ class _ChatPageState extends State<ChatPage> {
 
   void _scrollToBottom() {
     WidgetsBinding.instance.addPostFrameCallback((_) {
-      if (_scroll.hasClients)
+      if (_scroll.hasClients) {
         _scroll.animateTo(
           _scroll.position.maxScrollExtent,
           duration: const Duration(milliseconds: 300),
           curve: Curves.easeOut,
         );
+      }
     });
   }
 
@@ -318,16 +313,16 @@ class _ChatPageState extends State<ChatPage> {
                 : ListView.builder(
                     controller: _scroll,
                     padding: const EdgeInsets.all(16),
+                    reverse: true,
                     itemCount: _msgs.length,
                     itemBuilder: (_, i) {
-                      final m = _msgs[i] as Map<String, dynamic>;
+                      final m =
+                          _msgs[_msgs.length - 1 - i] as Map<String, dynamic>;
                       final mine = m['sender_id'].toString() == _myId;
-                      return _Bubble(msg: m, isMine: mine);
+                      return _ChatBubble(msg: m, isMine: mine);
                     },
                   ),
           ),
-
-          // Input bar
           Container(
             padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
             decoration: BoxDecoration(
@@ -392,10 +387,11 @@ class _ChatPageState extends State<ChatPage> {
   }
 }
 
-class _Bubble extends StatelessWidget {
+class _ChatBubble extends StatelessWidget {
   final Map<String, dynamic> msg;
   final bool isMine;
-  const _Bubble({required this.msg, required this.isMine});
+
+  const _ChatBubble({required this.msg, required this.isMine});
 
   @override
   Widget build(BuildContext context) {
