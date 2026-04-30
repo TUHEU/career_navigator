@@ -8,6 +8,7 @@ import '../theme/app_theme.dart';
 import 'registration_page.dart';
 import 'job_seeker_dashboard.dart';
 import 'mentor_dashboard.dart';
+import 'admin_dashboard.dart';
 
 class SignInPage extends StatefulWidget {
   const SignInPage({super.key});
@@ -23,7 +24,6 @@ class _SignInPageState extends State<SignInPage>
   final _passCtrl = TextEditingController();
   bool _obscure = true;
   bool _loading = false;
-  String _loginRole = 'job_seeker';
 
   late AnimationController _slideCtrl;
   late Animation<Offset> _slideAnim;
@@ -64,9 +64,14 @@ class _SignInPageState extends State<SignInPage>
         final data = res['data'] as Map<String, dynamic>;
         await TokenStore.save(data['access_token'], data['refresh_token']);
 
-        final serverRole = data['role'] as String? ?? _loginRole;
+        final role = data['role'] as String? ?? 'job_seeker';
 
-        if (serverRole == 'mentor') {
+        if (role == 'admin') {
+          Navigator.pushReplacement(
+            context,
+            MaterialPageRoute(builder: (_) => const AdminDashboard()),
+          );
+        } else if (role == 'mentor') {
           Navigator.pushReplacement(
             context,
             MaterialPageRoute(builder: (_) => const MentorDashboard()),
@@ -119,8 +124,6 @@ class _SignInPageState extends State<SignInPage>
                   child: Column(
                     children: [
                       _buildHeader(),
-                      const SizedBox(height: 28),
-                      _buildRoleToggle(),
                       const SizedBox(height: 28),
                       _buildGlassCard(),
                       const SizedBox(height: 28),
@@ -184,64 +187,6 @@ class _SignInPageState extends State<SignInPage>
       ),
     ],
   );
-
-  Widget _buildRoleToggle() {
-    return Container(
-      padding: const EdgeInsets.all(5),
-      decoration: BoxDecoration(
-        color: Colors.white.withOpacity(0.07),
-        borderRadius: BorderRadius.circular(16),
-        border: Border.all(color: Colors.white.withOpacity(0.12)),
-      ),
-      child: Row(
-        children: [
-          _roleTab('job_seeker', Icons.search_rounded, 'Job Seeker'),
-          _roleTab('mentor', Icons.school_outlined, 'Mentor'),
-        ],
-      ),
-    );
-  }
-
-  Widget _roleTab(String role, IconData icon, String label) {
-    final selected = _loginRole == role;
-    return Expanded(
-      child: GestureDetector(
-        onTap: () => setState(() => _loginRole = role),
-        child: AnimatedContainer(
-          duration: const Duration(milliseconds: 220),
-          padding: const EdgeInsets.symmetric(vertical: 12),
-          decoration: BoxDecoration(
-            color: selected
-                ? AppColors.primaryCyan.withOpacity(0.18)
-                : Colors.transparent,
-            borderRadius: BorderRadius.circular(12),
-            border: selected
-                ? Border.all(color: AppColors.primaryCyan.withOpacity(0.5))
-                : Border.all(color: Colors.transparent),
-          ),
-          child: Row(
-            mainAxisAlignment: MainAxisAlignment.center,
-            children: [
-              Icon(
-                icon,
-                size: 18,
-                color: selected ? AppColors.primaryCyan : Colors.white38,
-              ),
-              const SizedBox(width: 8),
-              Text(
-                label,
-                style: TextStyle(
-                  color: selected ? AppColors.primaryCyan : Colors.white38,
-                  fontWeight: selected ? FontWeight.bold : FontWeight.normal,
-                  fontSize: 14,
-                ),
-              ),
-            ],
-          ),
-        ),
-      ),
-    );
-  }
 
   Widget _buildGlassCard() => ClipRRect(
     borderRadius: BorderRadius.circular(28),
@@ -328,11 +273,9 @@ class _SignInPageState extends State<SignInPage>
                           color: Colors.black,
                         ),
                       )
-                    : Text(
-                        _loginRole == 'mentor'
-                            ? 'SIGN IN AS MENTOR'
-                            : 'SIGN IN AS JOB SEEKER',
-                        style: const TextStyle(
+                    : const Text(
+                        'SIGN IN',
+                        style: TextStyle(
                           fontWeight: FontWeight.bold,
                           fontSize: 15,
                         ),

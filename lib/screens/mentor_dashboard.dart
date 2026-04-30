@@ -103,13 +103,10 @@ class _MentorDashboardState extends State<MentorDashboard> {
       bottomNavigationBar: AppBottomNav(
         currentIndex: _currentIndex,
         onTap: (i) => setState(() => _currentIndex = i),
-        // REMOVED 'const' keyword from this list
-        items: [
+        items: const [
           NavItem(Icons.home_outlined, Icons.home, 'Home'),
           NavItem(Icons.person_outline, Icons.person, 'My Profile'),
-          // FIXED: Changed Icons.history_edu_outlined to Icons.history_outlined
           NavItem(Icons.history_outlined, Icons.history, 'History'),
-          // FIXED: Changed Icons.briefcase_outlined to Icons.work_outline
           NavItem(Icons.work_outline, Icons.work, 'Jobs'),
           NavItem(Icons.settings_outlined, Icons.settings, 'Settings'),
         ],

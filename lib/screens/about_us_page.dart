@@ -23,10 +23,10 @@ class Developer {
 
 const List<Developer> kDevelopers = [
   Developer(
-    name: 'Tuheu Moussa',
+    name: 'Tuheu Tchoubi Pempeme Moussa Fahdil',
     role: 'Lead Backend Developer & Database Architect',
-    github: 'tuheu_moussa',
-    linkedin: 'https://linkedin.com/in/tuheu-moussa',
+    github: 'https://github.com/TUHEU',
+    linkedin: 'https://www.linkedin.com/in/nadal-junior-63b5933a3/',
     imagePath: 'assets/team/dev1.jpg',
     description:
         'Designed and implemented the Flask API, database schema, authentication system, and job listing module.',
@@ -254,7 +254,6 @@ class AboutUsPage extends StatelessWidget {
               _buildTechChip('Flutter', Icons.mobile_friendly),
               _buildTechChip('Dart', Icons.code),
               _buildTechChip('Python', Icons.terminal),
-              // REPLACED Icons.flask with Icons.science
               _buildTechChip('Flask', Icons.science),
               _buildTechChip('MySQL', Icons.storage),
               _buildTechChip('JWT', Icons.security),

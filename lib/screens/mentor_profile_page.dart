@@ -23,6 +23,7 @@ class _MentorProfilePageState extends State<MentorProfilePage> {
   final _companyCtrl = TextEditingController();
   final _jobTitleCtrl = TextEditingController();
   final _expertiseCtrl = TextEditingController();
+  final _industriesCtrl = TextEditingController();
   final _styleCtrl = TextEditingController();
   final _priceCtrl = TextEditingController();
   final _linkedinCtrl = TextEditingController();
@@ -55,6 +56,13 @@ class _MentorProfilePageState extends State<MentorProfilePage> {
     } else if (exp is String) {
       _expertiseCtrl.text = exp;
     }
+
+    final ind = mp['industries'];
+    if (ind is List) {
+      _industriesCtrl.text = ind.join(', ');
+    } else if (ind is String) {
+      _industriesCtrl.text = ind;
+    }
   }
 
   @override
@@ -68,6 +76,7 @@ class _MentorProfilePageState extends State<MentorProfilePage> {
       _companyCtrl,
       _jobTitleCtrl,
       _expertiseCtrl,
+      _industriesCtrl,
       _styleCtrl,
       _priceCtrl,
       _linkedinCtrl,
@@ -91,6 +100,12 @@ class _MentorProfilePageState extends State<MentorProfilePage> {
           .where((s) => s.isNotEmpty)
           .toList();
 
+      final industriesList = _industriesCtrl.text
+          .split(',')
+          .map((s) => s.trim())
+          .where((s) => s.isNotEmpty)
+          .toList();
+
       await ApiService.updateMentorProfile(
         token: token,
         fields: {
@@ -102,6 +117,7 @@ class _MentorProfilePageState extends State<MentorProfilePage> {
           'current_company': _companyCtrl.text.trim(),
           'current_job_title': _jobTitleCtrl.text.trim(),
           'expertise_areas': expertiseList,
+          'industries': industriesList,
           'mentoring_style': _styleCtrl.text.trim(),
           'session_price': double.tryParse(_priceCtrl.text.trim()) ?? 0,
           'is_accepting_mentees': _accepting ? 1 : 0,
@@ -176,6 +192,12 @@ class _MentorProfilePageState extends State<MentorProfilePage> {
                 _expertiseCtrl,
                 Icons.lightbulb_outline,
                 'Expertise Areas (comma separated)',
+              ),
+              const SizedBox(height: 14),
+              _field(
+                _industriesCtrl,
+                Icons.factory_outlined,
+                'Industries (comma separated)',
               ),
               const SizedBox(height: 14),
               _field(_styleCtrl, Icons.psychology_outlined, 'Mentoring Style'),

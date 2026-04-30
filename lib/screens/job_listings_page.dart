@@ -26,11 +26,14 @@ class _JobListingsPageState extends State<JobListingsPage> {
     'part_time',
     'contract',
     'internship',
+    'freelance',
   ];
 
   @override
   void initState() {
     super.initState();
+    _selectedLocation = 'All';
+    _selectedType = 'All';
     _loadJobs();
   }
 
@@ -68,6 +71,8 @@ class _JobListingsPageState extends State<JobListingsPage> {
       return;
     }
 
+    final coverLetterCtrl = TextEditingController();
+
     showDialog(
       context: context,
       builder: (ctx) => AlertDialog(
@@ -76,13 +81,19 @@ class _JobListingsPageState extends State<JobListingsPage> {
           'Apply for Job',
           style: TextStyle(color: Colors.white),
         ),
-        content: TextField(
-          maxLines: 5,
-          style: const TextStyle(color: Colors.white),
-          decoration: buildInputDecoration(
-            icon: Icons.edit_note,
-            label: 'Cover Letter (optional)',
-          ),
+        content: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            TextField(
+              controller: coverLetterCtrl,
+              maxLines: 5,
+              style: const TextStyle(color: Colors.white),
+              decoration: buildInputDecoration(
+                icon: Icons.edit_note,
+                label: 'Cover Letter (optional)',
+              ),
+            ),
+          ],
         ),
         actions: [
           TextButton(
@@ -95,20 +106,31 @@ class _JobListingsPageState extends State<JobListingsPage> {
           TextButton(
             onPressed: () async {
               Navigator.pop(ctx);
-              final coverLetter =
-                  (ctx.findRootAncestorStateOfType() as _JobListingsPageState?)
-                      ?.toString() ??
-                  '';
-              final res = await ApiService.applyForJob(
-                token: token,
-                jobId: jobId,
-              );
-              if (mounted) {
-                ScaffoldMessenger.of(context).showSnackBar(
-                  SnackBar(
-                    content: Text(res['message'] ?? 'Application submitted!'),
-                  ),
+              setState(() => _loading = true);
+              try {
+                final res = await ApiService.applyForJob(
+                  token: token,
+                  jobId: jobId,
+                  coverLetter: coverLetterCtrl.text.trim(),
                 );
+                if (mounted) {
+                  ScaffoldMessenger.of(context).showSnackBar(
+                    SnackBar(
+                      content: Text(res['message'] ?? 'Application submitted!'),
+                      backgroundColor: Colors.green,
+                    ),
+                  );
+                }
+              } catch (e) {
+                if (mounted) {
+                  ScaffoldMessenger.of(context).showSnackBar(
+                    const SnackBar(
+                      content: Text('Failed to apply. Try again.'),
+                    ),
+                  );
+                }
+              } finally {
+                if (mounted) setState(() => _loading = false);
               }
             },
             child: const Text(
@@ -150,6 +172,18 @@ class _JobListingsPageState extends State<JobListingsPage> {
                   Icons.search,
                   color: AppColors.primaryCyan,
                 ),
+                suffixIcon: _searchQuery.isNotEmpty
+                    ? IconButton(
+                        icon: Icon(
+                          Icons.clear,
+                          color: Colors.white.withOpacity(0.5),
+                        ),
+                        onPressed: () {
+                          _searchQuery = '';
+                          _loadJobs();
+                        },
+                      )
+                    : null,
                 filled: true,
                 fillColor: Colors.white.withOpacity(0.06),
                 border: OutlineInputBorder(

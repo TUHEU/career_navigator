@@ -7,6 +7,9 @@ import '../theme/app_theme.dart';
 import 'sign_in_page.dart';
 import 'edit_profile_page.dart';
 import 'about_us_page.dart';
+import 'help_faq_page.dart';
+import 'send_feedback_page.dart';
+import 'privacy_policy_page.dart';
 
 class SettingsPage extends StatelessWidget {
   const SettingsPage({super.key});
@@ -43,10 +46,14 @@ class SettingsPage extends StatelessWidget {
                   ),
                 ),
                 const SizedBox(height: 24),
+
+                // App Theme Section
                 _label('App Theme'),
                 const SizedBox(height: 12),
                 _ThemePicker(theme: theme),
                 const SizedBox(height: 28),
+
+                // Account Section
                 _label('Account'),
                 const SizedBox(height: 12),
                 _Tile(
@@ -68,8 +75,36 @@ class SettingsPage extends StatelessWidget {
                   ),
                 ),
                 const SizedBox(height: 28),
+
+                // Support Section
                 _label('Support'),
                 const SizedBox(height: 12),
+                _Tile(
+                  icon: Icons.help_outline,
+                  label: 'Help & FAQ',
+                  onTap: () => Navigator.push(
+                    context,
+                    MaterialPageRoute(builder: (_) => const HelpFaqPage()),
+                  ),
+                ),
+                _Tile(
+                  icon: Icons.feedback_outlined,
+                  label: 'Send Feedback',
+                  onTap: () => Navigator.push(
+                    context,
+                    MaterialPageRoute(builder: (_) => const SendFeedbackPage()),
+                  ),
+                ),
+                _Tile(
+                  icon: Icons.privacy_tip_outlined,
+                  label: 'Privacy Policy',
+                  onTap: () => Navigator.push(
+                    context,
+                    MaterialPageRoute(
+                      builder: (_) => const PrivacyPolicyPage(),
+                    ),
+                  ),
+                ),
                 _Tile(
                   icon: Icons.info_outline,
                   label: 'About Us',
@@ -79,6 +114,8 @@ class SettingsPage extends StatelessWidget {
                   ),
                 ),
                 const SizedBox(height: 28),
+
+                // Account Actions Section
                 _label('Account Actions'),
                 const SizedBox(height: 12),
                 _Tile(
@@ -117,6 +154,18 @@ class SettingsPage extends StatelessWidget {
                   ),
                 ),
                 const SizedBox(height: 30),
+
+                // Version Info
+                Center(
+                  child: Text(
+                    'Version 2.0.0',
+                    style: TextStyle(
+                      color: Colors.white.withOpacity(0.2),
+                      fontSize: 11,
+                    ),
+                  ),
+                ),
+                const SizedBox(height: 20),
               ],
             ),
           ),
@@ -328,15 +377,18 @@ class _ChangePasswordPageState extends State<ChangePasswordPage> {
   final _emailCtrl = TextEditingController();
   final _codeCtrl = TextEditingController();
   final _passCtrl = TextEditingController();
+  final _confirmPassCtrl = TextEditingController();
   bool _codeSent = false;
   bool _loading = false;
   bool _obscure = true;
+  bool _obscureConfirm = true;
 
   @override
   void dispose() {
     _emailCtrl.dispose();
     _codeCtrl.dispose();
     _passCtrl.dispose();
+    _confirmPassCtrl.dispose();
     super.dispose();
   }
 
@@ -368,10 +420,17 @@ class _ChangePasswordPageState extends State<ChangePasswordPage> {
     final email = _emailCtrl.text.trim();
     final code = _codeCtrl.text.trim();
     final pass = _passCtrl.text;
+    final confirmPass = _confirmPassCtrl.text;
+
     if (code.isEmpty || pass.length < 6) {
       _snack('Enter code and a password of at least 6 chars');
       return;
     }
+    if (pass != confirmPass) {
+      _snack('Passwords do not match');
+      return;
+    }
+
     setState(() => _loading = true);
     try {
       final res = await ApiService.resetPassword(
@@ -468,6 +527,26 @@ class _ChangePasswordPageState extends State<ChangePasswordPage> {
                       color: AppColors.primaryCyan,
                     ),
                     onPressed: () => setState(() => _obscure = !_obscure),
+                  ),
+                ),
+              ),
+              const SizedBox(height: 16),
+              TextFormField(
+                controller: _confirmPassCtrl,
+                obscureText: _obscureConfirm,
+                style: const TextStyle(color: Colors.white),
+                decoration: buildInputDecoration(
+                  icon: Icons.lock_outline,
+                  label: 'Confirm New Password',
+                  suffix: IconButton(
+                    icon: Icon(
+                      _obscureConfirm
+                          ? Icons.visibility_off_outlined
+                          : Icons.visibility_outlined,
+                      color: AppColors.primaryCyan,
+                    ),
+                    onPressed: () =>
+                        setState(() => _obscureConfirm = !_obscureConfirm),
                   ),
                 ),
               ),

@@ -102,7 +102,7 @@ class _JobSeekerDashboardState extends State<JobSeekerDashboard> {
       bottomNavigationBar: AppBottomNav(
         currentIndex: _currentIndex,
         onTap: (i) => setState(() => _currentIndex = i),
-        items: [
+        items: const [
           NavItem(Icons.home_outlined, Icons.home, 'Home'),
           NavItem(Icons.school_outlined, Icons.school, 'Education'),
           NavItem(Icons.work_outline, Icons.work, 'Experience'),

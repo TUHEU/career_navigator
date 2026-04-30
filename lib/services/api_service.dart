@@ -286,7 +286,7 @@ class ApiService {
   }
 
   // =============================================
-  // MENTOR REQUESTS (INVITES)
+  // MENTOR REQUESTS
   // =============================================
 
   static Future<Map<String, dynamic>> sendMentorRequest({
@@ -490,6 +490,30 @@ class ApiService {
       '$kBaseUrl/search',
     ).replace(queryParameters: {'q': query, 'kind': kind, 'page': '$page'});
     final res = await http.get(uri, headers: _auth(token));
+    return _decode(res);
+  }
+
+  // =============================================
+  // FEEDBACK ENDPOINT
+  // =============================================
+
+  static Future<Map<String, dynamic>> submitFeedback({
+    required String token,
+    required String subject,
+    required String message,
+    String category = 'General',
+    int? rating,
+  }) async {
+    final res = await http.post(
+      Uri.parse('$kBaseUrl/feedback'),
+      headers: _auth(token),
+      body: jsonEncode({
+        'subject': subject,
+        'message': message,
+        'category': category,
+        'rating': rating,
+      }),
+    );
     return _decode(res);
   }
 
