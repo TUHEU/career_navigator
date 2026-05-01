@@ -25,9 +25,9 @@ const List<Developer> kDevelopers = [
   Developer(
     name: 'Tuheu Tchoubi Pempeme Moussa Fahdil',
     role: 'Lead Backend Developer & Database Architect',
-    github: 'https://github.com/TUHEU',
+    github: 'TUHEU',
     linkedin: 'https://www.linkedin.com/in/nadal-junior-63b5933a3/',
-    imagePath: 'assets/team/dev1.jpg',
+    imagePath: 'assets/team/dev1.png',
     description:
         'Designed and implemented the Flask API, database schema, authentication system, and job listing module.',
   ),
