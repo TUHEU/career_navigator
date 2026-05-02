@@ -1,9 +1,15 @@
 import 'package:flutter/material.dart';
+import 'package:provider/provider.dart';
 
-import '../../services/api_service.dart';
-import '../../services/token_store.dart';
-import '../../core/themes/app_theme.dart';
-import '../widgets/shared_widgets.dart';
+import '../../../core/themes/app_theme.dart';
+import '../../../core/utils/helpers.dart';
+import '../../../data/datasources/remote/api_service.dart';
+import '../../../providers/auth_provider.dart';
+import '../../../providers/theme_provider.dart';
+import '../../widgets/shared/buttons.dart';
+import '../../widgets/shared/cards.dart';
+import '../../widgets/shared/inputs.dart';
+import '../../widgets/shared/loading_widgets.dart';
 
 class JobListingsPage extends StatefulWidget {
   const JobListingsPage({super.key});
@@ -13,11 +19,13 @@ class JobListingsPage extends StatefulWidget {
 }
 
 class _JobListingsPageState extends State<JobListingsPage> {
-  List<dynamic> _jobs = [];
-  bool _loading = true;
-  String _searchQuery = '';
-  String? _selectedLocation;
-  String? _selectedType;
+  final ApiService _apiService = ApiService();
+  final TextEditingController _searchController = TextEditingController();
+
+  List<Map<String, dynamic>> _jobs = [];
+  bool _isLoading = true;
+  String _selectedLocation = 'All';
+  String _selectedType = 'All';
 
   final List<String> _locations = ['All', 'Remote', 'Hybrid', 'Onsite'];
   final List<String> _jobTypes = [
@@ -32,169 +40,148 @@ class _JobListingsPageState extends State<JobListingsPage> {
   @override
   void initState() {
     super.initState();
-    _selectedLocation = 'All';
-    _selectedType = 'All';
     _loadJobs();
   }
 
   Future<void> _loadJobs() async {
-    setState(() => _loading = true);
-    try {
-      final token = await TokenStore.getAccess();
-      if (token == null) return;
+    setState(() => _isLoading = true);
 
-      final res = await ApiService.getJobs(
-        location: _selectedLocation != 'All' ? _selectedLocation : null,
-        employmentType: _selectedType != 'All' ? _selectedType : null,
-        search: _searchQuery.isNotEmpty ? _searchQuery : null,
-      );
+    final response = await _apiService.getJobs(
+      location: _selectedLocation != 'All' ? _selectedLocation : null,
+      employmentType: _selectedType != 'All' ? _selectedType : null,
+      search: _searchController.text.isNotEmpty ? _searchController.text : null,
+    );
 
-      if (res['success'] == true && mounted) {
-        setState(() {
-          _jobs = (res['data'] as List<dynamic>?) ?? [];
-          _loading = false;
-        });
-      } else {
-        setState(() => _loading = false);
-      }
-    } catch (e) {
-      if (mounted) setState(() => _loading = false);
+    if (mounted && response['success'] == true) {
+      setState(() {
+        _jobs = List<Map<String, dynamic>>.from(response['data'] ?? []);
+        _isLoading = false;
+      });
+    } else if (mounted) {
+      setState(() => _isLoading = false);
     }
   }
 
   Future<void> _applyForJob(int jobId) async {
-    final token = await TokenStore.getAccess();
+    final token = await context.read<AuthProvider>().getAccessToken();
     if (token == null) {
-      ScaffoldMessenger.of(
-        context,
-      ).showSnackBar(const SnackBar(content: Text('Please login to apply')));
+      Helpers.showSnackBar(context, 'Please login to apply', isError: true);
       return;
     }
 
-    final coverLetterCtrl = TextEditingController();
+    final coverLetterController = TextEditingController();
 
-    showDialog(
+    showModalBottomSheet(
       context: context,
-      builder: (ctx) => AlertDialog(
-        backgroundColor: AppColors.darkSurface,
-        title: const Text(
-          'Apply for Job',
-          style: TextStyle(color: Colors.white),
+      isScrollControlled: true,
+      shape: const RoundedRectangleBorder(
+        borderRadius: BorderRadius.vertical(top: Radius.circular(20)),
+      ),
+      builder: (ctx) => Padding(
+        padding: EdgeInsets.only(
+          left: 20,
+          right: 20,
+          top: 20,
+          bottom: MediaQuery.of(ctx).viewInsets.bottom + 20,
         ),
-        content: Column(
+        child: Column(
           mainAxisSize: MainAxisSize.min,
+          crossAxisAlignment: CrossAxisAlignment.start,
           children: [
+            const Text(
+              'Apply for Job',
+              style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
+            ),
+            const SizedBox(height: 16),
+            const Text('Cover Letter (optional)'),
+            const SizedBox(height: 8),
             TextField(
-              controller: coverLetterCtrl,
+              controller: coverLetterController,
               maxLines: 5,
-              style: const TextStyle(color: Colors.white),
-              decoration: buildInputDecoration(
-                icon: Icons.edit_note,
-                label: 'Cover Letter (optional)',
+              decoration: InputDecoration(
+                hintText: 'Write your cover letter here...',
+                border: OutlineInputBorder(
+                  borderRadius: BorderRadius.circular(12),
+                ),
               ),
+            ),
+            const SizedBox(height: 20),
+            Row(
+              children: [
+                Expanded(
+                  child: OutlinedButton(
+                    onPressed: () => Navigator.pop(ctx),
+                    child: const Text('Cancel'),
+                  ),
+                ),
+                const SizedBox(width: 12),
+                Expanded(
+                  child: ElevatedButton(
+                    onPressed: () async {
+                      Navigator.pop(ctx);
+                      setState(() => _isLoading = true);
+
+                      final response = await _apiService.applyForJob(
+                        token: token,
+                        jobId: jobId,
+                        coverLetter: coverLetterController.text.trim(),
+                      );
+
+                      if (mounted) {
+                        setState(() => _isLoading = false);
+                        if (response['success'] == true) {
+                          Helpers.showSnackBar(
+                            context,
+                            'Application submitted!',
+                          );
+                        } else {
+                          Helpers.showSnackBar(
+                            context,
+                            response['message'] ?? 'Failed to apply',
+                            isError: true,
+                          );
+                        }
+                      }
+                    },
+                    style: ElevatedButton.styleFrom(
+                      backgroundColor: AppColors.primaryCyan,
+                      foregroundColor: Colors.black,
+                    ),
+                    child: const Text('Submit Application'),
+                  ),
+                ),
+              ],
             ),
           ],
         ),
-        actions: [
-          TextButton(
-            onPressed: () => Navigator.pop(ctx),
-            child: Text(
-              'Cancel',
-              style: TextStyle(color: Colors.white.withOpacity(0.5)),
-            ),
-          ),
-          TextButton(
-            onPressed: () async {
-              Navigator.pop(ctx);
-              setState(() => _loading = true);
-              try {
-                final res = await ApiService.applyForJob(
-                  token: token,
-                  jobId: jobId,
-                  coverLetter: coverLetterCtrl.text.trim(),
-                );
-                if (mounted) {
-                  ScaffoldMessenger.of(context).showSnackBar(
-                    SnackBar(
-                      content: Text(res['message'] ?? 'Application submitted!'),
-                      backgroundColor: Colors.green,
-                    ),
-                  );
-                }
-              } catch (e) {
-                if (mounted) {
-                  ScaffoldMessenger.of(context).showSnackBar(
-                    const SnackBar(
-                      content: Text('Failed to apply. Try again.'),
-                    ),
-                  );
-                }
-              } finally {
-                if (mounted) setState(() => _loading = false);
-              }
-            },
-            child: const Text(
-              'Submit',
-              style: TextStyle(color: AppColors.primaryCyan),
-            ),
-          ),
-        ],
       ),
     );
   }
 
+  void _clearSearch() {
+    _searchController.clear();
+    _loadJobs();
+  }
+
   @override
   Widget build(BuildContext context) {
+    final themeProvider = context.watch<ThemeProvider>();
+    final isDark = themeProvider.isDarkMode;
+
     return Scaffold(
-      backgroundColor: AppColors.darkBackground,
-      appBar: AppBar(
-        backgroundColor: Colors.transparent,
-        iconTheme: const IconThemeData(color: Colors.white),
-        title: const Text(
-          'Job Listings',
-          style: TextStyle(color: Colors.white),
-        ),
-      ),
+      backgroundColor: isDark
+          ? AppColors.darkBackground
+          : AppColors.lightBackground,
+      appBar: AppBar(title: const Text('Job Listings')),
       body: Column(
         children: [
           Padding(
             padding: const EdgeInsets.all(16),
-            child: TextField(
-              style: const TextStyle(color: Colors.white),
-              onChanged: (value) {
-                _searchQuery = value;
-                _loadJobs();
-              },
-              decoration: InputDecoration(
-                hintText: 'Search jobs...',
-                hintStyle: TextStyle(color: Colors.white.withOpacity(0.35)),
-                prefixIcon: const Icon(
-                  Icons.search,
-                  color: AppColors.primaryCyan,
-                ),
-                suffixIcon: _searchQuery.isNotEmpty
-                    ? IconButton(
-                        icon: Icon(
-                          Icons.clear,
-                          color: Colors.white.withOpacity(0.5),
-                        ),
-                        onPressed: () {
-                          _searchQuery = '';
-                          _loadJobs();
-                        },
-                      )
-                    : null,
-                filled: true,
-                fillColor: Colors.white.withOpacity(0.06),
-                border: OutlineInputBorder(
-                  borderRadius: BorderRadius.circular(16),
-                  borderSide: BorderSide.none,
-                ),
-                focusedBorder: OutlineInputBorder(
-                  borderRadius: BorderRadius.circular(16),
-                  borderSide: const BorderSide(color: AppColors.primaryCyan),
-                ),
-              ),
+            child: SearchField(
+              controller: _searchController,
+              onSubmitted: (_) => _loadJobs(),
+              onClear: _clearSearch,
+              isDark: isDark,
             ),
           ),
           SingleChildScrollView(
@@ -202,9 +189,14 @@ class _JobListingsPageState extends State<JobListingsPage> {
             padding: const EdgeInsets.symmetric(horizontal: 16),
             child: Row(
               children: [
-                const Text(
+                Text(
                   'Location: ',
-                  style: TextStyle(color: Colors.white70, fontSize: 12),
+                  style: TextStyle(
+                    color: isDark
+                        ? Colors.white70
+                        : AppColors.lightTextSecondary,
+                    fontSize: 12,
+                  ),
                 ),
                 ..._locations.map(
                   (loc) => Padding(
@@ -218,21 +210,30 @@ class _JobListingsPageState extends State<JobListingsPage> {
                         });
                         _loadJobs();
                       },
-                      backgroundColor: Colors.white.withOpacity(0.05),
+                      backgroundColor: isDark
+                          ? Colors.white.withOpacity(0.05)
+                          : Colors.grey.shade100,
                       selectedColor: AppColors.primaryCyan.withOpacity(0.3),
                       labelStyle: TextStyle(
                         color: _selectedLocation == loc
                             ? AppColors.primaryCyan
-                            : Colors.white70,
+                            : (isDark
+                                  ? Colors.white70
+                                  : AppColors.lightTextSecondary),
                         fontSize: 12,
                       ),
                     ),
                   ),
                 ),
                 const SizedBox(width: 16),
-                const Text(
+                Text(
                   'Type: ',
-                  style: TextStyle(color: Colors.white70, fontSize: 12),
+                  style: TextStyle(
+                    color: isDark
+                        ? Colors.white70
+                        : AppColors.lightTextSecondary,
+                    fontSize: 12,
+                  ),
                 ),
                 ..._jobTypes.map(
                   (type) => Padding(
@@ -246,12 +247,16 @@ class _JobListingsPageState extends State<JobListingsPage> {
                         });
                         _loadJobs();
                       },
-                      backgroundColor: Colors.white.withOpacity(0.05),
+                      backgroundColor: isDark
+                          ? Colors.white.withOpacity(0.05)
+                          : Colors.grey.shade100,
                       selectedColor: AppColors.primaryCyan.withOpacity(0.3),
                       labelStyle: TextStyle(
                         color: _selectedType == type
                             ? AppColors.primaryCyan
-                            : Colors.white70,
+                            : (isDark
+                                  ? Colors.white70
+                                  : AppColors.lightTextSecondary),
                         fontSize: 12,
                       ),
                     ),
@@ -262,27 +267,25 @@ class _JobListingsPageState extends State<JobListingsPage> {
           ),
           const SizedBox(height: 8),
           Expanded(
-            child: _loading
-                ? const Center(
-                    child: CircularProgressIndicator(
-                      color: AppColors.primaryCyan,
-                    ),
-                  )
+            child: _isLoading
+                ? const LoadingIndicator()
                 : _jobs.isEmpty
                 ? Center(
                     child: Column(
                       mainAxisSize: MainAxisSize.min,
                       children: [
-                        const Icon(
+                        Icon(
                           Icons.work_off,
-                          color: Colors.white24,
-                          size: 60,
+                          size: 64,
+                          color: isDark ? Colors.white24 : Colors.grey.shade400,
                         ),
                         const SizedBox(height: 16),
                         Text(
                           'No jobs found',
                           style: TextStyle(
-                            color: Colors.white.withOpacity(0.4),
+                            color: isDark
+                                ? Colors.white.withOpacity(0.4)
+                                : Colors.grey.shade600,
                             fontSize: 16,
                           ),
                         ),
@@ -290,7 +293,9 @@ class _JobListingsPageState extends State<JobListingsPage> {
                         Text(
                           'Try adjusting your filters',
                           style: TextStyle(
-                            color: Colors.white.withOpacity(0.3),
+                            color: isDark
+                                ? Colors.white.withOpacity(0.3)
+                                : Colors.grey.shade500,
                             fontSize: 13,
                           ),
                         ),
@@ -306,8 +311,8 @@ class _JobListingsPageState extends State<JobListingsPage> {
                         vertical: 8,
                       ),
                       itemCount: _jobs.length,
-                      itemBuilder: (_, i) {
-                        final job = _jobs[i] as Map<String, dynamic>;
+                      itemBuilder: (_, index) {
+                        final job = _jobs[index];
                         return JobCard(
                           job: job,
                           onApply: () => _applyForJob(job['id']),

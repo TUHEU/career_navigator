@@ -1,8 +1,14 @@
 import 'package:flutter/material.dart';
+import 'package:provider/provider.dart';
 
-import '../../services/api_service.dart';
-import '../../services/token_store.dart';
-import '../../core/themes/app_theme.dart';
+import '../../../core/themes/app_theme.dart';
+import '../../../core/utils/helpers.dart';
+import '../../../core/utils/validators.dart';
+import '../../../data/models/user_model.dart';
+import '../../../providers/auth_provider.dart';
+import '../../../providers/theme_provider.dart';
+import '../../widgets/shared/buttons.dart';
+import '../../widgets/shared/inputs.dart';
 
 class WorkExperienceFormPage extends StatefulWidget {
   final Map<String, dynamic>? existing;
@@ -15,17 +21,18 @@ class WorkExperienceFormPage extends StatefulWidget {
 
 class _WorkExperienceFormPageState extends State<WorkExperienceFormPage> {
   final _formKey = GlobalKey<FormState>();
-  final _companyCtrl = TextEditingController();
-  final _titleCtrl = TextEditingController();
-  final _locationCtrl = TextEditingController();
-  final _startCtrl = TextEditingController();
-  final _endCtrl = TextEditingController();
-  final _descCtrl = TextEditingController();
-  bool _isCurrent = false;
-  bool _loading = false;
-  String _empType = 'full_time';
+  final _companyController = TextEditingController();
+  final _titleController = TextEditingController();
+  final _locationController = TextEditingController();
+  final _startController = TextEditingController();
+  final _endController = TextEditingController();
+  final _descriptionController = TextEditingController();
 
-  final List<String> _empTypes = [
+  bool _isCurrent = false;
+  bool _isLoading = false;
+  String _employmentType = 'full_time';
+
+  final List<String> _employmentTypes = [
     'full_time',
     'part_time',
     'contract',
@@ -39,80 +46,88 @@ class _WorkExperienceFormPageState extends State<WorkExperienceFormPage> {
   @override
   void initState() {
     super.initState();
-    final e = widget.existing;
-    if (e != null) {
-      _companyCtrl.text = e['company'] ?? '';
-      _titleCtrl.text = e['job_title'] ?? '';
-      _locationCtrl.text = e['location'] ?? '';
-      _startCtrl.text = e['start_date']?.toString() ?? '';
-      _endCtrl.text = e['end_date']?.toString() ?? '';
-      _descCtrl.text = e['description'] ?? '';
-      _isCurrent = e['is_current'] == 1 || e['is_current'] == true;
-      _empType = e['employment_type'] ?? 'full_time';
+    final existing = widget.existing;
+    if (existing != null) {
+      _companyController.text = existing['company'] ?? '';
+      _titleController.text = existing['job_title'] ?? '';
+      _locationController.text = existing['location'] ?? '';
+      _startController.text = existing['start_date']?.toString() ?? '';
+      _endController.text = existing['end_date']?.toString() ?? '';
+      _descriptionController.text = existing['description'] ?? '';
+      _isCurrent =
+          existing['is_current'] == 1 || existing['is_current'] == true;
+      _employmentType = existing['employment_type'] ?? 'full_time';
+    }
+  }
+
+  Future<void> _save() async {
+    if (!_formKey.currentState!.validate()) return;
+
+    setState(() => _isLoading = true);
+    final authProvider = context.read<AuthProvider>();
+    final userRepo = authProvider._userRepository;
+
+    try {
+      final work = WorkExperience(
+        id: _isEdit ? widget.existing!['id'] as int : null,
+        company: _companyController.text.trim(),
+        jobTitle: _titleController.text.trim(),
+        employmentType: _employmentType,
+        location: _locationController.text.trim().isEmpty
+            ? null
+            : _locationController.text.trim(),
+        startDate: _startController.text.trim(),
+        endDate: _isCurrent
+            ? null
+            : (_endController.text.trim().isEmpty
+                  ? null
+                  : _endController.text.trim()),
+        isCurrent: _isCurrent,
+        description: _descriptionController.text.trim().isEmpty
+            ? null
+            : _descriptionController.text.trim(),
+      );
+
+      if (_isEdit) {
+        await userRepo.updateWorkExperience(work.id!, work);
+      } else {
+        await userRepo.addWorkExperience(work);
+      }
+
+      if (mounted) {
+        Navigator.pop(context, true);
+      }
+    } catch (e) {
+      if (mounted) {
+        Helpers.showSnackBar(context, 'Failed to save: $e', isError: true);
+      }
+    } finally {
+      if (mounted) setState(() => _isLoading = false);
     }
   }
 
   @override
   void dispose() {
-    _companyCtrl.dispose();
-    _titleCtrl.dispose();
-    _locationCtrl.dispose();
-    _startCtrl.dispose();
-    _endCtrl.dispose();
-    _descCtrl.dispose();
+    _companyController.dispose();
+    _titleController.dispose();
+    _locationController.dispose();
+    _startController.dispose();
+    _endController.dispose();
+    _descriptionController.dispose();
     super.dispose();
-  }
-
-  Future<void> _save() async {
-    if (!_formKey.currentState!.validate()) return;
-    setState(() => _loading = true);
-    try {
-      final token = await TokenStore.getAccess();
-      if (token == null) return;
-
-      final data = {
-        'company': _companyCtrl.text.trim(),
-        'job_title': _titleCtrl.text.trim(),
-        'employment_type': _empType,
-        'location': _locationCtrl.text.trim(),
-        'start_date': _startCtrl.text.trim(),
-        'end_date': _isCurrent ? null : _endCtrl.text.trim(),
-        'is_current': _isCurrent ? 1 : 0,
-        'description': _descCtrl.text.trim(),
-      };
-
-      if (_isEdit) {
-        await ApiService.updateWorkExperience(
-          token: token,
-          id: widget.existing!['id'] as int,
-          data: data,
-        );
-      } else {
-        await ApiService.addWorkExperience(token: token, data: data);
-      }
-
-      if (mounted) Navigator.pop(context);
-    } catch (e) {
-      if (mounted)
-        ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(content: Text('Failed to save. Try again.')),
-        );
-    } finally {
-      if (mounted) setState(() => _loading = false);
-    }
   }
 
   @override
   Widget build(BuildContext context) {
+    final themeProvider = context.watch<ThemeProvider>();
+    final isDark = themeProvider.isDarkMode;
+
     return Scaffold(
-      backgroundColor: AppColors.darkBackground,
+      backgroundColor: isDark
+          ? AppColors.darkBackground
+          : AppColors.lightBackground,
       appBar: AppBar(
-        backgroundColor: Colors.transparent,
-        iconTheme: const IconThemeData(color: Colors.white),
-        title: Text(
-          _isEdit ? 'Edit Experience' : 'Add Experience',
-          style: const TextStyle(color: Colors.white),
-        ),
+        title: Text(_isEdit ? 'Edit Experience' : 'Add Experience'),
       ),
       body: SingleChildScrollView(
         padding: const EdgeInsets.all(24),
@@ -120,66 +135,99 @@ class _WorkExperienceFormPageState extends State<WorkExperienceFormPage> {
           key: _formKey,
           child: Column(
             children: [
-              _field(
-                _companyCtrl,
-                Icons.business_outlined,
-                'Company / Organization',
-                validator: (v) => v == null || v.isEmpty ? 'Required' : null,
+              CustomTextField(
+                controller: _companyController,
+                icon: Icons.business_outlined,
+                label: 'Company / Organization',
+                validator: (v) => Validators.validateRequired(v, 'Company'),
+                isDark: isDark,
               ),
               const SizedBox(height: 16),
-              _field(
-                _titleCtrl,
-                Icons.badge_outlined,
-                'Job Title',
-                validator: (v) => v == null || v.isEmpty ? 'Required' : null,
+              CustomTextField(
+                controller: _titleController,
+                icon: Icons.badge_outlined,
+                label: 'Job Title',
+                validator: (v) => Validators.validateRequired(v, 'Job Title'),
+                isDark: isDark,
               ),
               const SizedBox(height: 16),
-              _field(
-                _locationCtrl,
-                Icons.location_on_outlined,
-                'Location (optional)',
+              CustomTextField(
+                controller: _locationController,
+                icon: Icons.location_on_outlined,
+                label: 'Location (optional)',
+                isDark: isDark,
               ),
               const SizedBox(height: 16),
               DropdownButtonFormField<String>(
-                value: _empType,
-                dropdownColor: const Color(0xFF0D2137),
-                style: const TextStyle(color: Colors.white),
-                decoration: buildInputDecoration(
-                  icon: Icons.work_outline,
-                  label: 'Employment Type',
+                value: _employmentType,
+                dropdownColor: isDark ? AppColors.darkSurface : Colors.white,
+                style: TextStyle(
+                  color: isDark ? Colors.white : AppColors.lightText,
                 ),
-                items: _empTypes
-                    .map(
-                      (t) => DropdownMenuItem(
-                        value: t,
-                        child: Text(
-                          t.replaceAll('_', ' ').toUpperCase(),
-                          style: const TextStyle(fontSize: 13),
-                        ),
-                      ),
-                    )
-                    .toList(),
-                onChanged: (v) => setState(() => _empType = v!),
+                decoration: InputDecoration(
+                  prefixIcon: const Icon(
+                    Icons.work_outline,
+                    color: AppColors.primaryCyan,
+                  ),
+                  labelText: 'Employment Type',
+                  labelStyle: TextStyle(
+                    color: isDark
+                        ? Colors.white.withOpacity(0.6)
+                        : Colors.grey.shade600,
+                  ),
+                  filled: true,
+                  fillColor: isDark
+                      ? Colors.white.withOpacity(0.05)
+                      : Colors.grey.shade100,
+                  border: OutlineInputBorder(
+                    borderRadius: BorderRadius.circular(15),
+                    borderSide: BorderSide.none,
+                  ),
+                  enabledBorder: OutlineInputBorder(
+                    borderRadius: BorderRadius.circular(15),
+                    borderSide: BorderSide(
+                      color: isDark
+                          ? Colors.white.withOpacity(0.15)
+                          : Colors.grey.shade300,
+                    ),
+                  ),
+                  focusedBorder: OutlineInputBorder(
+                    borderRadius: BorderRadius.circular(15),
+                    borderSide: const BorderSide(color: AppColors.primaryCyan),
+                  ),
+                ),
+                items: _employmentTypes.map((type) {
+                  return DropdownMenuItem(
+                    value: type,
+                    child: Text(
+                      type.replaceAll('_', ' ').toUpperCase(),
+                      style: const TextStyle(fontSize: 13),
+                    ),
+                  );
+                }).toList(),
+                onChanged: (value) => setState(() => _employmentType = value!),
               ),
               const SizedBox(height: 16),
               Row(
                 children: [
                   Expanded(
-                    child: _field(
-                      _startCtrl,
-                      Icons.calendar_today_outlined,
-                      'Start Date (YYYY-MM-DD)',
+                    child: CustomTextField(
+                      controller: _startController,
+                      icon: Icons.calendar_today_outlined,
+                      label: 'Start Date (YYYY-MM-DD)',
                       validator: (v) =>
-                          v == null || v.isEmpty ? 'Required' : null,
+                          Validators.validateRequired(v, 'Start Date'),
+                      isDark: isDark,
                     ),
                   ),
                   const SizedBox(width: 12),
                   Expanded(
-                    child: _field(
-                      _endCtrl,
-                      Icons.calendar_month_outlined,
-                      _isCurrent ? 'End (Present)' : 'End Date',
+                    child: CustomTextField(
+                      controller: _endController,
+                      icon: Icons.calendar_month_outlined,
+                      label: _isCurrent ? 'End Date (Present)' : 'End Date',
                       enabled: !_isCurrent,
+                      isDark: isDark,
                     ),
                   ),
                 ],
@@ -191,9 +239,15 @@ class _WorkExperienceFormPageState extends State<WorkExperienceFormPage> {
                   vertical: 10,
                 ),
                 decoration: BoxDecoration(
-                  color: Colors.white.withOpacity(0.04),
+                  color: isDark
+                      ? Colors.white.withOpacity(0.04)
+                      : Colors.grey.shade100,
                   borderRadius: BorderRadius.circular(14),
-                  border: Border.all(color: Colors.white.withOpacity(0.08)),
+                  border: Border.all(
+                    color: isDark
+                        ? Colors.white.withOpacity(0.08)
+                        : Colors.grey.shade300,
+                  ),
                 ),
                 child: Row(
                   mainAxisAlignment: MainAxisAlignment.spaceBetween,
@@ -201,7 +255,9 @@ class _WorkExperienceFormPageState extends State<WorkExperienceFormPage> {
                     Text(
                       'I currently work here',
                       style: TextStyle(
-                        color: Colors.white.withOpacity(0.75),
+                        color: isDark
+                            ? Colors.white.withOpacity(0.75)
+                            : AppColors.lightText,
                         fontSize: 14,
                       ),
                     ),
@@ -214,39 +270,18 @@ class _WorkExperienceFormPageState extends State<WorkExperienceFormPage> {
                 ),
               ),
               const SizedBox(height: 16),
-              _field(
-                _descCtrl,
-                Icons.notes_outlined,
-                'Description (optional)',
+              CustomTextField(
+                controller: _descriptionController,
+                icon: Icons.notes_outlined,
+                label: 'Description (optional)',
                 maxLines: 3,
+                isDark: isDark,
               ),
               const SizedBox(height: 30),
-              ElevatedButton(
-                onPressed: _loading ? null : _save,
-                style: ElevatedButton.styleFrom(
-                  backgroundColor: AppColors.primaryCyan,
-                  foregroundColor: Colors.black,
-                  minimumSize: const Size(double.infinity, 52),
-                  shape: RoundedRectangleBorder(
-                    borderRadius: BorderRadius.circular(14),
-                  ),
-                ),
-                child: _loading
-                    ? const SizedBox(
-                        width: 20,
-                        height: 20,
-                        child: CircularProgressIndicator(
-                          strokeWidth: 2.5,
-                          color: Colors.black,
-                        ),
-                      )
-                    : Text(
-                        _isEdit ? 'UPDATE' : 'ADD EXPERIENCE',
-                        style: const TextStyle(
-                          fontWeight: FontWeight.bold,
-                          fontSize: 15,
-                        ),
-                      ),
+              PrimaryButton(
+                text: _isEdit ? 'UPDATE' : 'ADD EXPERIENCE',
+                onPressed: _save,
+                isLoading: _isLoading,
               ),
             ],
           ),
@@ -254,20 +289,4 @@ class _WorkExperienceFormPageState extends State<WorkExperienceFormPage> {
       ),
     );
   }
-
-  Widget _field(
-    TextEditingController ctrl,
-    IconData icon,
-    String label, {
-    String? Function(String?)? validator,
-    int maxLines = 1,
-    bool enabled = true,
-  }) => TextFormField(
-    controller: ctrl,
-    validator: validator,
-    maxLines: maxLines,
-    enabled: enabled,
-    style: const TextStyle(color: Colors.white),
-    decoration: buildInputDecoration(icon: icon, label: label),
-  );
 }

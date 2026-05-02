@@ -1,8 +1,13 @@
 import 'package:flutter/material.dart';
+import 'package:provider/provider.dart';
 
-import '../../services/api_service.dart';
-import '../../services/token_store.dart';
-import '../../core/themes/app_theme.dart';
+import '../../../core/themes/app_theme.dart';
+import '../../../core/utils/helpers.dart';
+import '../../../data/models/user_model.dart';
+import '../../../providers/auth_provider.dart';
+import '../../../providers/theme_provider.dart';
+import '../../widgets/shared/buttons.dart';
+import '../../widgets/shared/inputs.dart';
 
 class MentorProfilePage extends StatefulWidget {
   final Map<String, dynamic> profile;
@@ -15,146 +20,139 @@ class MentorProfilePage extends StatefulWidget {
 
 class _MentorProfilePageState extends State<MentorProfilePage> {
   final _formKey = GlobalKey<FormState>();
-  final _headlineCtrl = TextEditingController();
-  final _bioCtrl = TextEditingController();
-  final _phoneCtrl = TextEditingController();
-  final _locationCtrl = TextEditingController();
-  final _yearsCtrl = TextEditingController();
-  final _companyCtrl = TextEditingController();
-  final _jobTitleCtrl = TextEditingController();
-  final _expertiseCtrl = TextEditingController();
-  final _industriesCtrl = TextEditingController();
-  final _styleCtrl = TextEditingController();
-  final _priceCtrl = TextEditingController();
-  final _linkedinCtrl = TextEditingController();
-  final _githubCtrl = TextEditingController();
-  final _websiteCtrl = TextEditingController();
+  final _headlineController = TextEditingController();
+  final _bioController = TextEditingController();
+  final _phoneController = TextEditingController();
+  final _locationController = TextEditingController();
+  final _yearsController = TextEditingController();
+  final _companyController = TextEditingController();
+  final _jobTitleController = TextEditingController();
+  final _expertiseController = TextEditingController();
+  final _industriesController = TextEditingController();
+  final _styleController = TextEditingController();
+  final _priceController = TextEditingController();
+  final _linkedinController = TextEditingController();
+  final _githubController = TextEditingController();
+  final _websiteController = TextEditingController();
+
   bool _accepting = true;
-  bool _loading = false;
+  bool _isLoading = false;
 
   @override
   void initState() {
     super.initState();
-    final mp = widget.profile['mentor_profile'] as Map<String, dynamic>? ?? {};
-    _headlineCtrl.text = mp['headline'] ?? '';
-    _bioCtrl.text = mp['bio'] ?? '';
-    _phoneCtrl.text = mp['phone'] ?? '';
-    _locationCtrl.text = mp['location'] ?? '';
-    _yearsCtrl.text = '${mp['years_of_experience'] ?? ''}';
-    _companyCtrl.text = mp['current_company'] ?? '';
-    _jobTitleCtrl.text = mp['current_job_title'] ?? '';
-    _styleCtrl.text = mp['mentoring_style'] ?? '';
-    _priceCtrl.text = '${mp['session_price'] ?? '0'}';
-    _linkedinCtrl.text = mp['linkedin_url'] ?? '';
-    _githubCtrl.text = mp['github_url'] ?? '';
-    _websiteCtrl.text = mp['website_url'] ?? '';
-    _accepting = mp['is_accepting_mentees'] != 0;
+    final mentorProfile =
+        widget.profile['mentor_profile'] as Map<String, dynamic>? ?? {};
 
-    final exp = mp['expertise_areas'];
-    if (exp is List) {
-      _expertiseCtrl.text = exp.join(', ');
-    } else if (exp is String) {
-      _expertiseCtrl.text = exp;
+    _headlineController.text = mentorProfile['headline'] ?? '';
+    _bioController.text = mentorProfile['bio'] ?? '';
+    _phoneController.text = mentorProfile['phone'] ?? '';
+    _locationController.text = mentorProfile['location'] ?? '';
+    _yearsController.text = '${mentorProfile['years_of_experience'] ?? ''}';
+    _companyController.text = mentorProfile['current_company'] ?? '';
+    _jobTitleController.text = mentorProfile['current_job_title'] ?? '';
+    _styleController.text = mentorProfile['mentoring_style'] ?? '';
+    _priceController.text = '${mentorProfile['session_price'] ?? '0'}';
+    _linkedinController.text = mentorProfile['linkedin_url'] ?? '';
+    _githubController.text = mentorProfile['github_url'] ?? '';
+    _websiteController.text = mentorProfile['website_url'] ?? '';
+    _accepting = mentorProfile['is_accepting_mentees'] != 0;
+
+    final expertise = mentorProfile['expertise_areas'];
+    if (expertise is List) {
+      _expertiseController.text = expertise.join(', ');
+    } else if (expertise is String) {
+      _expertiseController.text = expertise;
     }
 
-    final ind = mp['industries'];
-    if (ind is List) {
-      _industriesCtrl.text = ind.join(', ');
-    } else if (ind is String) {
-      _industriesCtrl.text = ind;
+    final industries = mentorProfile['industries'];
+    if (industries is List) {
+      _industriesController.text = industries.join(', ');
+    } else if (industries is String) {
+      _industriesController.text = industries;
+    }
+  }
+
+  Future<void> _save() async {
+    if (!_formKey.currentState!.validate()) return;
+
+    setState(() => _isLoading = true);
+    final authProvider = context.read<AuthProvider>();
+    final userRepo = authProvider._userRepository;
+
+    try {
+      final expertiseList = _expertiseController.text
+          .split(',')
+          .map((s) => s.trim())
+          .where((s) => s.isNotEmpty)
+          .toList();
+
+      final industriesList = _industriesController.text
+          .split(',')
+          .map((s) => s.trim())
+          .where((s) => s.isNotEmpty)
+          .toList();
+
+      await userRepo.updateMentorProfile({
+        'headline': _headlineController.text.trim(),
+        'bio': _bioController.text.trim(),
+        'phone': _phoneController.text.trim(),
+        'location': _locationController.text.trim(),
+        'years_of_experience': int.tryParse(_yearsController.text.trim()) ?? 0,
+        'current_company': _companyController.text.trim(),
+        'current_job_title': _jobTitleController.text.trim(),
+        'expertise_areas': expertiseList,
+        'industries': industriesList,
+        'mentoring_style': _styleController.text.trim(),
+        'session_price': double.tryParse(_priceController.text.trim()) ?? 0,
+        'is_accepting_mentees': _accepting ? 1 : 0,
+        'linkedin_url': _linkedinController.text.trim(),
+        'github_url': _githubController.text.trim(),
+        'website_url': _websiteController.text.trim(),
+      });
+
+      if (mounted) {
+        Helpers.showSnackBar(context, 'Mentor profile updated!');
+        Navigator.pop(context);
+      }
+    } catch (e) {
+      if (mounted) {
+        Helpers.showSnackBar(context, 'Failed to save: $e', isError: true);
+      }
+    } finally {
+      if (mounted) setState(() => _isLoading = false);
     }
   }
 
   @override
   void dispose() {
-    for (final c in [
-      _headlineCtrl,
-      _bioCtrl,
-      _phoneCtrl,
-      _locationCtrl,
-      _yearsCtrl,
-      _companyCtrl,
-      _jobTitleCtrl,
-      _expertiseCtrl,
-      _industriesCtrl,
-      _styleCtrl,
-      _priceCtrl,
-      _linkedinCtrl,
-      _githubCtrl,
-      _websiteCtrl,
-    ])
-      c.dispose();
+    _headlineController.dispose();
+    _bioController.dispose();
+    _phoneController.dispose();
+    _locationController.dispose();
+    _yearsController.dispose();
+    _companyController.dispose();
+    _jobTitleController.dispose();
+    _expertiseController.dispose();
+    _industriesController.dispose();
+    _styleController.dispose();
+    _priceController.dispose();
+    _linkedinController.dispose();
+    _githubController.dispose();
+    _websiteController.dispose();
     super.dispose();
-  }
-
-  Future<void> _save() async {
-    if (!_formKey.currentState!.validate()) return;
-    setState(() => _loading = true);
-    try {
-      final token = await TokenStore.getAccess();
-      if (token == null) return;
-
-      final expertiseList = _expertiseCtrl.text
-          .split(',')
-          .map((s) => s.trim())
-          .where((s) => s.isNotEmpty)
-          .toList();
-
-      final industriesList = _industriesCtrl.text
-          .split(',')
-          .map((s) => s.trim())
-          .where((s) => s.isNotEmpty)
-          .toList();
-
-      await ApiService.updateMentorProfile(
-        token: token,
-        fields: {
-          'headline': _headlineCtrl.text.trim(),
-          'bio': _bioCtrl.text.trim(),
-          'phone': _phoneCtrl.text.trim(),
-          'location': _locationCtrl.text.trim(),
-          'years_of_experience': int.tryParse(_yearsCtrl.text.trim()) ?? 0,
-          'current_company': _companyCtrl.text.trim(),
-          'current_job_title': _jobTitleCtrl.text.trim(),
-          'expertise_areas': expertiseList,
-          'industries': industriesList,
-          'mentoring_style': _styleCtrl.text.trim(),
-          'session_price': double.tryParse(_priceCtrl.text.trim()) ?? 0,
-          'is_accepting_mentees': _accepting ? 1 : 0,
-          'linkedin_url': _linkedinCtrl.text.trim(),
-          'github_url': _githubCtrl.text.trim(),
-          'website_url': _websiteCtrl.text.trim(),
-        },
-      );
-
-      if (mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(content: Text('Mentor profile updated!')),
-        );
-        Navigator.pop(context);
-      }
-    } catch (e) {
-      if (mounted)
-        ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(content: Text('Failed to save. Try again.')),
-        );
-    } finally {
-      if (mounted) setState(() => _loading = false);
-    }
   }
 
   @override
   Widget build(BuildContext context) {
+    final themeProvider = context.watch<ThemeProvider>();
+    final isDark = themeProvider.isDarkMode;
+
     return Scaffold(
-      backgroundColor: AppColors.darkBackground,
-      appBar: AppBar(
-        backgroundColor: Colors.transparent,
-        iconTheme: const IconThemeData(color: Colors.white),
-        title: const Text(
-          'Mentor Profile',
-          style: TextStyle(color: Colors.white),
-        ),
-      ),
+      backgroundColor: isDark
+          ? AppColors.darkBackground
+          : AppColors.lightBackground,
+      appBar: AppBar(title: const Text('Mentor Profile')),
       body: SingleChildScrollView(
         padding: const EdgeInsets.all(24),
         child: Form(
@@ -162,74 +160,130 @@ class _MentorProfilePageState extends State<MentorProfilePage> {
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              _sectionLabel('Professional Info'),
-              _field(
-                _headlineCtrl,
-                Icons.title,
-                'Headline (e.g. Senior Engineer @ Google)',
+              _sectionLabel('Professional Info', isDark),
+              const SizedBox(height: 12),
+              CustomTextField(
+                controller: _headlineController,
+                icon: Icons.title,
+                label: 'Headline (e.g. Senior Engineer @ Google)',
+                isDark: isDark,
               ),
               const SizedBox(height: 14),
-              _field(
-                _bioCtrl,
-                Icons.notes_outlined,
-                'Bio / About Me',
+              CustomTextField(
+                controller: _bioController,
+                icon: Icons.notes_outlined,
+                label: 'Bio / About Me',
                 maxLines: 4,
+                isDark: isDark,
               ),
               const SizedBox(height: 14),
-              _field(_companyCtrl, Icons.business_outlined, 'Current Company'),
+              CustomTextField(
+                controller: _companyController,
+                icon: Icons.business_outlined,
+                label: 'Current Company',
+                isDark: isDark,
+              ),
               const SizedBox(height: 14),
-              _field(_jobTitleCtrl, Icons.badge_outlined, 'Current Job Title'),
+              CustomTextField(
+                controller: _jobTitleController,
+                icon: Icons.badge_outlined,
+                label: 'Current Job Title',
+                isDark: isDark,
+              ),
               const SizedBox(height: 14),
-              _field(
-                _yearsCtrl,
-                Icons.signal_cellular_alt,
-                'Years of Experience',
+              CustomTextField(
+                controller: _yearsController,
+                icon: Icons.signal_cellular_alt,
+                label: 'Years of Experience',
                 keyboardType: TextInputType.number,
+                isDark: isDark,
               ),
               const SizedBox(height: 22),
-              _sectionLabel('Expertise'),
-              _field(
-                _expertiseCtrl,
-                Icons.lightbulb_outline,
-                'Expertise Areas (comma separated)',
+              _sectionLabel('Expertise', isDark),
+              const SizedBox(height: 12),
+              CustomTextField(
+                controller: _expertiseController,
+                icon: Icons.lightbulb_outline,
+                label: 'Expertise Areas (comma separated)',
+                isDark: isDark,
               ),
               const SizedBox(height: 14),
-              _field(
-                _industriesCtrl,
-                Icons.factory_outlined,
-                'Industries (comma separated)',
+              CustomTextField(
+                controller: _industriesController,
+                icon: Icons.factory_outlined,
+                label: 'Industries (comma separated)',
+                isDark: isDark,
               ),
               const SizedBox(height: 14),
-              _field(_styleCtrl, Icons.psychology_outlined, 'Mentoring Style'),
+              CustomTextField(
+                controller: _styleController,
+                icon: Icons.psychology_outlined,
+                label: 'Mentoring Style',
+                isDark: isDark,
+              ),
               const SizedBox(height: 14),
-              _field(
-                _priceCtrl,
-                Icons.attach_money,
-                'Session Price (0 = Free)',
+              CustomTextField(
+                controller: _priceController,
+                icon: Icons.attach_money,
+                label: 'Session Price (0 = Free)',
                 keyboardType: TextInputType.number,
+                isDark: isDark,
               ),
               const SizedBox(height: 22),
-              _sectionLabel('Contact & Links'),
-              _field(_phoneCtrl, Icons.phone_outlined, 'Phone (optional)'),
+              _sectionLabel('Contact & Links', isDark),
+              const SizedBox(height: 12),
+              CustomTextField(
+                controller: _phoneController,
+                icon: Icons.phone_outlined,
+                label: 'Phone (optional)',
+                isDark: isDark,
+              ),
               const SizedBox(height: 14),
-              _field(_locationCtrl, Icons.location_on_outlined, 'Location'),
+              CustomTextField(
+                controller: _locationController,
+                icon: Icons.location_on_outlined,
+                label: 'Location',
+                isDark: isDark,
+              ),
               const SizedBox(height: 14),
-              _field(_linkedinCtrl, Icons.link, 'LinkedIn URL'),
+              CustomTextField(
+                controller: _linkedinController,
+                icon: Icons.link,
+                label: 'LinkedIn URL',
+                isDark: isDark,
+              ),
               const SizedBox(height: 14),
-              _field(_githubCtrl, Icons.code, 'GitHub URL'),
+              CustomTextField(
+                controller: _githubController,
+                icon: Icons.code,
+                label: 'GitHub URL',
+                isDark: isDark,
+              ),
               const SizedBox(height: 14),
-              _field(_websiteCtrl, Icons.language, 'Website / Portfolio URL'),
+              CustomTextField(
+                controller: _websiteController,
+                icon: Icons.language,
+                label: 'Website / Portfolio URL',
+                isDark: isDark,
+              ),
               const SizedBox(height: 22),
-              _sectionLabel('Availability'),
+              _sectionLabel('Availability', isDark),
+              const SizedBox(height: 12),
               Container(
                 padding: const EdgeInsets.symmetric(
                   horizontal: 16,
                   vertical: 12,
                 ),
                 decoration: BoxDecoration(
-                  color: Colors.white.withOpacity(0.04),
+                  color: isDark
+                      ? Colors.white.withOpacity(0.04)
+                      : Colors.grey.shade100,
                   borderRadius: BorderRadius.circular(14),
-                  border: Border.all(color: Colors.white.withOpacity(0.08)),
+                  border: Border.all(
+                    color: isDark
+                        ? Colors.white.withOpacity(0.08)
+                        : Colors.grey.shade300,
+                  ),
                 ),
                 child: Row(
                   mainAxisAlignment: MainAxisAlignment.spaceBetween,
@@ -237,7 +291,9 @@ class _MentorProfilePageState extends State<MentorProfilePage> {
                     Text(
                       'Currently accepting mentees',
                       style: TextStyle(
-                        color: Colors.white.withOpacity(0.75),
+                        color: isDark
+                            ? Colors.white.withOpacity(0.75)
+                            : AppColors.lightText,
                         fontSize: 14,
                       ),
                     ),
@@ -250,32 +306,10 @@ class _MentorProfilePageState extends State<MentorProfilePage> {
                 ),
               ),
               const SizedBox(height: 32),
-              ElevatedButton(
-                onPressed: _loading ? null : _save,
-                style: ElevatedButton.styleFrom(
-                  backgroundColor: AppColors.primaryCyan,
-                  foregroundColor: Colors.black,
-                  minimumSize: const Size(double.infinity, 52),
-                  shape: RoundedRectangleBorder(
-                    borderRadius: BorderRadius.circular(14),
-                  ),
-                ),
-                child: _loading
-                    ? const SizedBox(
-                        width: 20,
-                        height: 20,
-                        child: CircularProgressIndicator(
-                          strokeWidth: 2.5,
-                          color: Colors.black,
-                        ),
-                      )
-                    : const Text(
-                        'SAVE MENTOR PROFILE',
-                        style: TextStyle(
-                          fontWeight: FontWeight.bold,
-                          fontSize: 15,
-                        ),
-                      ),
+              PrimaryButton(
+                text: 'SAVE MENTOR PROFILE',
+                onPressed: _save,
+                isLoading: _isLoading,
               ),
               const SizedBox(height: 20),
             ],
@@ -285,9 +319,8 @@ class _MentorProfilePageState extends State<MentorProfilePage> {
     );
   }
 
-  Widget _sectionLabel(String label) => Padding(
-    padding: const EdgeInsets.only(bottom: 12),
-    child: Text(
+  Widget _sectionLabel(String label, bool isDark) {
+    return Text(
       label,
       style: const TextStyle(
         color: AppColors.primaryCyan,
@@ -295,20 +328,6 @@ class _MentorProfilePageState extends State<MentorProfilePage> {
         fontWeight: FontWeight.bold,
         letterSpacing: 1,
       ),
-    ),
-  );
-
-  Widget _field(
-    TextEditingController ctrl,
-    IconData icon,
-    String label, {
-    TextInputType? keyboardType,
-    int maxLines = 1,
-  }) => TextFormField(
-    controller: ctrl,
-    keyboardType: keyboardType,
-    maxLines: maxLines,
-    style: const TextStyle(color: Colors.white),
-    decoration: buildInputDecoration(icon: icon, label: label),
-  );
+    );
+  }
 }
