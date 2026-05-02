@@ -5,7 +5,7 @@ import 'package:provider/provider.dart';
 import 'screens/splash_screen.dart';
 import 'theme/app_theme.dart';
 
-const String kBaseUrl = 'http://10.76.195.66:5000';
+const String kBaseUrl = 'http://38.242.246.126:5000';
 
 void main() async {
   WidgetsBinding widgetsBinding = WidgetsFlutterBinding.ensureInitialized();
