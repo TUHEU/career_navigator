@@ -38,12 +38,15 @@ class NotificationProvider extends ChangeNotifier {
     }
   }
 
-  Future<void> markAsRead() async {
+  Future<void> markAllAsRead() async {
     final token = await _tokenStore.getAccess();
     if (token == null) return;
 
     try {
       await _apiService.markNotificationsRead(token: token);
+      for (var notification in _notifications) {
+        notification['is_read'] = 1;
+      }
       _unreadCount = 0;
       notifyListeners();
     } catch (e) {
