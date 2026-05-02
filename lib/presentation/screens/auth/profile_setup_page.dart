@@ -1,13 +1,15 @@
 import 'dart:io';
 import 'package:flutter/material.dart';
 import 'package:image_picker/image_picker.dart';
+import 'package:provider/provider.dart';
 
-import '../../services/api_service.dart';
-import '../../services/token_store.dart';
-import '../../core/themes/app_theme.dart';
-import 'sign_in_page.dart';
-import 'job_seeker_dashboard.dart';
-import 'mentor_dashboard.dart';
+import '../../../core/themes/app_theme.dart';
+import '../../../core/utils/helpers.dart';
+import '../../../providers/auth_provider.dart';
+import '../../../providers/theme_provider.dart';
+import '../../widgets/shared/buttons.dart';
+import '../dashboard/job_seeker_dashboard.dart';
+import '../dashboard/mentor_dashboard.dart';
 
 class ProfileSetupPage extends StatefulWidget {
   const ProfileSetupPage({super.key});
@@ -21,9 +23,7 @@ class _ProfileSetupPageState extends State<ProfileSetupPage> {
   File? _image;
   DateTime? _selectedDate;
   String _selectedRole = 'job_seeker';
-  final TextEditingController _dobController = TextEditingController();
   final TextEditingController _nameController = TextEditingController();
-  bool _loading = false;
 
   Future<void> _pickImage() async {
     final picked = await _picker.pickImage(source: ImageSource.gallery);
@@ -38,40 +38,34 @@ class _ProfileSetupPageState extends State<ProfileSetupPage> {
       lastDate: DateTime.now(),
     );
     if (picked != null) {
-      setState(() {
-        _selectedDate = picked;
-        _dobController.text = '${picked.day}/${picked.month}/${picked.year}';
-      });
+      setState(() => _selectedDate = picked);
     }
   }
 
   Future<void> _finish() async {
     if (_nameController.text.trim().isEmpty) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('Please enter your full name.')),
+      Helpers.showSnackBar(
+        context,
+        'Please enter your full name.',
+        isError: true,
       );
       return;
     }
-    setState(() => _loading = true);
-    try {
-      final token = await TokenStore.getAccess();
-      if (token == null) {
-        Navigator.pushReplacement(
-          context,
-          MaterialPageRoute(builder: (_) => const SignInPage()),
-        );
-        return;
-      }
-      final dob = _selectedDate != null
-          ? '${_selectedDate!.year}-${_selectedDate!.month.toString().padLeft(2, '0')}-${_selectedDate!.day.toString().padLeft(2, '0')}'
-          : '';
-      await ApiService.setupProfile(
-        token: token,
-        fullName: _nameController.text.trim(),
-        dob: dob,
-        role: _selectedRole,
-      );
-      if (!mounted) return;
+
+    final authProvider = context.read<AuthProvider>();
+    final dob = _selectedDate != null
+        ? '${_selectedDate!.year}-${_selectedDate!.month.toString().padLeft(2, '0')}-${_selectedDate!.day.toString().padLeft(2, '0')}'
+        : '';
+
+    final success = await authProvider.setupProfile(
+      fullName: _nameController.text.trim(),
+      dob: dob,
+      role: _selectedRole,
+    );
+
+    if (!mounted) return;
+
+    if (success) {
       if (_selectedRole == 'mentor') {
         Navigator.pushReplacement(
           context,
@@ -83,35 +77,32 @@ class _ProfileSetupPageState extends State<ProfileSetupPage> {
           MaterialPageRoute(builder: (_) => const JobSeekerDashboard()),
         );
       }
-    } catch (e) {
-      if (mounted)
-        ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(content: Text('Failed to save profile.')),
-        );
-    } finally {
-      if (mounted) setState(() => _loading = false);
+    } else {
+      Helpers.showSnackBar(
+        context,
+        authProvider.error ?? 'Failed to save profile',
+        isError: true,
+      );
     }
   }
 
   @override
   void dispose() {
-    _dobController.dispose();
     _nameController.dispose();
     super.dispose();
   }
 
   @override
   Widget build(BuildContext context) {
+    final themeProvider = context.watch<ThemeProvider>();
+    final authProvider = context.watch<AuthProvider>();
+    final isDark = themeProvider.isDarkMode;
+
     return Scaffold(
-      backgroundColor: AppColors.darkBackground,
-      appBar: AppBar(
-        backgroundColor: Colors.transparent,
-        iconTheme: const IconThemeData(color: Colors.white),
-        title: const Text(
-          'Profile Setup',
-          style: TextStyle(color: Colors.white),
-        ),
-      ),
+      backgroundColor: isDark
+          ? AppColors.darkBackground
+          : AppColors.lightBackground,
+      appBar: AppBar(title: const Text('Profile Setup')),
       body: SingleChildScrollView(
         padding: const EdgeInsets.all(24),
         child: Column(
@@ -119,11 +110,7 @@ class _ProfileSetupPageState extends State<ProfileSetupPage> {
           children: [
             const Text(
               'Complete Your Profile',
-              style: TextStyle(
-                fontSize: 24,
-                color: Colors.white,
-                fontWeight: FontWeight.bold,
-              ),
+              style: TextStyle(fontSize: 24, fontWeight: FontWeight.bold),
             ),
             const SizedBox(height: 30),
             Center(
@@ -169,34 +156,69 @@ class _ProfileSetupPageState extends State<ProfileSetupPage> {
             Center(
               child: Text(
                 'Tap to upload profile picture',
-                style: TextStyle(color: Colors.white.withOpacity(0.5)),
+                style: TextStyle(
+                  color: isDark
+                      ? Colors.white.withOpacity(0.5)
+                      : AppColors.lightTextSecondary,
+                ),
               ),
             ),
             const SizedBox(height: 30),
-            TextFormField(
+            CustomTextField(
               controller: _nameController,
-              style: const TextStyle(color: Colors.white),
-              decoration: buildInputDecoration(
-                icon: Icons.person_outline,
-                label: 'Full Name',
-              ),
+              icon: Icons.person_outline,
+              label: 'Full Name',
+              isDark: isDark,
             ),
             const SizedBox(height: 20),
-            TextFormField(
-              controller: _dobController,
-              readOnly: true,
+            GestureDetector(
               onTap: _pickDate,
-              style: const TextStyle(color: Colors.white),
-              decoration: buildInputDecoration(
-                icon: Icons.calendar_today_outlined,
-                label: 'Date of Birth',
+              child: Container(
+                padding: const EdgeInsets.symmetric(
+                  horizontal: 16,
+                  vertical: 16,
+                ),
+                decoration: BoxDecoration(
+                  color: isDark
+                      ? Colors.white.withOpacity(0.05)
+                      : Colors.grey.shade100,
+                  borderRadius: BorderRadius.circular(15),
+                  border: Border.all(
+                    color: isDark
+                        ? Colors.white.withOpacity(0.15)
+                        : Colors.grey.shade300,
+                  ),
+                ),
+                child: Row(
+                  children: [
+                    const Icon(
+                      Icons.calendar_today_outlined,
+                      color: AppColors.primaryCyan,
+                    ),
+                    const SizedBox(width: 12),
+                    Text(
+                      _selectedDate != null
+                          ? '${_selectedDate!.day}/${_selectedDate!.month}/${_selectedDate!.year}'
+                          : 'Date of Birth',
+                      style: TextStyle(
+                        color: _selectedDate != null
+                            ? (isDark ? Colors.white : AppColors.lightText)
+                            : (isDark
+                                  ? Colors.white.withOpacity(0.5)
+                                  : Colors.grey.shade500),
+                      ),
+                    ),
+                  ],
+                ),
               ),
             ),
             const SizedBox(height: 28),
             Text(
               'I am a...',
               style: TextStyle(
-                color: Colors.white.withOpacity(0.75),
+                color: isDark
+                    ? Colors.white.withOpacity(0.75)
+                    : AppColors.lightText,
                 fontSize: 15,
                 fontWeight: FontWeight.w600,
               ),
@@ -211,6 +233,7 @@ class _ProfileSetupPageState extends State<ProfileSetupPage> {
                     subtitle: 'Looking for opportunities',
                     selected: _selectedRole == 'job_seeker',
                     onTap: () => setState(() => _selectedRole = 'job_seeker'),
+                    isDark: isDark,
                   ),
                 ),
                 const SizedBox(width: 14),
@@ -221,38 +244,16 @@ class _ProfileSetupPageState extends State<ProfileSetupPage> {
                     subtitle: 'Guide others in their career',
                     selected: _selectedRole == 'mentor',
                     onTap: () => setState(() => _selectedRole = 'mentor'),
+                    isDark: isDark,
                   ),
                 ),
               ],
             ),
             const SizedBox(height: 36),
-            ElevatedButton(
-              onPressed: _loading ? null : _finish,
-              style: ElevatedButton.styleFrom(
-                backgroundColor: AppColors.primaryCyan,
-                foregroundColor: Colors.black,
-                minimumSize: const Size(double.infinity, 55),
-                shape: RoundedRectangleBorder(
-                  borderRadius: BorderRadius.circular(15),
-                ),
-                elevation: 6,
-              ),
-              child: _loading
-                  ? const SizedBox(
-                      width: 22,
-                      height: 22,
-                      child: CircularProgressIndicator(
-                        strokeWidth: 2.5,
-                        color: Colors.black,
-                      ),
-                    )
-                  : const Text(
-                      'FINISH REGISTRATION',
-                      style: TextStyle(
-                        fontWeight: FontWeight.bold,
-                        fontSize: 16,
-                      ),
-                    ),
+            PrimaryButton(
+              text: 'FINISH REGISTRATION',
+              onPressed: _finish,
+              isLoading: authProvider.isLoading,
             ),
           ],
         ),
@@ -266,6 +267,7 @@ class _RoleCard extends StatelessWidget {
   final String title, subtitle;
   final bool selected;
   final VoidCallback onTap;
+  final bool isDark;
 
   const _RoleCard({
     required this.icon,
@@ -273,6 +275,7 @@ class _RoleCard extends StatelessWidget {
     required this.subtitle,
     required this.selected,
     required this.onTap,
+    required this.isDark,
   });
 
   @override
@@ -284,12 +287,14 @@ class _RoleCard extends StatelessWidget {
       decoration: BoxDecoration(
         color: selected
             ? AppColors.primaryCyan.withOpacity(0.12)
-            : Colors.white.withOpacity(0.05),
+            : (isDark ? Colors.white.withOpacity(0.05) : Colors.grey.shade100),
         borderRadius: BorderRadius.circular(18),
         border: Border.all(
           color: selected
               ? AppColors.primaryCyan
-              : Colors.white.withOpacity(0.12),
+              : (isDark
+                    ? Colors.white.withOpacity(0.12)
+                    : Colors.grey.shade300),
           width: selected ? 2 : 1,
         ),
       ),
@@ -299,14 +304,20 @@ class _RoleCard extends StatelessWidget {
             icon,
             color: selected
                 ? AppColors.primaryCyan
-                : Colors.white.withOpacity(0.5),
+                : (isDark
+                      ? Colors.white.withOpacity(0.5)
+                      : Colors.grey.shade500),
             size: 32,
           ),
           const SizedBox(height: 10),
           Text(
             title,
             style: TextStyle(
-              color: selected ? Colors.white : Colors.white.withOpacity(0.65),
+              color: selected
+                  ? (isDark ? Colors.white : AppColors.lightText)
+                  : (isDark
+                        ? Colors.white.withOpacity(0.65)
+                        : AppColors.lightTextSecondary),
               fontWeight: FontWeight.bold,
               fontSize: 14,
             ),
@@ -316,7 +327,9 @@ class _RoleCard extends StatelessWidget {
             subtitle,
             textAlign: TextAlign.center,
             style: TextStyle(
-              color: Colors.white.withOpacity(0.4),
+              color: isDark
+                  ? Colors.white.withOpacity(0.4)
+                  : Colors.grey.shade500,
               fontSize: 11,
             ),
           ),

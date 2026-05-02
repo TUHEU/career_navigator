@@ -2,13 +2,17 @@ import 'dart:ui';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 
-import '../../services/api_service.dart';
-import '../../services/token_store.dart';
-import '../../core/themes/app_theme.dart';
+import '../../../core/themes/app_theme.dart';
+import '../../../core/utils/helpers.dart';
+import '../../../core/utils/validators.dart';
+import '../../../providers/auth_provider.dart';
+import '../../../providers/theme_provider.dart';
+import '../../widgets/shared/buttons.dart';
+import '../../widgets/shared/inputs.dart';
 import 'registration_page.dart';
-import 'job_seeker_dashboard.dart';
-import 'mentor_dashboard.dart';
-import 'admin_dashboard.dart';
+import '../dashboard/job_seeker_dashboard.dart';
+import '../dashboard/mentor_dashboard.dart';
+import '../dashboard/admin_dashboard.dart';
 
 class SignInPage extends StatefulWidget {
   const SignInPage({super.key});
@@ -23,7 +27,6 @@ class _SignInPageState extends State<SignInPage>
   final _emailCtrl = TextEditingController();
   final _passCtrl = TextEditingController();
   bool _obscure = true;
-  bool _loading = false;
 
   late AnimationController _slideCtrl;
   late Animation<Offset> _slideAnim;
@@ -52,66 +55,72 @@ class _SignInPageState extends State<SignInPage>
 
   Future<void> _signIn() async {
     if (!_formKey.currentState!.validate()) return;
-    setState(() => _loading = true);
-    try {
-      final res = await ApiService.login(
-        _emailCtrl.text.trim(),
-        _passCtrl.text,
-      );
-      if (!mounted) return;
 
-      if (res['success'] == true) {
-        final data = res['data'] as Map<String, dynamic>;
-        await TokenStore.save(data['access_token'], data['refresh_token']);
+    final authProvider = context.read<AuthProvider>();
+    final success = await authProvider.login(
+      _emailCtrl.text.trim(),
+      _passCtrl.text,
+    );
 
-        final role = data['role'] as String? ?? 'job_seeker';
+    if (!mounted) return;
 
-        if (role == 'admin') {
-          Navigator.pushReplacement(
-            context,
-            MaterialPageRoute(builder: (_) => const AdminDashboard()),
-          );
-        } else if (role == 'mentor') {
-          Navigator.pushReplacement(
-            context,
-            MaterialPageRoute(builder: (_) => const MentorDashboard()),
-          );
-        } else {
-          Navigator.pushReplacement(
-            context,
-            MaterialPageRoute(builder: (_) => const JobSeekerDashboard()),
-          );
-        }
+    if (success) {
+      final user = authProvider.currentUser;
+      if (user?.role == 'admin') {
+        Navigator.pushReplacement(
+          context,
+          MaterialPageRoute(builder: (_) => const AdminDashboard()),
+        );
+      } else if (user?.role == 'mentor') {
+        Navigator.pushReplacement(
+          context,
+          MaterialPageRoute(builder: (_) => const MentorDashboard()),
+        );
       } else {
-        _snack(res['message'] ?? 'Login failed');
+        Navigator.pushReplacement(
+          context,
+          MaterialPageRoute(builder: (_) => const JobSeekerDashboard()),
+        );
       }
-    } catch (e) {
-      _snack('Network error. Check your connection.');
-    } finally {
-      if (mounted) setState(() => _loading = false);
+    } else {
+      Helpers.showSnackBar(
+        context,
+        authProvider.error ?? 'Login failed',
+        isError: true,
+      );
     }
   }
 
-  void _snack(String msg) =>
-      ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text(msg)));
-
   @override
   Widget build(BuildContext context) {
-    final theme = context.watch<AppThemeProvider>();
+    final themeProvider = context.watch<ThemeProvider>();
+    final authProvider = context.watch<AuthProvider>();
+    final isDark = themeProvider.isDarkMode;
+
     return Scaffold(
       body: Stack(
         children: [
           Container(
             decoration: BoxDecoration(
-              color: AppColors.darkBackground,
+              color: isDark
+                  ? AppColors.darkBackground
+                  : AppColors.lightBackground,
               image: DecorationImage(
-                image: AssetImage(theme.backgroundPath),
+                image: AssetImage(
+                  isDark
+                      ? 'assets/background/bg8.png'
+                      : 'assets/background/bg6.png',
+                ),
                 fit: BoxFit.cover,
                 opacity: 0.35,
               ),
             ),
           ),
-          Container(color: Colors.black.withOpacity(0.50)),
+          Container(
+            color: isDark
+                ? Colors.black.withOpacity(0.50)
+                : Colors.white.withOpacity(0.92),
+          ),
           SafeArea(
             child: Center(
               child: SingleChildScrollView(
@@ -123,11 +132,11 @@ class _SignInPageState extends State<SignInPage>
                   position: _slideAnim,
                   child: Column(
                     children: [
-                      _buildHeader(),
+                      _buildHeader(isDark),
                       const SizedBox(height: 28),
-                      _buildGlassCard(),
+                      _buildGlassCard(isDark, authProvider.isLoading),
                       const SizedBox(height: 28),
-                      _buildSignUpRow(),
+                      _buildSignUpRow(isDark),
                       const SizedBox(height: 20),
                     ],
                   ),
@@ -140,7 +149,7 @@ class _SignInPageState extends State<SignInPage>
     );
   }
 
-  Widget _buildHeader() => Column(
+  Widget _buildHeader(bool isDark) => Column(
     children: [
       Container(
         width: 84,
@@ -162,7 +171,7 @@ class _SignInPageState extends State<SignInPage>
             errorBuilder: (_, __, ___) => Container(
               color: AppColors.primaryCyan.withOpacity(0.2),
               child: const Icon(
-                Icons.person,
+                Icons.school,
                 color: AppColors.primaryCyan,
                 size: 40,
               ),
@@ -171,76 +180,78 @@ class _SignInPageState extends State<SignInPage>
         ),
       ),
       const SizedBox(height: 16),
-      const Text(
+      Text(
         'Welcome Back',
         style: TextStyle(
           fontSize: 28,
           fontWeight: FontWeight.bold,
-          color: Colors.white,
+          color: isDark ? Colors.white : AppColors.lightText,
           letterSpacing: 1,
         ),
       ),
       const SizedBox(height: 6),
       Text(
         'Sign in to continue your journey',
-        style: TextStyle(color: Colors.white.withOpacity(0.55), fontSize: 14),
+        style: TextStyle(
+          color: isDark
+              ? Colors.white.withOpacity(0.55)
+              : AppColors.lightTextSecondary,
+          fontSize: 14,
+        ),
       ),
     ],
   );
 
-  Widget _buildGlassCard() => ClipRRect(
+  Widget _buildGlassCard(bool isDark, bool isLoading) => ClipRRect(
     borderRadius: BorderRadius.circular(28),
     child: BackdropFilter(
       filter: ImageFilter.blur(sigmaX: 14, sigmaY: 14),
       child: Container(
         padding: const EdgeInsets.all(24),
         decoration: BoxDecoration(
-          color: Colors.white.withOpacity(0.07),
+          color: isDark ? Colors.white.withOpacity(0.07) : Colors.white,
           borderRadius: BorderRadius.circular(28),
-          border: Border.all(color: Colors.white.withOpacity(0.13)),
+          border: Border.all(
+            color: isDark
+                ? Colors.white.withOpacity(0.13)
+                : Colors.grey.shade200,
+          ),
         ),
         child: Form(
           key: _formKey,
           child: Column(
             children: [
-              TextFormField(
+              CustomTextField(
                 controller: _emailCtrl,
+                icon: Icons.email_outlined,
+                label: 'Email Address',
                 keyboardType: TextInputType.emailAddress,
-                style: const TextStyle(color: Colors.white),
-                validator: (v) => v == null || !v.contains('@')
-                    ? 'Enter a valid email'
-                    : null,
-                decoration: buildInputDecoration(
-                  icon: Icons.email_outlined,
-                  label: 'Email Address',
-                ),
+                validator: Validators.validateEmail,
+                isDark: isDark,
               ),
               const SizedBox(height: 16),
-              TextFormField(
+              CustomTextField(
                 controller: _passCtrl,
+                icon: Icons.lock_outline,
+                label: 'Password',
                 obscureText: _obscure,
-                style: const TextStyle(color: Colors.white),
-                validator: (v) =>
-                    v == null || v.length < 6 ? 'Min 6 characters' : null,
-                decoration: buildInputDecoration(
-                  icon: Icons.lock_outline,
-                  label: 'Password',
-                  suffix: IconButton(
-                    icon: Icon(
-                      _obscure
-                          ? Icons.visibility_off_outlined
-                          : Icons.visibility_outlined,
-                      color: AppColors.primaryCyan,
-                    ),
-                    onPressed: () => setState(() => _obscure = !_obscure),
+                validator: Validators.validatePassword,
+                suffixIcon: IconButton(
+                  icon: Icon(
+                    _obscure
+                        ? Icons.visibility_off_outlined
+                        : Icons.visibility_outlined,
+                    color: AppColors.primaryCyan,
                   ),
+                  onPressed: () => setState(() => _obscure = !_obscure),
                 ),
+                isDark: isDark,
               ),
               const SizedBox(height: 10),
               Align(
                 alignment: Alignment.centerRight,
                 child: GestureDetector(
-                  onTap: () => _showForgotSheet(),
+                  onTap: () => _showForgotSheet(isDark),
                   child: const Text(
                     'Forgot Password?',
                     style: TextStyle(
@@ -252,34 +263,10 @@ class _SignInPageState extends State<SignInPage>
                 ),
               ),
               const SizedBox(height: 20),
-              ElevatedButton(
-                onPressed: _loading ? null : _signIn,
-                style: ElevatedButton.styleFrom(
-                  backgroundColor: AppColors.primaryCyan,
-                  foregroundColor: Colors.black,
-                  minimumSize: const Size(double.infinity, 52),
-                  shape: RoundedRectangleBorder(
-                    borderRadius: BorderRadius.circular(15),
-                  ),
-                  elevation: 6,
-                  shadowColor: AppColors.primaryCyan.withOpacity(0.4),
-                ),
-                child: _loading
-                    ? const SizedBox(
-                        width: 22,
-                        height: 22,
-                        child: CircularProgressIndicator(
-                          strokeWidth: 2.5,
-                          color: Colors.black,
-                        ),
-                      )
-                    : const Text(
-                        'SIGN IN',
-                        style: TextStyle(
-                          fontWeight: FontWeight.bold,
-                          fontSize: 15,
-                        ),
-                      ),
+              PrimaryButton(
+                text: 'SIGN IN',
+                onPressed: _signIn,
+                isLoading: isLoading,
               ),
             ],
           ),
@@ -288,12 +275,16 @@ class _SignInPageState extends State<SignInPage>
     ),
   );
 
-  Widget _buildSignUpRow() => Row(
+  Widget _buildSignUpRow(bool isDark) => Row(
     mainAxisAlignment: MainAxisAlignment.center,
     children: [
       Text(
         "Don't have an account? ",
-        style: TextStyle(color: Colors.white.withOpacity(0.60)),
+        style: TextStyle(
+          color: isDark
+              ? Colors.white.withOpacity(0.60)
+              : AppColors.lightTextSecondary,
+        ),
       ),
       GestureDetector(
         onTap: () => Navigator.push(
@@ -312,12 +303,12 @@ class _SignInPageState extends State<SignInPage>
     ],
   );
 
-  void _showForgotSheet() {
+  void _showForgotSheet(bool isDark) {
     final emailCtrl = TextEditingController();
     showModalBottomSheet(
       context: context,
       isScrollControlled: true,
-      backgroundColor: AppColors.darkSurface,
+      backgroundColor: isDark ? AppColors.darkSurface : Colors.white,
       shape: const RoundedRectangleBorder(
         borderRadius: BorderRadius.vertical(top: Radius.circular(28)),
       ),
@@ -335,10 +326,10 @@ class _SignInPageState extends State<SignInPage>
               mainAxisSize: MainAxisSize.min,
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                const Text(
+                Text(
                   'Reset Password',
                   style: TextStyle(
-                    color: Colors.white,
+                    color: isDark ? Colors.white : AppColors.lightText,
                     fontSize: 22,
                     fontWeight: FontWeight.bold,
                   ),
@@ -346,52 +337,47 @@ class _SignInPageState extends State<SignInPage>
                 const SizedBox(height: 8),
                 Text(
                   "Enter your email and we'll send a reset code.",
-                  style: TextStyle(color: Colors.white.withOpacity(0.55)),
-                ),
-                const SizedBox(height: 20),
-                TextField(
-                  controller: emailCtrl,
-                  style: const TextStyle(color: Colors.white),
-                  keyboardType: TextInputType.emailAddress,
-                  decoration: buildInputDecoration(
-                    icon: Icons.email_outlined,
-                    label: 'Email Address',
+                  style: TextStyle(
+                    color: isDark
+                        ? Colors.white.withOpacity(0.55)
+                        : AppColors.lightTextSecondary,
                   ),
                 ),
                 const SizedBox(height: 20),
-                ElevatedButton(
+                CustomTextField(
+                  controller: emailCtrl,
+                  icon: Icons.email_outlined,
+                  label: 'Email Address',
+                  keyboardType: TextInputType.emailAddress,
+                  isDark: isDark,
+                ),
+                const SizedBox(height: 20),
+                PrimaryButton(
+                  text: 'SEND RESET CODE',
                   onPressed: sending
                       ? null
                       : () async {
                           setSheetState(() => sending = true);
-                          final res = await ApiService.forgotPassword(
+                          final authProvider = context.read<AuthProvider>();
+                          final success = await authProvider.forgotPassword(
                             emailCtrl.text.trim(),
                           );
                           setSheetState(() => sending = false);
                           Navigator.pop(ctx);
-                          _snack(res['message'] ?? 'Reset code sent!');
+                          if (success) {
+                            Helpers.showSnackBar(
+                              ctx,
+                              'Reset code sent! Check your email.',
+                            );
+                          } else {
+                            Helpers.showSnackBar(
+                              ctx,
+                              authProvider.error ?? 'Failed to send code',
+                              isError: true,
+                            );
+                          }
                         },
-                  style: ElevatedButton.styleFrom(
-                    backgroundColor: AppColors.primaryCyan,
-                    foregroundColor: Colors.black,
-                    minimumSize: const Size(double.infinity, 52),
-                    shape: RoundedRectangleBorder(
-                      borderRadius: BorderRadius.circular(15),
-                    ),
-                  ),
-                  child: sending
-                      ? const SizedBox(
-                          width: 22,
-                          height: 22,
-                          child: CircularProgressIndicator(
-                            strokeWidth: 2.5,
-                            color: Colors.black,
-                          ),
-                        )
-                      : const Text(
-                          'SEND RESET CODE',
-                          style: TextStyle(fontWeight: FontWeight.bold),
-                        ),
+                  isLoading: sending,
                 ),
               ],
             ),
