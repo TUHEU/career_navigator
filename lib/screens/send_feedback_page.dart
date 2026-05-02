@@ -1,6 +1,5 @@
 import 'package:flutter/material.dart';
-import '../services/api_service.dart';
-import '../services/token_store.dart';
+
 import '../theme/app_theme.dart';
 
 class SendFeedbackPage extends StatefulWidget {
@@ -43,48 +42,14 @@ class _SendFeedbackPageState extends State<SendFeedbackPage> {
 
     setState(() => _loading = true);
 
-    try {
-      final token = await TokenStore.getAccess();
-      if (token == null) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(content: Text('Please login to send feedback')),
-        );
-        setState(() => _loading = false);
-        return;
-      }
+    // Simulate sending — replace with your actual API call
+    await Future.delayed(const Duration(seconds: 2));
 
-      final res = await ApiService.submitFeedback(
-        token: token,
-        subject: _subjectCtrl.text.trim(),
-        message: _messageCtrl.text.trim(),
-        category: _selectedCategory,
-        rating: _rating > 0 ? _rating : null,
-      );
-
-      if (mounted) {
-        if (res['success'] == true) {
-          setState(() {
-            _loading = false;
-            _submitted = true;
-          });
-        } else {
-          setState(() => _loading = false);
-          ScaffoldMessenger.of(context).showSnackBar(
-            SnackBar(
-              content: Text(res['message'] ?? 'Failed to send feedback'),
-            ),
-          );
-        }
-      }
-    } catch (e) {
-      if (mounted) {
-        setState(() => _loading = false);
-        ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(
-            content: Text('Failed to send feedback. Please try again.'),
-          ),
-        );
-      }
+    if (mounted) {
+      setState(() {
+        _loading = false;
+        _submitted = true;
+      });
     }
   }
 
@@ -104,6 +69,7 @@ class _SendFeedbackPageState extends State<SendFeedbackPage> {
     );
   }
 
+  // ── Success state ──────────────────────────────────────
   Widget _buildSuccess() {
     return Center(
       child: Padding(
@@ -150,10 +116,8 @@ class _SendFeedbackPageState extends State<SendFeedbackPage> {
             GestureDetector(
               onTap: () => Navigator.pop(context),
               child: Container(
-                padding: const EdgeInsets.symmetric(
-                  horizontal: 32,
-                  vertical: 14,
-                ),
+                padding:
+                    const EdgeInsets.symmetric(horizontal: 32, vertical: 14),
                 decoration: BoxDecoration(
                   color: AppColors.primaryCyan.withOpacity(0.12),
                   borderRadius: BorderRadius.circular(14),
@@ -177,13 +141,14 @@ class _SendFeedbackPageState extends State<SendFeedbackPage> {
     );
   }
 
+  // ── Form ───────────────────────────────────────────────
   Widget _buildForm() {
     return SingleChildScrollView(
       padding: const EdgeInsets.all(20),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          // Intro
+          // ── Intro ──────────────────────────────────────
           Container(
             padding: const EdgeInsets.all(16),
             decoration: BoxDecoration(
@@ -195,11 +160,8 @@ class _SendFeedbackPageState extends State<SendFeedbackPage> {
             ),
             child: Row(
               children: [
-                Icon(
-                  Icons.feedback_outlined,
-                  color: AppColors.primaryCyan,
-                  size: 20,
-                ),
+                Icon(Icons.feedback_outlined,
+                    color: AppColors.primaryCyan, size: 20),
                 const SizedBox(width: 12),
                 Expanded(
                   child: Text(
@@ -214,9 +176,10 @@ class _SendFeedbackPageState extends State<SendFeedbackPage> {
               ],
             ),
           ),
+
           const SizedBox(height: 24),
 
-          // Rating
+          // ── Rating ─────────────────────────────────────
           _sectionLabel('How would you rate your experience?'),
           const SizedBox(height: 12),
           Row(
@@ -237,9 +200,10 @@ class _SendFeedbackPageState extends State<SendFeedbackPage> {
               );
             }),
           ),
+
           const SizedBox(height: 24),
 
-          // Category
+          // ── Category ───────────────────────────────────
           _sectionLabel('Category'),
           const SizedBox(height: 12),
           Wrap(
@@ -250,10 +214,8 @@ class _SendFeedbackPageState extends State<SendFeedbackPage> {
               return GestureDetector(
                 onTap: () => setState(() => _selectedCategory = cat),
                 child: Container(
-                  padding: const EdgeInsets.symmetric(
-                    horizontal: 16,
-                    vertical: 8,
-                  ),
+                  padding:
+                      const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
                   decoration: BoxDecoration(
                     color: sel
                         ? AppColors.primaryCyan.withOpacity(0.15)
@@ -268,9 +230,7 @@ class _SendFeedbackPageState extends State<SendFeedbackPage> {
                   child: Text(
                     cat,
                     style: TextStyle(
-                      color: sel
-                          ? AppColors.primaryCyan
-                          : Colors.white.withOpacity(0.55),
+                      color: sel ? AppColors.primaryCyan : Colors.white.withOpacity(0.55),
                       fontSize: 13,
                       fontWeight: sel ? FontWeight.w600 : FontWeight.normal,
                     ),
@@ -279,9 +239,10 @@ class _SendFeedbackPageState extends State<SendFeedbackPage> {
               );
             }).toList(),
           ),
+
           const SizedBox(height: 24),
 
-          // Subject
+          // ── Subject ────────────────────────────────────
           _sectionLabel('Subject'),
           const SizedBox(height: 10),
           TextField(
@@ -289,22 +250,22 @@ class _SendFeedbackPageState extends State<SendFeedbackPage> {
             style: const TextStyle(color: Colors.white, fontSize: 14),
             decoration: _inputDecoration('e.g. App crashes on login'),
           ),
+
           const SizedBox(height: 20),
 
-          // Message
+          // ── Message ────────────────────────────────────
           _sectionLabel('Message'),
           const SizedBox(height: 10),
           TextField(
             controller: _messageCtrl,
             style: const TextStyle(color: Colors.white, fontSize: 14),
             maxLines: 6,
-            decoration: _inputDecoration(
-              'Describe your experience in detail...',
-            ),
+            decoration: _inputDecoration('Describe your experience in detail...'),
           ),
+
           const SizedBox(height: 32),
 
-          // Submit Button
+          // ── Submit ─────────────────────────────────────
           ElevatedButton(
             onPressed: _loading ? null : _submit,
             style: ElevatedButton.styleFrom(
@@ -326,9 +287,13 @@ class _SendFeedbackPageState extends State<SendFeedbackPage> {
                   )
                 : const Text(
                     'SUBMIT FEEDBACK',
-                    style: TextStyle(fontWeight: FontWeight.bold, fontSize: 15),
+                    style: TextStyle(
+                      fontWeight: FontWeight.bold,
+                      fontSize: 15,
+                    ),
                   ),
           ),
+
           const SizedBox(height: 32),
         ],
       ),
@@ -336,35 +301,37 @@ class _SendFeedbackPageState extends State<SendFeedbackPage> {
   }
 
   Widget _sectionLabel(String text) => Text(
-    text,
-    style: const TextStyle(
-      color: AppColors.primaryCyan,
-      fontSize: 12,
-      fontWeight: FontWeight.bold,
-      letterSpacing: 1.1,
-    ),
-  );
+        text,
+        style: const TextStyle(
+          color: AppColors.primaryCyan,
+          fontSize: 12,
+          fontWeight: FontWeight.bold,
+          letterSpacing: 1.1,
+        ),
+      );
 
   InputDecoration _inputDecoration(String hint) => InputDecoration(
-    hintText: hint,
-    hintStyle: TextStyle(color: Colors.white.withOpacity(0.25), fontSize: 13),
-    filled: true,
-    fillColor: Colors.white.withOpacity(0.04),
-    contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
-    border: OutlineInputBorder(
-      borderRadius: BorderRadius.circular(14),
-      borderSide: BorderSide(color: Colors.white.withOpacity(0.07)),
-    ),
-    enabledBorder: OutlineInputBorder(
-      borderRadius: BorderRadius.circular(14),
-      borderSide: BorderSide(color: Colors.white.withOpacity(0.07)),
-    ),
-    focusedBorder: OutlineInputBorder(
-      borderRadius: BorderRadius.circular(14),
-      borderSide: BorderSide(
-        color: AppColors.primaryCyan.withOpacity(0.5),
-        width: 1.5,
-      ),
-    ),
-  );
+        hintText: hint,
+        hintStyle: TextStyle(
+          color: Colors.white.withOpacity(0.25),
+          fontSize: 13,
+        ),
+        filled: true,
+        fillColor: Colors.white.withOpacity(0.04),
+        contentPadding:
+            const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
+        border: OutlineInputBorder(
+          borderRadius: BorderRadius.circular(14),
+          borderSide: BorderSide(color: Colors.white.withOpacity(0.07)),
+        ),
+        enabledBorder: OutlineInputBorder(
+          borderRadius: BorderRadius.circular(14),
+          borderSide: BorderSide(color: Colors.white.withOpacity(0.07)),
+        ),
+        focusedBorder: OutlineInputBorder(
+          borderRadius: BorderRadius.circular(14),
+          borderSide: BorderSide(
+              color: AppColors.primaryCyan.withOpacity(0.5), width: 1.5),
+        ),
+      );
 }

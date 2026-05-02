@@ -1,17 +1,52 @@
-# career_navigator
+🚀 CareerCompass AI
 
-A new Flutter project.
+Your Personal Career Navigator
 
-## Getting Started
+Overview
 
-This project is a starting point for a Flutter application.
+CareerCompass AI is an intelligent mobile application designed to help
+users navigate their career paths through AI-powered recommendations,
+skill tracking, and job market insights.
 
-A few resources to get you started if this is your first Flutter project:
+Problem Statement
 
-- [Learn Flutter](https://docs.flutter.dev/get-started/learn-flutter)
-- [Write your first Flutter app](https://docs.flutter.dev/get-started/codelab)
-- [Flutter learning resources](https://docs.flutter.dev/reference/learning-resources)
+-   Information overload
+-   Lack of personalized guidance
+-   Difficulty identifying relevant skills
+-   Fragmented tools
 
-For help getting started with Flutter development, view the
-[online documentation](https://docs.flutter.dev/), which offers tutorials,
-samples, guidance on mobile development, and a full API reference.
+Solution
+
+-   AI Resume Analysis
+-   Job Matching
+-   Skill Tracking
+-   Mock Interviews
+-   Mentorship
+-   Portfolio Builder
+
+Tech Stack
+
+-   Flutter (Dart)
+-   Firebase / Node.js
+-   Firestore / PostgreSQL
+-   OpenAI API / Google NLP
+
+Features
+
+-   User Authentication
+-   Resume Analysis
+-   Job Matching
+-   Skill Tracking
+-   Mock Interviews
+
+Getting Started
+
+git clone https://github.com/TUHEU/career_navigator.git
+cd career_navigator
+flutter pub get
+flutter run
+
+Author
+
+Fahdil Tuhue
+https://github.com/TUHEU

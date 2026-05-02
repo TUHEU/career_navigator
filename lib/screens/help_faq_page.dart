@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+
 import '../theme/app_theme.dart';
 
 class HelpFaqPage extends StatefulWidget {
@@ -35,24 +36,6 @@ class _HelpFaqPageState extends State<HelpFaqPage> {
           'then use that code to set a new password.',
     ),
     _FaqItem(
-      question: 'How do I send an invite to a mentor?',
-      answer:
-          'Go to the Search page, find a mentor you want to connect with, and tap the "Invite" button. '
-          'They will receive a notification and can accept or decline your request.',
-    ),
-    _FaqItem(
-      question: 'How do I chat with my mentor?',
-      answer:
-          'Once your mentorship request is accepted, a conversation will be created automatically. '
-          'Go to the Messages tab to start chatting.',
-    ),
-    _FaqItem(
-      question: 'How do I apply for a job?',
-      answer:
-          'Go to the Jobs page, browse available job listings, tap on a job to view details, '
-          'then tap "Apply Now" to submit your application.',
-    ),
-    _FaqItem(
       question: 'Is my data safe?',
       answer:
           'Yes. We encrypt all data in transit using TLS and at rest using AES-256. '
@@ -62,7 +45,7 @@ class _HelpFaqPageState extends State<HelpFaqPage> {
       question: 'Can I delete my account?',
       answer:
           'Yes. Go to Settings → Delete Account. This will permanently remove your account '
-          'and all associated data. This action cannot be undone.',
+          'and all associated data within 30 days. This action cannot be undone.',
     ),
     _FaqItem(
       question: 'How do I change the app theme?',
@@ -101,7 +84,7 @@ class _HelpFaqPageState extends State<HelpFaqPage> {
       body: ListView(
         padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 8),
         children: [
-          // Header Card
+          // ── Header ──────────────────────────────────────
           Container(
             padding: const EdgeInsets.all(18),
             decoration: BoxDecoration(
@@ -113,11 +96,8 @@ class _HelpFaqPageState extends State<HelpFaqPage> {
             ),
             child: Row(
               children: [
-                Icon(
-                  Icons.help_outline,
-                  color: AppColors.primaryCyan,
-                  size: 22,
-                ),
+                Icon(Icons.help_outline,
+                    color: AppColors.primaryCyan, size: 22),
                 const SizedBox(width: 12),
                 Expanded(
                   child: Text(
@@ -132,9 +112,10 @@ class _HelpFaqPageState extends State<HelpFaqPage> {
               ],
             ),
           ),
+
           const SizedBox(height: 20),
 
-          // FAQ items
+          // ── FAQ items ────────────────────────────────────
           ...List.generate(_faqs.length, (i) {
             final faq = _faqs[i];
             final isOpen = _openIndex == i;
@@ -159,9 +140,7 @@ class _HelpFaqPageState extends State<HelpFaqPage> {
                   children: [
                     Padding(
                       padding: const EdgeInsets.symmetric(
-                        horizontal: 18,
-                        vertical: 15,
-                      ),
+                          horizontal: 18, vertical: 15),
                       child: Row(
                         children: [
                           Expanded(
@@ -216,9 +195,9 @@ class _HelpFaqPageState extends State<HelpFaqPage> {
             );
           }),
 
-          const SizedBox(height: 20),
+          const SizedBox(height: 10),
 
-          // Still need help card
+          // ── Still need help ──────────────────────────────
           Container(
             padding: const EdgeInsets.all(16),
             decoration: BoxDecoration(
@@ -228,11 +207,8 @@ class _HelpFaqPageState extends State<HelpFaqPage> {
             ),
             child: Row(
               children: [
-                Icon(
-                  Icons.support_agent_outlined,
-                  color: Colors.white.withOpacity(0.35),
-                  size: 20,
-                ),
+                Icon(Icons.support_agent_outlined,
+                    color: Colors.white.withOpacity(0.35), size: 20),
                 const SizedBox(width: 12),
                 Expanded(
                   child: Text(
