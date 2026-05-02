@@ -3,7 +3,7 @@ import 'package:flutter/services.dart';
 
 import '../services/api_service.dart';
 import '../services/token_store.dart';
-import '../theme/app_theme.dart';
+import '../core/themes/app_theme.dart';
 import 'sign_in_page.dart';
 import 'profile_setup_page.dart';
 

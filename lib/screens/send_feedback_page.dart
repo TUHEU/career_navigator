@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 
-import '../theme/app_theme.dart';
+import '../core/themes/app_theme.dart';
 
 class SendFeedbackPage extends StatefulWidget {
   const SendFeedbackPage({super.key});
@@ -116,8 +116,10 @@ class _SendFeedbackPageState extends State<SendFeedbackPage> {
             GestureDetector(
               onTap: () => Navigator.pop(context),
               child: Container(
-                padding:
-                    const EdgeInsets.symmetric(horizontal: 32, vertical: 14),
+                padding: const EdgeInsets.symmetric(
+                  horizontal: 32,
+                  vertical: 14,
+                ),
                 decoration: BoxDecoration(
                   color: AppColors.primaryCyan.withOpacity(0.12),
                   borderRadius: BorderRadius.circular(14),
@@ -160,8 +162,11 @@ class _SendFeedbackPageState extends State<SendFeedbackPage> {
             ),
             child: Row(
               children: [
-                Icon(Icons.feedback_outlined,
-                    color: AppColors.primaryCyan, size: 20),
+                Icon(
+                  Icons.feedback_outlined,
+                  color: AppColors.primaryCyan,
+                  size: 20,
+                ),
                 const SizedBox(width: 12),
                 Expanded(
                   child: Text(
@@ -214,8 +219,10 @@ class _SendFeedbackPageState extends State<SendFeedbackPage> {
               return GestureDetector(
                 onTap: () => setState(() => _selectedCategory = cat),
                 child: Container(
-                  padding:
-                      const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+                  padding: const EdgeInsets.symmetric(
+                    horizontal: 16,
+                    vertical: 8,
+                  ),
                   decoration: BoxDecoration(
                     color: sel
                         ? AppColors.primaryCyan.withOpacity(0.15)
@@ -230,7 +237,9 @@ class _SendFeedbackPageState extends State<SendFeedbackPage> {
                   child: Text(
                     cat,
                     style: TextStyle(
-                      color: sel ? AppColors.primaryCyan : Colors.white.withOpacity(0.55),
+                      color: sel
+                          ? AppColors.primaryCyan
+                          : Colors.white.withOpacity(0.55),
                       fontSize: 13,
                       fontWeight: sel ? FontWeight.w600 : FontWeight.normal,
                     ),
@@ -260,7 +269,9 @@ class _SendFeedbackPageState extends State<SendFeedbackPage> {
             controller: _messageCtrl,
             style: const TextStyle(color: Colors.white, fontSize: 14),
             maxLines: 6,
-            decoration: _inputDecoration('Describe your experience in detail...'),
+            decoration: _inputDecoration(
+              'Describe your experience in detail...',
+            ),
           ),
 
           const SizedBox(height: 32),
@@ -287,10 +298,7 @@ class _SendFeedbackPageState extends State<SendFeedbackPage> {
                   )
                 : const Text(
                     'SUBMIT FEEDBACK',
-                    style: TextStyle(
-                      fontWeight: FontWeight.bold,
-                      fontSize: 15,
-                    ),
+                    style: TextStyle(fontWeight: FontWeight.bold, fontSize: 15),
                   ),
           ),
 
@@ -301,37 +309,35 @@ class _SendFeedbackPageState extends State<SendFeedbackPage> {
   }
 
   Widget _sectionLabel(String text) => Text(
-        text,
-        style: const TextStyle(
-          color: AppColors.primaryCyan,
-          fontSize: 12,
-          fontWeight: FontWeight.bold,
-          letterSpacing: 1.1,
-        ),
-      );
+    text,
+    style: const TextStyle(
+      color: AppColors.primaryCyan,
+      fontSize: 12,
+      fontWeight: FontWeight.bold,
+      letterSpacing: 1.1,
+    ),
+  );
 
   InputDecoration _inputDecoration(String hint) => InputDecoration(
-        hintText: hint,
-        hintStyle: TextStyle(
-          color: Colors.white.withOpacity(0.25),
-          fontSize: 13,
-        ),
-        filled: true,
-        fillColor: Colors.white.withOpacity(0.04),
-        contentPadding:
-            const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
-        border: OutlineInputBorder(
-          borderRadius: BorderRadius.circular(14),
-          borderSide: BorderSide(color: Colors.white.withOpacity(0.07)),
-        ),
-        enabledBorder: OutlineInputBorder(
-          borderRadius: BorderRadius.circular(14),
-          borderSide: BorderSide(color: Colors.white.withOpacity(0.07)),
-        ),
-        focusedBorder: OutlineInputBorder(
-          borderRadius: BorderRadius.circular(14),
-          borderSide: BorderSide(
-              color: AppColors.primaryCyan.withOpacity(0.5), width: 1.5),
-        ),
-      );
+    hintText: hint,
+    hintStyle: TextStyle(color: Colors.white.withOpacity(0.25), fontSize: 13),
+    filled: true,
+    fillColor: Colors.white.withOpacity(0.04),
+    contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
+    border: OutlineInputBorder(
+      borderRadius: BorderRadius.circular(14),
+      borderSide: BorderSide(color: Colors.white.withOpacity(0.07)),
+    ),
+    enabledBorder: OutlineInputBorder(
+      borderRadius: BorderRadius.circular(14),
+      borderSide: BorderSide(color: Colors.white.withOpacity(0.07)),
+    ),
+    focusedBorder: OutlineInputBorder(
+      borderRadius: BorderRadius.circular(14),
+      borderSide: BorderSide(
+        color: AppColors.primaryCyan.withOpacity(0.5),
+        width: 1.5,
+      ),
+    ),
+  );
 }

@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:url_launcher/url_launcher.dart';
 
-import '../theme/app_theme.dart';
+import '../core/themes/app_theme.dart';
 
 class Developer {
   final String name;

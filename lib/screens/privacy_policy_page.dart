@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 
-import '../theme/app_theme.dart';
+import '../core/themes/app_theme.dart';
 
 class PrivacyPolicyPage extends StatelessWidget {
   const PrivacyPolicyPage({super.key});
@@ -128,7 +128,10 @@ class PrivacyPolicyPage extends StatelessWidget {
               _Body(
                 'We use your data solely to operate and improve Career Navigator. Specifically, we use it to:',
               ),
-              _Bullet(text: 'Authenticate your identity and manage your account securely.'),
+              _Bullet(
+                text:
+                    'Authenticate your identity and manage your account securely.',
+              ),
               _Bullet(
                 text:
                     'Personalize career recommendations, job matches, and in-app content.',
@@ -142,7 +145,8 @@ class PrivacyPolicyPage extends StatelessWidget {
                     'Analyze usage patterns to improve app performance, stability, and features.',
               ),
               _Bullet(
-                text: 'Detect, investigate, and prevent fraudulent or unauthorized activity.',
+                text:
+                    'Detect, investigate, and prevent fraudulent or unauthorized activity.',
               ),
               _Bullet(text: 'Comply with applicable legal obligations.'),
               _Body(
@@ -199,15 +203,20 @@ class PrivacyPolicyPage extends StatelessWidget {
                 'When you delete your account, we will delete or anonymize your data within 30 days, '
                 'unless we are legally required to retain certain records.',
               ),
-              _Body('We implement industry-standard security measures including:'),
-              _Bullet(
-                text: 'Encryption of data in transit (TLS) and at rest (AES-256).',
+              _Body(
+                'We implement industry-standard security measures including:',
               ),
               _Bullet(
-                text: 'Secure authentication, token management, and session expiry controls.',
+                text:
+                    'Encryption of data in transit (TLS) and at rest (AES-256).',
               ),
               _Bullet(
-                text: 'Regular security reviews and access controls — only authorized personnel can access personal data.',
+                text:
+                    'Secure authentication, token management, and session expiry controls.',
+              ),
+              _Bullet(
+                text:
+                    'Regular security reviews and access controls — only authorized personnel can access personal data.',
               ),
               _Body(
                 'No method of electronic transmission is 100% secure. While we take every reasonable precaution, '
@@ -240,11 +249,13 @@ class PrivacyPolicyPage extends StatelessWidget {
               ),
               _Bullet(
                 label: 'Portability',
-                text: 'Request your data in a structured, machine-readable format.',
+                text:
+                    'Request your data in a structured, machine-readable format.',
               ),
               _Bullet(
                 label: 'Objection',
-                text: 'Object to processing of your data for certain purposes such as marketing.',
+                text:
+                    'Object to processing of your data for certain purposes such as marketing.',
               ),
               _Bullet(
                 label: 'Withdraw consent',
@@ -269,7 +280,8 @@ class PrivacyPolicyPage extends StatelessWidget {
               ),
               _Bullet(
                 label: 'Essential',
-                text: 'Required for the app to function correctly. Cannot be disabled.',
+                text:
+                    'Required for the app to function correctly. Cannot be disabled.',
               ),
               _Bullet(
                 label: 'Analytics',
@@ -278,7 +290,8 @@ class PrivacyPolicyPage extends StatelessWidget {
               ),
               _Bullet(
                 label: 'Preferences',
-                text: 'Store your theme and customization choices across sessions.',
+                text:
+                    'Store your theme and customization choices across sessions.',
               ),
               _Body(
                 'You can manage or clear tracking data at any time through your device settings or the app\'s privacy settings menu.',
@@ -295,8 +308,13 @@ class PrivacyPolicyPage extends StatelessWidget {
                 'We may update this Privacy Policy from time to time to reflect changes in our practices, '
                 'technology, or legal requirements. When we make significant changes, we will notify you via:',
               ),
-              _Bullet(text: 'An in-app notification or banner when you next open the app.'),
-              _Bullet(text: 'An email to the address associated with your account.'),
+              _Bullet(
+                text:
+                    'An in-app notification or banner when you next open the app.',
+              ),
+              _Bullet(
+                text: 'An email to the address associated with your account.',
+              ),
               _Body(
                 'The "Last updated" date at the top of this page reflects the most recent revision. '
                 'Your continued use of the app after changes constitutes acceptance of the updated policy.',
@@ -313,14 +331,8 @@ class PrivacyPolicyPage extends StatelessWidget {
                 'If you have any questions, concerns, or requests regarding this Privacy Policy '
                 'or how we handle your data, please reach out:',
               ),
-              _Bullet(
-                label: 'GitHub',
-                text: 'github.com/career-navigator',
-              ),
-              _Bullet(
-                label: 'Country',
-                text: 'Cameroon',
-              ),
+              _Bullet(label: 'GitHub', text: 'github.com/career-navigator'),
+              _Bullet(label: 'Country', text: 'Cameroon'),
               _Body(
                 'We are committed to resolving any privacy concerns promptly and transparently. '
                 'We aim to respond to all privacy-related inquiries within 5 business days.',

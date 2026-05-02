@@ -2,7 +2,7 @@ import 'package:flutter/material.dart';
 
 import '../services/api_service.dart';
 import '../services/token_store.dart';
-import '../theme/app_theme.dart';
+import '../core/themes/app_theme.dart';
 
 class SearchPage extends StatefulWidget {
   const SearchPage({super.key});

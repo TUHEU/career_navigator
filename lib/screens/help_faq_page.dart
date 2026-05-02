@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 
-import '../theme/app_theme.dart';
+import '../core/themes/app_theme.dart';
 
 class HelpFaqPage extends StatefulWidget {
   const HelpFaqPage({super.key});
@@ -96,8 +96,11 @@ class _HelpFaqPageState extends State<HelpFaqPage> {
             ),
             child: Row(
               children: [
-                Icon(Icons.help_outline,
-                    color: AppColors.primaryCyan, size: 22),
+                Icon(
+                  Icons.help_outline,
+                  color: AppColors.primaryCyan,
+                  size: 22,
+                ),
                 const SizedBox(width: 12),
                 Expanded(
                   child: Text(
@@ -140,7 +143,9 @@ class _HelpFaqPageState extends State<HelpFaqPage> {
                   children: [
                     Padding(
                       padding: const EdgeInsets.symmetric(
-                          horizontal: 18, vertical: 15),
+                        horizontal: 18,
+                        vertical: 15,
+                      ),
                       child: Row(
                         children: [
                           Expanded(
@@ -207,8 +212,11 @@ class _HelpFaqPageState extends State<HelpFaqPage> {
             ),
             child: Row(
               children: [
-                Icon(Icons.support_agent_outlined,
-                    color: Colors.white.withOpacity(0.35), size: 20),
+                Icon(
+                  Icons.support_agent_outlined,
+                  color: Colors.white.withOpacity(0.35),
+                  size: 20,
+                ),
                 const SizedBox(width: 12),
                 Expanded(
                   child: Text(

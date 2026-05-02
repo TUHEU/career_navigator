@@ -2,7 +2,7 @@ import 'package:flutter/material.dart';
 
 import '../services/api_service.dart';
 import '../services/token_store.dart';
-import '../theme/app_theme.dart';
+import '../core/themes/app_theme.dart';
 import 'sign_in_page.dart';
 import 'education_form_page.dart';
 import 'work_experience_form_page.dart';
@@ -37,7 +37,10 @@ class _DashboardPageState extends State<DashboardPage>
   Future<void> _loadProfile() async {
     try {
       final token = await TokenStore.getAccess();
-      if (token == null) { _logout(); return; }
+      if (token == null) {
+        _logout();
+        return;
+      }
       final res = await ApiService.getProfile(token);
       if (mounted) {
         if (res['success'] == true) {
@@ -58,7 +61,9 @@ class _DashboardPageState extends State<DashboardPage>
     await TokenStore.clear();
     if (mounted)
       Navigator.pushReplacement(
-          context, MaterialPageRoute(builder: (_) => const SignInPage()));
+        context,
+        MaterialPageRoute(builder: (_) => const SignInPage()),
+      );
   }
 
   @override
@@ -80,7 +85,10 @@ class _DashboardPageState extends State<DashboardPage>
           SafeArea(
             child: _loading
                 ? const Center(
-                    child: CircularProgressIndicator(color: AppColors.primaryCyan))
+                    child: CircularProgressIndicator(
+                      color: AppColors.primaryCyan,
+                    ),
+                  )
                 : _buildBody(),
           ),
         ],
@@ -89,7 +97,7 @@ class _DashboardPageState extends State<DashboardPage>
   }
 
   Widget _buildBody() {
-    final p    = _profile ?? {};
+    final p = _profile ?? {};
     final role = (p['role'] as String?) ?? 'job_seeker';
 
     return Column(
@@ -118,7 +126,10 @@ class _DashboardPageState extends State<DashboardPage>
               border: Border.all(color: AppColors.primaryCyan.withOpacity(0.3)),
             ),
             dividerColor: Colors.transparent,
-            labelStyle: const TextStyle(fontWeight: FontWeight.w600, fontSize: 13),
+            labelStyle: const TextStyle(
+              fontWeight: FontWeight.w600,
+              fontSize: 13,
+            ),
           ),
         ),
         const SizedBox(height: 4),
@@ -159,8 +170,9 @@ class _DashboardPageState extends State<DashboardPage>
   );
 
   Widget _buildProfileCard(Map<String, dynamic> p, String role) {
-    final name       = (p['full_name'] as String?) ?? (p['email'] as String?) ?? 'User';
-    final headline   = (p['headline'] as String?) ?? '';
+    final name =
+        (p['full_name'] as String?) ?? (p['email'] as String?) ?? 'User';
+    final headline = (p['headline'] as String?) ?? '';
     final pictureUrl = p['profile_picture'] as String?;
 
     return Container(
@@ -185,10 +197,15 @@ class _DashboardPageState extends State<DashboardPage>
             CircleAvatar(
               radius: 36,
               backgroundColor: AppColors.primaryCyan.withOpacity(0.2),
-              backgroundImage:
-                  pictureUrl != null ? NetworkImage(pictureUrl) : null,
+              backgroundImage: pictureUrl != null
+                  ? NetworkImage(pictureUrl)
+                  : null,
               child: pictureUrl == null
-                  ? const Icon(Icons.person, color: AppColors.primaryCyan, size: 30)
+                  ? const Icon(
+                      Icons.person,
+                      color: AppColors.primaryCyan,
+                      size: 30,
+                    )
                   : null,
             ),
             const SizedBox(width: 14),
@@ -196,16 +213,23 @@ class _DashboardPageState extends State<DashboardPage>
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  Text(name,
-                      style: const TextStyle(
-                          color: Colors.white,
-                          fontSize: 17,
-                          fontWeight: FontWeight.bold)),
+                  Text(
+                    name,
+                    style: const TextStyle(
+                      color: Colors.white,
+                      fontSize: 17,
+                      fontWeight: FontWeight.bold,
+                    ),
+                  ),
                   if (headline.isNotEmpty) ...[
                     const SizedBox(height: 3),
-                    Text(headline,
-                        style: const TextStyle(
-                            color: AppColors.primaryCyan, fontSize: 12)),
+                    Text(
+                      headline,
+                      style: const TextStyle(
+                        color: AppColors.primaryCyan,
+                        fontSize: 12,
+                      ),
+                    ),
                   ],
                   const SizedBox(height: 6),
                   _roleBadge(role),
@@ -220,7 +244,7 @@ class _DashboardPageState extends State<DashboardPage>
 
   Widget _roleBadge(String role) {
     final label = role == 'mentor' ? 'Mentor' : 'Job Seeker';
-    final icon  = role == 'mentor' ? Icons.school_outlined : Icons.search;
+    final icon = role == 'mentor' ? Icons.school_outlined : Icons.search;
     return Container(
       padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
       decoration: BoxDecoration(
@@ -233,11 +257,14 @@ class _DashboardPageState extends State<DashboardPage>
         children: [
           Icon(icon, color: AppColors.primaryCyan, size: 12),
           const SizedBox(width: 5),
-          Text(label,
-              style: const TextStyle(
-                  color: AppColors.primaryCyan,
-                  fontSize: 11,
-                  fontWeight: FontWeight.w600)),
+          Text(
+            label,
+            style: const TextStyle(
+              color: AppColors.primaryCyan,
+              fontSize: 11,
+              fontWeight: FontWeight.w600,
+            ),
+          ),
         ],
       ),
     );
@@ -251,7 +278,11 @@ class _ProfileTab extends StatelessWidget {
   final Map<String, dynamic> profile;
   final String role;
   final VoidCallback onRefresh;
-  const _ProfileTab({required this.profile, required this.role, required this.onRefresh});
+  const _ProfileTab({
+    required this.profile,
+    required this.role,
+    required this.onRefresh,
+  });
 
   @override
   Widget build(BuildContext context) {
@@ -262,31 +293,70 @@ class _ProfileTab extends StatelessWidget {
       child: ListView(
         padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 12),
         children: [
-          _tile(Icons.badge_outlined,       'Full name',    (p['full_name']        as String?) ?? '—'),
-          _tile(Icons.email_outlined,       'Email',        (p['email']            as String?) ?? '—'),
-          _tile(Icons.cake_outlined,        'Date of birth',(p['date_of_birth']    as String?) ?? '—'),
-          _tile(Icons.phone_outlined,       'Phone',        (p['phone']            as String?) ?? '—'),
-          _tile(Icons.location_on_outlined, 'Location',     (p['location']         as String?) ?? '—'),
-          _tile(Icons.work_outline,         'Current role', (p['current_job_title']as String?) ?? '—'),
-          _tile(Icons.signal_cellular_alt,  'Experience',
-              p['years_of_experience'] != null ? '${p['years_of_experience']} yrs' : '—'),
+          _tile(
+            Icons.badge_outlined,
+            'Full name',
+            (p['full_name'] as String?) ?? '—',
+          ),
+          _tile(Icons.email_outlined, 'Email', (p['email'] as String?) ?? '—'),
+          _tile(
+            Icons.cake_outlined,
+            'Date of birth',
+            (p['date_of_birth'] as String?) ?? '—',
+          ),
+          _tile(Icons.phone_outlined, 'Phone', (p['phone'] as String?) ?? '—'),
+          _tile(
+            Icons.location_on_outlined,
+            'Location',
+            (p['location'] as String?) ?? '—',
+          ),
+          _tile(
+            Icons.work_outline,
+            'Current role',
+            (p['current_job_title'] as String?) ?? '—',
+          ),
+          _tile(
+            Icons.signal_cellular_alt,
+            'Experience',
+            p['years_of_experience'] != null
+                ? '${p['years_of_experience']} yrs'
+                : '—',
+          ),
           if (role == 'job_seeker') ...[
-            _tile(Icons.flag_outlined,           'Desired role',  (p['desired_job_title']as String?) ?? '—'),
-            _tile(Icons.hourglass_top_outlined,  'Availability',  (p['availability']     as String?) ?? '—'),
+            _tile(
+              Icons.flag_outlined,
+              'Desired role',
+              (p['desired_job_title'] as String?) ?? '—',
+            ),
+            _tile(
+              Icons.hourglass_top_outlined,
+              'Availability',
+              (p['availability'] as String?) ?? '—',
+            ),
           ],
           if (role == 'mentor') ...[
             const SizedBox(height: 12),
             OutlinedButton.icon(
               onPressed: () => Navigator.push(
                 context,
-                MaterialPageRoute(builder: (_) => MentorProfilePage(profile: profile)),
+                MaterialPageRoute(
+                  builder: (_) => MentorProfilePage(profile: profile),
+                ),
               ).then((_) => onRefresh()),
-              icon: const Icon(Icons.edit_outlined, size: 17, color: AppColors.primaryCyan),
-              label: const Text('Edit Mentor Profile',
-                  style: TextStyle(color: AppColors.primaryCyan)),
+              icon: const Icon(
+                Icons.edit_outlined,
+                size: 17,
+                color: AppColors.primaryCyan,
+              ),
+              label: const Text(
+                'Edit Mentor Profile',
+                style: TextStyle(color: AppColors.primaryCyan),
+              ),
               style: OutlinedButton.styleFrom(
                 side: const BorderSide(color: AppColors.primaryCyan),
-                shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+                shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(12),
+                ),
                 minimumSize: const Size(double.infinity, 46),
               ),
             ),
@@ -297,21 +367,38 @@ class _ProfileTab extends StatelessWidget {
             decoration: BoxDecoration(
               color: AppColors.primaryCyan.withOpacity(0.06),
               borderRadius: BorderRadius.circular(14),
-              border: Border.all(color: AppColors.primaryCyan.withOpacity(0.15)),
+              border: Border.all(
+                color: AppColors.primaryCyan.withOpacity(0.15),
+              ),
             ),
             child: Row(
               children: [
-                const Icon(Icons.rocket_launch_outlined, color: AppColors.primaryCyan, size: 20),
+                const Icon(
+                  Icons.rocket_launch_outlined,
+                  color: AppColors.primaryCyan,
+                  size: 20,
+                ),
                 const SizedBox(width: 12),
                 Expanded(
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
-                      const Text('More features coming soon',
-                          style: TextStyle(color: Colors.white, fontWeight: FontWeight.w600, fontSize: 13)),
+                      const Text(
+                        'More features coming soon',
+                        style: TextStyle(
+                          color: Colors.white,
+                          fontWeight: FontWeight.w600,
+                          fontSize: 13,
+                        ),
+                      ),
                       const SizedBox(height: 3),
-                      Text('Job listings, AI recommendations & more.',
-                          style: TextStyle(color: Colors.white.withOpacity(0.45), fontSize: 12)),
+                      Text(
+                        'Job listings, AI recommendations & more.',
+                        style: TextStyle(
+                          color: Colors.white.withOpacity(0.45),
+                          fontSize: 12,
+                        ),
+                      ),
                     ],
                   ),
                 ),
@@ -339,11 +426,18 @@ class _ProfileTab extends StatelessWidget {
         Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            Text(label,
-                style: TextStyle(color: Colors.white.withOpacity(0.38), fontSize: 10)),
+            Text(
+              label,
+              style: TextStyle(
+                color: Colors.white.withOpacity(0.38),
+                fontSize: 10,
+              ),
+            ),
             const SizedBox(height: 2),
-            Text(value,
-                style: const TextStyle(color: Colors.white, fontSize: 14)),
+            Text(
+              value,
+              style: const TextStyle(color: Colors.white, fontSize: 14),
+            ),
           ],
         ),
       ],
@@ -377,8 +471,10 @@ class _EducationTab extends StatelessWidget {
           ),
           const SizedBox(height: 16),
           if (items.isEmpty)
-            _EmptyState(icon: Icons.school_outlined,
-                message: 'No education entries yet.\nTap + to add one.')
+            _EmptyState(
+              icon: Icons.school_outlined,
+              message: 'No education entries yet.\nTap + to add one.',
+            )
           else
             ...items.map((e) {
               final item = e as Map<String, dynamic>;
@@ -386,12 +482,17 @@ class _EducationTab extends StatelessWidget {
                 item: item,
                 onEdit: () => Navigator.push(
                   context,
-                  MaterialPageRoute(builder: (_) => EducationFormPage(existing: item)),
+                  MaterialPageRoute(
+                    builder: (_) => EducationFormPage(existing: item),
+                  ),
                 ).then((_) => onRefresh()),
                 onDelete: () async {
                   final token = await TokenStore.getAccess();
                   if (token == null) return;
-                  await ApiService.deleteEducation(token: token, id: item['id'] as int);
+                  await ApiService.deleteEducation(
+                    token: token,
+                    id: item['id'] as int,
+                  );
                   onRefresh();
                 },
               );
@@ -406,12 +507,16 @@ class _EducationCard extends StatelessWidget {
   final Map<String, dynamic> item;
   final VoidCallback onEdit;
   final VoidCallback onDelete;
-  const _EducationCard({required this.item, required this.onEdit, required this.onDelete});
+  const _EducationCard({
+    required this.item,
+    required this.onEdit,
+    required this.onDelete,
+  });
 
   @override
   Widget build(BuildContext context) {
     final isCurrent = item['is_current'] == 1 || item['is_current'] == true;
-    final endLabel  = isCurrent ? 'Present' : '${item['end_year'] ?? ''}';
+    final endLabel = isCurrent ? 'Present' : '${item['end_year'] ?? ''}';
     return Container(
       margin: const EdgeInsets.only(bottom: 12),
       padding: const EdgeInsets.all(16),
@@ -429,21 +534,41 @@ class _EducationCard extends StatelessWidget {
               color: AppColors.primaryCyan.withOpacity(0.1),
               borderRadius: BorderRadius.circular(12),
             ),
-            child: const Icon(Icons.school_outlined, color: AppColors.primaryCyan, size: 20),
+            child: const Icon(
+              Icons.school_outlined,
+              color: AppColors.primaryCyan,
+              size: 20,
+            ),
           ),
           const SizedBox(width: 12),
           Expanded(
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                Text(item['institution'] ?? '',
-                    style: const TextStyle(color: Colors.white, fontWeight: FontWeight.bold, fontSize: 14)),
+                Text(
+                  item['institution'] ?? '',
+                  style: const TextStyle(
+                    color: Colors.white,
+                    fontWeight: FontWeight.bold,
+                    fontSize: 14,
+                  ),
+                ),
                 const SizedBox(height: 3),
-                Text('${item['degree']} · ${item['field_of_study']}',
-                    style: const TextStyle(color: AppColors.primaryCyan, fontSize: 12)),
+                Text(
+                  '${item['degree']} · ${item['field_of_study']}',
+                  style: const TextStyle(
+                    color: AppColors.primaryCyan,
+                    fontSize: 12,
+                  ),
+                ),
                 const SizedBox(height: 3),
-                Text('${item['start_year']} – $endLabel',
-                    style: TextStyle(color: Colors.white.withOpacity(0.4), fontSize: 11)),
+                Text(
+                  '${item['start_year']} – $endLabel',
+                  style: TextStyle(
+                    color: Colors.white.withOpacity(0.4),
+                    fontSize: 11,
+                  ),
+                ),
               ],
             ),
           ),
@@ -464,7 +589,8 @@ class _WorkTab extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final List<dynamic> items = (profile['work_experience'] as List<dynamic>?) ?? [];
+    final List<dynamic> items =
+        (profile['work_experience'] as List<dynamic>?) ?? [];
     return RefreshIndicator(
       onRefresh: () async => onRefresh(),
       color: AppColors.primaryCyan,
@@ -480,8 +606,10 @@ class _WorkTab extends StatelessWidget {
           ),
           const SizedBox(height: 16),
           if (items.isEmpty)
-            _EmptyState(icon: Icons.work_outline,
-                message: 'No work experience yet.\nTap + to add one.')
+            _EmptyState(
+              icon: Icons.work_outline,
+              message: 'No work experience yet.\nTap + to add one.',
+            )
           else
             ...items.map((w) {
               final item = w as Map<String, dynamic>;
@@ -489,12 +617,17 @@ class _WorkTab extends StatelessWidget {
                 item: item,
                 onEdit: () => Navigator.push(
                   context,
-                  MaterialPageRoute(builder: (_) => WorkExperienceFormPage(existing: item)),
+                  MaterialPageRoute(
+                    builder: (_) => WorkExperienceFormPage(existing: item),
+                  ),
                 ).then((_) => onRefresh()),
                 onDelete: () async {
                   final token = await TokenStore.getAccess();
                   if (token == null) return;
-                  await ApiService.deleteWorkExperience(token: token, id: item['id'] as int);
+                  await ApiService.deleteWorkExperience(
+                    token: token,
+                    id: item['id'] as int,
+                  );
                   onRefresh();
                 },
               );
@@ -509,14 +642,19 @@ class _WorkCard extends StatelessWidget {
   final Map<String, dynamic> item;
   final VoidCallback onEdit;
   final VoidCallback onDelete;
-  const _WorkCard({required this.item, required this.onEdit, required this.onDelete});
+  const _WorkCard({
+    required this.item,
+    required this.onEdit,
+    required this.onDelete,
+  });
 
   @override
   Widget build(BuildContext context) {
     final isCurrent = item['is_current'] == 1 || item['is_current'] == true;
-    final endLabel  = isCurrent ? 'Present' : (item['end_date'] ?? '');
-    final empType   = (item['employment_type'] as String? ?? '')
-        .replaceAll('_', ' ').toUpperCase();
+    final endLabel = isCurrent ? 'Present' : (item['end_date'] ?? '');
+    final empType = (item['employment_type'] as String? ?? '')
+        .replaceAll('_', ' ')
+        .toUpperCase();
     return Container(
       margin: const EdgeInsets.only(bottom: 12),
       padding: const EdgeInsets.all(16),
@@ -534,33 +672,61 @@ class _WorkCard extends StatelessWidget {
               color: AppColors.primaryCyan.withOpacity(0.1),
               borderRadius: BorderRadius.circular(12),
             ),
-            child: const Icon(Icons.business_center_outlined, color: AppColors.primaryCyan, size: 20),
+            child: const Icon(
+              Icons.business_center_outlined,
+              color: AppColors.primaryCyan,
+              size: 20,
+            ),
           ),
           const SizedBox(width: 12),
           Expanded(
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                Text(item['job_title'] ?? '',
-                    style: const TextStyle(color: Colors.white, fontWeight: FontWeight.bold, fontSize: 14)),
+                Text(
+                  item['job_title'] ?? '',
+                  style: const TextStyle(
+                    color: Colors.white,
+                    fontWeight: FontWeight.bold,
+                    fontSize: 14,
+                  ),
+                ),
                 const SizedBox(height: 3),
-                Text(item['company'] ?? '',
-                    style: const TextStyle(color: AppColors.primaryCyan, fontSize: 12)),
+                Text(
+                  item['company'] ?? '',
+                  style: const TextStyle(
+                    color: AppColors.primaryCyan,
+                    fontSize: 12,
+                  ),
+                ),
                 const SizedBox(height: 3),
                 Row(
                   children: [
-                    Text('${item['start_date']} – $endLabel',
-                        style: TextStyle(color: Colors.white.withOpacity(0.4), fontSize: 11)),
+                    Text(
+                      '${item['start_date']} – $endLabel',
+                      style: TextStyle(
+                        color: Colors.white.withOpacity(0.4),
+                        fontSize: 11,
+                      ),
+                    ),
                     if (empType.isNotEmpty) ...[
                       const SizedBox(width: 7),
                       Container(
-                        padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
+                        padding: const EdgeInsets.symmetric(
+                          horizontal: 6,
+                          vertical: 2,
+                        ),
                         decoration: BoxDecoration(
                           color: Colors.white.withOpacity(0.07),
                           borderRadius: BorderRadius.circular(5),
                         ),
-                        child: Text(empType,
-                            style: TextStyle(color: Colors.white.withOpacity(0.4), fontSize: 10)),
+                        child: Text(
+                          empType,
+                          style: TextStyle(
+                            color: Colors.white.withOpacity(0.4),
+                            fontSize: 10,
+                          ),
+                        ),
                       ),
                     ],
                   ],
@@ -596,13 +762,20 @@ class _AddButton extends StatelessWidget {
       child: Row(
         mainAxisAlignment: MainAxisAlignment.center,
         children: [
-          const Icon(Icons.add_circle_outline, color: AppColors.primaryCyan, size: 19),
+          const Icon(
+            Icons.add_circle_outline,
+            color: AppColors.primaryCyan,
+            size: 19,
+          ),
           const SizedBox(width: 8),
-          Text(label,
-              style: const TextStyle(
-                  color: AppColors.primaryCyan,
-                  fontWeight: FontWeight.w600,
-                  fontSize: 13)),
+          Text(
+            label,
+            style: const TextStyle(
+              color: AppColors.primaryCyan,
+              fontWeight: FontWeight.w600,
+              fontSize: 13,
+            ),
+          ),
         ],
       ),
     ),
@@ -621,12 +794,15 @@ class _EmptyState extends StatelessWidget {
       children: [
         Icon(icon, color: Colors.white10, size: 52),
         const SizedBox(height: 14),
-        Text(message,
-            textAlign: TextAlign.center,
-            style: TextStyle(
-                color: Colors.white.withOpacity(0.28),
-                fontSize: 13,
-                height: 1.7)),
+        Text(
+          message,
+          textAlign: TextAlign.center,
+          style: TextStyle(
+            color: Colors.white.withOpacity(0.28),
+            fontSize: 13,
+            height: 1.7,
+          ),
+        ),
       ],
     ),
   );
@@ -641,14 +817,22 @@ class _ActionButtons extends StatelessWidget {
   Widget build(BuildContext context) => Column(
     children: [
       IconButton(
-        icon: const Icon(Icons.edit_outlined, color: AppColors.primaryCyan, size: 17),
+        icon: const Icon(
+          Icons.edit_outlined,
+          color: AppColors.primaryCyan,
+          size: 17,
+        ),
         onPressed: onEdit,
         padding: EdgeInsets.zero,
         constraints: const BoxConstraints(),
       ),
       const SizedBox(height: 6),
       IconButton(
-        icon: Icon(Icons.delete_outline, color: Colors.redAccent.withOpacity(0.65), size: 17),
+        icon: Icon(
+          Icons.delete_outline,
+          color: Colors.redAccent.withOpacity(0.65),
+          size: 17,
+        ),
         onPressed: onDelete,
         padding: EdgeInsets.zero,
         constraints: const BoxConstraints(),

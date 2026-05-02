@@ -4,7 +4,7 @@ import 'package:provider/provider.dart';
 
 import '../services/api_service.dart';
 import '../services/token_store.dart';
-import '../theme/app_theme.dart';
+import '../core/themes/app_theme.dart';
 import 'registration_page.dart';
 import 'job_seeker_dashboard.dart';
 import 'mentor_dashboard.dart';
