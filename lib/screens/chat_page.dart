@@ -97,6 +97,7 @@ class _ConversationsPageState extends State<ConversationsPage> {
                   final lastTime = c['last_message_at'] ?? '';
                   final convId = c['id'] as int;
                   final otherId = c['other_user_id'] as int;
+                  final unread = c['unread_count'] as int? ?? 0;
 
                   return GestureDetector(
                     onTap: () => Navigator.push(
@@ -144,13 +145,40 @@ class _ConversationsPageState extends State<ConversationsPage> {
                             child: Column(
                               crossAxisAlignment: CrossAxisAlignment.start,
                               children: [
-                                Text(
-                                  name,
-                                  style: const TextStyle(
-                                    color: Colors.white,
-                                    fontWeight: FontWeight.bold,
-                                    fontSize: 14,
-                                  ),
+                                Row(
+                                  children: [
+                                    Expanded(
+                                      child: Text(
+                                        name,
+                                        style: const TextStyle(
+                                          color: Colors.white,
+                                          fontWeight: FontWeight.bold,
+                                          fontSize: 14,
+                                        ),
+                                      ),
+                                    ),
+                                    if (unread > 0)
+                                      Container(
+                                        padding: const EdgeInsets.symmetric(
+                                          horizontal: 6,
+                                          vertical: 2,
+                                        ),
+                                        decoration: BoxDecoration(
+                                          color: AppColors.primaryCyan,
+                                          borderRadius: BorderRadius.circular(
+                                            10,
+                                          ),
+                                        ),
+                                        child: Text(
+                                          '$unread',
+                                          style: const TextStyle(
+                                            color: Colors.black,
+                                            fontSize: 10,
+                                            fontWeight: FontWeight.bold,
+                                          ),
+                                        ),
+                                      ),
+                                  ],
                                 ),
                                 const SizedBox(height: 3),
                                 Text(
@@ -165,6 +193,7 @@ class _ConversationsPageState extends State<ConversationsPage> {
                               ],
                             ),
                           ),
+                          const SizedBox(width: 8),
                           Text(
                             lastTime.length > 10
                                 ? lastTime.substring(0, 10)

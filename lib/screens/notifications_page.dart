@@ -51,6 +51,8 @@ class _NotificationsPageState extends State<NotificationsPage> {
         return Icons.chat_bubble_outline;
       case 'job_alert':
         return Icons.work_off_outlined;
+      case 'system':
+        return Icons.settings_outlined;
       default:
         return Icons.notifications_outlined;
     }
@@ -66,8 +68,10 @@ class _NotificationsPageState extends State<NotificationsPage> {
         return AppColors.primaryCyan;
       case 'job_alert':
         return Colors.amber;
-      default:
+      case 'mentor_request':
         return Colors.orangeAccent;
+      default:
+        return Colors.blueAccent;
     }
   }
 
@@ -105,6 +109,14 @@ class _NotificationsPageState extends State<NotificationsPage> {
                       fontSize: 15,
                     ),
                   ),
+                  const SizedBox(height: 8),
+                  Text(
+                    'When you receive notifications, they will appear here.',
+                    style: TextStyle(
+                      color: Colors.white.withOpacity(0.2),
+                      fontSize: 12,
+                    ),
+                  ),
                 ],
               ),
             )
@@ -121,6 +133,10 @@ class _NotificationsPageState extends State<NotificationsPage> {
                   final n = _notifs[i] as Map<String, dynamic>;
                   final type = (n['type'] as String?) ?? '';
                   final read = n['is_read'] == 1 || n['is_read'] == true;
+                  final createdAt = n['created_at'] ?? '';
+                  final title = n['title'] ?? '';
+                  final body = n['body'] ?? '';
+
                   return Container(
                     margin: const EdgeInsets.only(bottom: 10),
                     padding: const EdgeInsets.all(14),
@@ -156,7 +172,7 @@ class _NotificationsPageState extends State<NotificationsPage> {
                             crossAxisAlignment: CrossAxisAlignment.start,
                             children: [
                               Text(
-                                n['title'] ?? '',
+                                title,
                                 style: TextStyle(
                                   color: Colors.white,
                                   fontWeight: read
@@ -165,10 +181,12 @@ class _NotificationsPageState extends State<NotificationsPage> {
                                   fontSize: 14,
                                 ),
                               ),
-                              if ((n['body'] ?? '').isNotEmpty) ...[
+                              if (body.isNotEmpty) ...[
                                 const SizedBox(height: 3),
                                 Text(
-                                  n['body'],
+                                  body,
+                                  maxLines: 2,
+                                  overflow: TextOverflow.ellipsis,
                                   style: TextStyle(
                                     color: Colors.white.withOpacity(0.55),
                                     fontSize: 12,
@@ -177,7 +195,7 @@ class _NotificationsPageState extends State<NotificationsPage> {
                               ],
                               const SizedBox(height: 5),
                               Text(
-                                n['created_at'] ?? '',
+                                _formatDate(createdAt),
                                 style: TextStyle(
                                   color: Colors.white.withOpacity(0.3),
                                   fontSize: 10,
@@ -202,5 +220,18 @@ class _NotificationsPageState extends State<NotificationsPage> {
               ),
             ),
     );
+  }
+
+  String _formatDate(String dateStr) {
+    if (dateStr.isEmpty) return '';
+    try {
+      final parts = dateStr.split(' ');
+      if (parts.length >= 2) {
+        return '${parts[0]} ${parts[1].substring(0, 5)}';
+      }
+      return dateStr;
+    } catch (e) {
+      return dateStr;
+    }
   }
 }

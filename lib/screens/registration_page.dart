@@ -17,7 +17,7 @@ class _RegistrationPageState extends State<RegistrationPage> {
   final _formKey = GlobalKey<FormState>();
   final _emailCtrl = TextEditingController();
   final _passCtrl = TextEditingController();
-  final _confCtrl = TextEditingController();
+  final _confirmPassCtrl = TextEditingController();
   bool _obscurePassword = true;
   bool _obscureConfirm = true;
   bool _loading = false;
@@ -26,18 +26,20 @@ class _RegistrationPageState extends State<RegistrationPage> {
   void dispose() {
     _emailCtrl.dispose();
     _passCtrl.dispose();
-    _confCtrl.dispose();
+    _confirmPassCtrl.dispose();
     super.dispose();
   }
 
   Future<void> _register() async {
     if (!_formKey.currentState!.validate()) return;
-    if (_passCtrl.text != _confCtrl.text) {
+
+    if (_passCtrl.text != _confirmPassCtrl.text) {
       ScaffoldMessenger.of(
         context,
       ).showSnackBar(const SnackBar(content: Text('Passwords do not match')));
       return;
     }
+
     setState(() => _loading = true);
     try {
       final res = await ApiService.register(
@@ -214,7 +216,7 @@ class _RegistrationPageState extends State<RegistrationPage> {
               ),
               const SizedBox(height: 15),
               _buildPasswordField(
-                controller: _confCtrl,
+                controller: _confirmPassCtrl,
                 label: 'Confirm Password',
                 obscure: _obscureConfirm,
                 onToggle: () =>

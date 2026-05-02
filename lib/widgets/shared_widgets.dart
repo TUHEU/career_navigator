@@ -634,15 +634,14 @@ class SectionTitle extends StatelessWidget {
 }
 
 // =============================================
-// BOTTOM NAV ITEM (FIXED - NO CONST CONSTRUCTOR)
+// BOTTOM NAV ITEM
 // =============================================
 class NavItem {
   final IconData outlinedIcon;
   final IconData filledIcon;
   final String label;
 
-  // REMOVED 'const' - this fixes the error
-  NavItem(this.outlinedIcon, this.filledIcon, this.label);
+  const NavItem(this.outlinedIcon, this.filledIcon, this.label);
 }
 
 // =============================================
