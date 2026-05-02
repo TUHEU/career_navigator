@@ -26,8 +26,8 @@ class _EmailVerificationPageState extends State<EmailVerificationPage> {
 
   @override
   void dispose() {
-    for (final c in _controllers) c.dispose();
-    for (final f in _focusNodes) f.dispose();
+    for (var c in _controllers) c.dispose();
+    for (var f in _focusNodes) f.dispose();
     super.dispose();
   }
 
@@ -42,9 +42,11 @@ class _EmailVerificationPageState extends State<EmailVerificationPage> {
     try {
       final res = await ApiService.verifyEmail(widget.email, _fullCode);
       if (!mounted) return;
+
       if (res['success'] == true) {
         final data = res['data'] as Map<String, dynamic>;
         await TokenStore.save(data['access_token'], data['refresh_token']);
+
         if (mounted) {
           Navigator.pushReplacement(
             context,
@@ -52,10 +54,10 @@ class _EmailVerificationPageState extends State<EmailVerificationPage> {
           );
         }
       } else {
-        _showSnack(res['message'] ?? 'Invalid code');
+        _showSnack(res['message'] ?? 'Invalid verification code');
       }
     } catch (e) {
-      _showSnack('Network error.');
+      _showSnack('Network error. Please try again.');
     } finally {
       if (mounted) setState(() => _loading = false);
     }
@@ -65,7 +67,7 @@ class _EmailVerificationPageState extends State<EmailVerificationPage> {
     setState(() => _resending = true);
     try {
       final res = await ApiService.resendCode(widget.email);
-      if (mounted) _showSnack(res['message'] ?? 'Code sent!');
+      if (mounted) _showSnack(res['message'] ?? 'Code sent successfully!');
     } catch (e) {
       if (mounted) _showSnack('Failed to resend code.');
     } finally {
@@ -74,7 +76,9 @@ class _EmailVerificationPageState extends State<EmailVerificationPage> {
   }
 
   void _showSnack(String msg) {
-    ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text(msg)));
+    ScaffoldMessenger.of(context).showSnackBar(
+      SnackBar(content: Text(msg), behavior: SnackBarBehavior.floating),
+    );
   }
 
   @override
@@ -95,16 +99,17 @@ class _EmailVerificationPageState extends State<EmailVerificationPage> {
             child: Column(
               mainAxisAlignment: MainAxisAlignment.center,
               children: [
-                const SizedBox(height: 20),
+                // Logo with glow
                 Container(
-                  width: 80,
-                  height: 80,
+                  width: 90,
+                  height: 90,
                   decoration: BoxDecoration(
                     shape: BoxShape.circle,
                     boxShadow: [
                       BoxShadow(
-                        color: AppColors.primaryCyan.withOpacity(0.35),
-                        blurRadius: 20,
+                        color: AppColors.primaryCyan.withOpacity(0.4),
+                        blurRadius: 25,
+                        spreadRadius: 5,
                       ),
                     ],
                   ),
@@ -115,69 +120,75 @@ class _EmailVerificationPageState extends State<EmailVerificationPage> {
                       errorBuilder: (_, __, ___) => Container(
                         color: AppColors.primaryCyan.withOpacity(0.2),
                         child: const Icon(
-                          Icons.email,
+                          Icons.school,
                           color: AppColors.primaryCyan,
-                          size: 40,
+                          size: 45,
                         ),
                       ),
                     ),
                   ),
                 ),
-                const SizedBox(height: 24),
+                const SizedBox(height: 20),
+
+                // Envelope Icon
                 Container(
-                  padding: const EdgeInsets.all(16),
+                  padding: const EdgeInsets.all(18),
                   decoration: BoxDecoration(
                     shape: BoxShape.circle,
                     color: AppColors.primaryCyan.withOpacity(0.12),
                     border: Border.all(
                       color: AppColors.primaryCyan.withOpacity(0.3),
-                      width: 1.5,
+                      width: 2,
                     ),
                   ),
                   child: const Icon(
                     Icons.mark_email_read_outlined,
                     color: AppColors.primaryCyan,
-                    size: 48,
+                    size: 52,
                   ),
                 ),
-                const SizedBox(height: 24),
+
+                const SizedBox(height: 28),
                 const Text(
                   'Verify Your Email',
                   style: TextStyle(
                     fontSize: 28,
                     fontWeight: FontWeight.bold,
                     color: Colors.white,
-                    letterSpacing: 1,
                   ),
                   textAlign: TextAlign.center,
                 ),
                 const SizedBox(height: 12),
+
                 Text(
                   'We sent a 6-digit verification code to',
-                  textAlign: TextAlign.center,
                   style: TextStyle(
                     color: Colors.white.withOpacity(0.65),
-                    fontSize: 14,
+                    fontSize: 15,
                   ),
+                  textAlign: TextAlign.center,
                 ),
-                const SizedBox(height: 4),
+                const SizedBox(height: 6),
                 Text(
                   widget.email,
-                  textAlign: TextAlign.center,
                   style: const TextStyle(
                     color: AppColors.primaryCyan,
-                    fontSize: 14,
+                    fontSize: 15,
                     fontWeight: FontWeight.w600,
                   ),
+                  textAlign: TextAlign.center,
                 ),
-                const SizedBox(height: 32),
+
+                const SizedBox(height: 40),
+
+                // OTP Fields
                 Row(
                   mainAxisAlignment: MainAxisAlignment.center,
                   children: List.generate(6, (i) {
                     return Container(
-                      width: 50,
-                      height: 60,
-                      margin: const EdgeInsets.symmetric(horizontal: 6),
+                      width: 48,
+                      height: 62,
+                      margin: const EdgeInsets.symmetric(horizontal: 5),
                       child: TextFormField(
                         controller: _controllers[i],
                         focusNode: _focusNodes[i],
@@ -185,9 +196,9 @@ class _EmailVerificationPageState extends State<EmailVerificationPage> {
                         keyboardType: TextInputType.number,
                         maxLength: 1,
                         style: const TextStyle(
-                          fontSize: 24,
+                          fontSize: 26,
                           fontWeight: FontWeight.bold,
-                          color: AppColors.primaryCyan,
+                          color: Colors.white,
                         ),
                         inputFormatters: [
                           FilteringTextInputFormatter.digitsOnly,
@@ -197,45 +208,42 @@ class _EmailVerificationPageState extends State<EmailVerificationPage> {
                           filled: true,
                           fillColor: Colors.white.withOpacity(0.07),
                           border: OutlineInputBorder(
-                            borderRadius: BorderRadius.circular(12),
+                            borderRadius: BorderRadius.circular(14),
                             borderSide: BorderSide.none,
                           ),
                           enabledBorder: OutlineInputBorder(
-                            borderRadius: BorderRadius.circular(12),
+                            borderRadius: BorderRadius.circular(14),
                             borderSide: BorderSide(
                               color: Colors.white.withOpacity(0.2),
                             ),
                           ),
                           focusedBorder: OutlineInputBorder(
-                            borderRadius: BorderRadius.circular(12),
+                            borderRadius: BorderRadius.circular(14),
                             borderSide: const BorderSide(
                               color: AppColors.primaryCyan,
-                              width: 2,
+                              width: 2.5,
                             ),
                           ),
                         ),
                         onChanged: (val) {
                           if (val.isNotEmpty && i < 5) {
-                            FocusScope.of(
-                              context,
-                            ).requestFocus(_focusNodes[i + 1]);
+                            _focusNodes[i + 1].requestFocus();
                           } else if (val.isEmpty && i > 0) {
-                            FocusScope.of(
-                              context,
-                            ).requestFocus(_focusNodes[i - 1]);
+                            _focusNodes[i - 1].requestFocus();
                           }
-                          if (_fullCode.length == 6) {
-                            _verify();
-                          }
+                          if (_fullCode.length == 6) _verify();
                         },
                       ),
                     );
                   }),
                 ),
-                const SizedBox(height: 32),
+
+                const SizedBox(height: 40),
+
+                // Verify Button
                 SizedBox(
                   width: double.infinity,
-                  height: 54,
+                  height: 56,
                   child: ElevatedButton(
                     onPressed: _loading ? null : _verify,
                     style: ElevatedButton.styleFrom(
@@ -244,12 +252,12 @@ class _EmailVerificationPageState extends State<EmailVerificationPage> {
                       shape: RoundedRectangleBorder(
                         borderRadius: BorderRadius.circular(16),
                       ),
-                      elevation: 4,
+                      elevation: 5,
                     ),
                     child: _loading
                         ? const SizedBox(
-                            width: 22,
-                            height: 22,
+                            width: 24,
+                            height: 24,
                             child: CircularProgressIndicator(
                               strokeWidth: 2.5,
                               color: Colors.black,
@@ -264,7 +272,10 @@ class _EmailVerificationPageState extends State<EmailVerificationPage> {
                           ),
                   ),
                 ),
-                const SizedBox(height: 20),
+
+                const SizedBox(height: 24),
+
+                // Resend
                 Row(
                   mainAxisAlignment: MainAxisAlignment.center,
                   children: [
@@ -293,20 +304,19 @@ class _EmailVerificationPageState extends State<EmailVerificationPage> {
                     ),
                   ],
                 ),
-                const SizedBox(height: 16),
+
+                const SizedBox(height: 20),
+
                 TextButton(
-                  onPressed: () {
-                    Navigator.pushReplacement(
-                      context,
-                      MaterialPageRoute(builder: (_) => const SignInPage()),
-                    );
-                  },
+                  onPressed: () => Navigator.pushReplacement(
+                    context,
+                    MaterialPageRoute(builder: (_) => const SignInPage()),
+                  ),
                   child: Text(
                     '← Back to Sign In',
                     style: TextStyle(color: Colors.white.withOpacity(0.5)),
                   ),
                 ),
-                const SizedBox(height: 20),
               ],
             ),
           ),
