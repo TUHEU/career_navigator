@@ -2,9 +2,9 @@ import 'package:flutter/material.dart';
 import 'package:flutter_native_splash/flutter_native_splash.dart';
 import 'package:provider/provider.dart';
 
-import '../services/token_store.dart';
-import '../services/api_service.dart';
-import '../core/themes/app_theme.dart';
+import '../../services/token_store.dart';
+import '../../services/api_service.dart';
+import '../../core/themes/app_theme.dart';
 import 'sign_in_page.dart';
 import 'job_seeker_dashboard.dart';
 import 'mentor_dashboard.dart';

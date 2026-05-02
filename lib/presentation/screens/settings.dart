@@ -1,9 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 
-import '../services/api_service.dart';
-import '../services/token_store.dart';
-import '../core/themes/app_theme.dart';
+import '../../services/api_service.dart';
+import '../../services/token_store.dart';
+import '../../core/themes/app_theme.dart';
 import 'sign_in_page.dart';
 import 'edit_profile_page.dart';
 import 'about_us_page.dart';

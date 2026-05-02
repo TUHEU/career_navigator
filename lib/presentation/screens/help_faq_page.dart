@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 
-import '../core/themes/app_theme.dart';
+import '../../core/themes/app_theme.dart';
 
 class HelpFaqPage extends StatefulWidget {
   const HelpFaqPage({super.key});

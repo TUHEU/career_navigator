@@ -1,10 +1,10 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 
-import '../services/api_service.dart';
-import '../services/token_store.dart';
-import '../core/themes/app_theme.dart';
-import '../widgets/shared_widgets.dart';
+import '../../services/api_service.dart';
+import '../../services/token_store.dart';
+import '../../core/themes/app_theme.dart';
+import '../../widgets/shared_widgets.dart';
 import 'sign_in_page.dart';
 import 'mentor_profile_page.dart';
 import 'education_form_page.dart';

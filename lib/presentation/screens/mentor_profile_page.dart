@@ -1,8 +1,8 @@
 import 'package:flutter/material.dart';
 
-import '../services/api_service.dart';
-import '../services/token_store.dart';
-import '../core/themes/app_theme.dart';
+import '../../services/api_service.dart';
+import '../../services/token_store.dart';
+import '../../core/themes/app_theme.dart';
 
 class MentorProfilePage extends StatefulWidget {
   final Map<String, dynamic> profile;

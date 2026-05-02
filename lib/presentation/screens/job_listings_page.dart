@@ -1,9 +1,9 @@
 import 'package:flutter/material.dart';
 
-import '../services/api_service.dart';
-import '../services/token_store.dart';
-import '../core/themes/app_theme.dart';
-import '../widgets/shared_widgets.dart';
+import '../../services/api_service.dart';
+import '../../services/token_store.dart';
+import '../../core/themes/app_theme.dart';
+import '../../widgets/shared_widgets.dart';
 
 class JobListingsPage extends StatefulWidget {
   const JobListingsPage({super.key});

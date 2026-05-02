@@ -2,9 +2,9 @@ import 'dart:io';
 import 'package:flutter/material.dart';
 import 'package:image_picker/image_picker.dart';
 
-import '../services/api_service.dart';
-import '../services/token_store.dart';
-import '../core/themes/app_theme.dart';
+import '../../services/api_service.dart';
+import '../../services/token_store.dart';
+import '../../core/themes/app_theme.dart';
 
 class EditProfilePage extends StatefulWidget {
   const EditProfilePage({super.key});

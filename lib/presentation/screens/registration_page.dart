@@ -1,8 +1,8 @@
 import 'dart:ui';
 import 'package:flutter/material.dart';
 
-import '../services/api_service.dart';
-import '../core/themes/app_theme.dart';
+import '../../services/api_service.dart';
+import '../../core/themes/app_theme.dart';
 import 'sign_in_page.dart';
 import 'email_verification_page.dart';
 
