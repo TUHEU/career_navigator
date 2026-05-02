@@ -1,7 +1,10 @@
 import 'package:flutter/material.dart';
 import 'package:url_launcher/url_launcher.dart';
+import 'package:provider/provider.dart';
 
-import '../../core/themes/app_theme.dart';
+import '../../../core/themes/app_theme.dart';
+import '../../../core/utils/helpers.dart';
+import '../../../providers/theme_provider.dart';
 
 class Developer {
   final String name;
@@ -26,7 +29,7 @@ const List<Developer> kDevelopers = [
     name: 'Tuheu Tchoubi Pempeme Moussa Fahdil',
     role: 'Lead Backend Developer & Database Architect',
     github: 'TUHEU',
-    linkedin: 'https://www.linkedin.com/in/nadal-junior-63b5933a3/',
+    linkedin: 'https://www.linkedin.com/in/fahdil-tuheu/',
     imagePath: 'assets/team/dev1.png',
     description:
         'Designed and implemented the Flask API, database schema, authentication system, and job listing module.',
@@ -36,7 +39,7 @@ const List<Developer> kDevelopers = [
     role: 'Lead Flutter Developer',
     github: 'sarah_dev',
     linkedin: 'https://linkedin.com/in/sarah-johnson',
-    imagePath: 'assets/team/dev2.jpg',
+    imagePath: 'assets/team/dev2.png',
     description:
         'Built the mobile UI, dashboard screens, navigation system, and chat integration.',
   ),
@@ -45,7 +48,7 @@ const List<Developer> kDevelopers = [
     role: 'UI/UX Designer & Frontend Developer',
     github: 'mike_chen',
     linkedin: 'https://linkedin.com/in/michael-chen',
-    imagePath: 'assets/team/dev3.jpg',
+    imagePath: 'assets/team/dev3.png',
     description:
         'Created the design system, theming engine, and all screen layouts with responsive design.',
   ),
@@ -54,9 +57,18 @@ const List<Developer> kDevelopers = [
     role: 'DevOps & Security Engineer',
     github: 'david_okonkwo',
     linkedin: 'https://linkedin.com/in/david-okonkwo',
-    imagePath: 'assets/team/dev4.jpg',
+    imagePath: 'assets/team/dev4.png',
     description:
         'Deployed the backend on Contabo VPS, configured PM2, managed server security, and CI/CD pipelines.',
+  ),
+  Developer(
+    name: 'Emma Rodriguez',
+    role: 'Quality Assurance & Product Manager',
+    github: 'emma_qa',
+    linkedin: 'https://linkedin.com/in/emma-rodriguez',
+    imagePath: 'assets/team/dev5.png',
+    description:
+        'Manages testing, user acceptance, and coordinates feature releases across the team.',
   ),
 ];
 
@@ -65,49 +77,55 @@ class AboutUsPage extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final themeProvider = context.watch<ThemeProvider>();
+    final isDark = themeProvider.isDarkMode;
+
     return Scaffold(
-      backgroundColor: AppColors.darkBackground,
-      appBar: AppBar(
-        backgroundColor: Colors.transparent,
-        iconTheme: const IconThemeData(color: Colors.white),
-        title: const Text('About Us', style: TextStyle(color: Colors.white)),
-        elevation: 0,
-      ),
+      backgroundColor: isDark
+          ? AppColors.darkBackground
+          : AppColors.lightBackground,
+      appBar: AppBar(title: const Text('About Us')),
       body: SingleChildScrollView(
         padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 16),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.center,
           children: [
-            _buildAppIntroCard(),
+            _buildAppIntroCard(isDark),
             const SizedBox(height: 32),
-            const Text(
+            Text(
               'Meet the Team',
               style: TextStyle(
-                color: Colors.white,
                 fontSize: 22,
                 fontWeight: FontWeight.bold,
+                color: isDark ? Colors.white : AppColors.lightText,
               ),
             ),
             const SizedBox(height: 6),
             Text(
               'The passionate developers behind Career Navigator',
               style: TextStyle(
-                color: Colors.white.withOpacity(0.45),
+                color: isDark
+                    ? Colors.white.withOpacity(0.45)
+                    : AppColors.lightTextSecondary,
                 fontSize: 13,
               ),
               textAlign: TextAlign.center,
             ),
             const SizedBox(height: 20),
-            ...kDevelopers.map((dev) => _DeveloperCard(dev: dev)),
+            ...kDevelopers.map(
+              (dev) => _DeveloperCard(dev: dev, isDark: isDark),
+            ),
             const SizedBox(height: 32),
-            _buildTechStackCard(),
+            _buildTechStackCard(isDark),
             const SizedBox(height: 24),
             Container(
               padding: const EdgeInsets.symmetric(vertical: 12),
               child: Text(
                 '© 2025 Career Navigator. All rights reserved.',
                 style: TextStyle(
-                  color: Colors.white.withOpacity(0.25),
+                  color: isDark
+                      ? Colors.white.withOpacity(0.25)
+                      : Colors.grey.shade500,
                   fontSize: 11,
                 ),
                 textAlign: TextAlign.center,
@@ -119,14 +137,14 @@ class AboutUsPage extends StatelessWidget {
     );
   }
 
-  Widget _buildAppIntroCard() {
+  Widget _buildAppIntroCard(bool isDark) {
     return Container(
       padding: const EdgeInsets.all(24),
       decoration: BoxDecoration(
         gradient: LinearGradient(
           colors: [
             AppColors.primaryCyan.withOpacity(0.15),
-            AppColors.darkCard.withOpacity(0.8),
+            isDark ? AppColors.darkCard.withOpacity(0.8) : Colors.grey.shade100,
           ],
           begin: Alignment.topLeft,
           end: Alignment.bottomRight,
@@ -167,12 +185,12 @@ class AboutUsPage extends StatelessWidget {
             ),
           ),
           const SizedBox(height: 20),
-          const Text(
+          Text(
             'Career Navigator',
             style: TextStyle(
-              color: Colors.white,
               fontSize: 24,
               fontWeight: FontWeight.bold,
+              color: isDark ? Colors.white : AppColors.lightText,
               letterSpacing: 1.5,
             ),
           ),
@@ -199,7 +217,9 @@ class AboutUsPage extends StatelessWidget {
             'and professional networking — all in one place.',
             textAlign: TextAlign.center,
             style: TextStyle(
-              color: Colors.white.withOpacity(0.65),
+              color: isDark
+                  ? Colors.white.withOpacity(0.65)
+                  : AppColors.lightTextSecondary,
               fontSize: 14,
               height: 1.6,
             ),
@@ -209,13 +229,15 @@ class AboutUsPage extends StatelessWidget {
     );
   }
 
-  Widget _buildTechStackCard() {
+  Widget _buildTechStackCard(bool isDark) {
     return Container(
       padding: const EdgeInsets.all(20),
       decoration: BoxDecoration(
-        color: Colors.white.withOpacity(0.04),
+        color: isDark ? Colors.white.withOpacity(0.04) : Colors.grey.shade100,
         borderRadius: BorderRadius.circular(20),
-        border: Border.all(color: Colors.white.withOpacity(0.08)),
+        border: Border.all(
+          color: isDark ? Colors.white.withOpacity(0.08) : Colors.grey.shade300,
+        ),
       ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
@@ -251,28 +273,34 @@ class AboutUsPage extends StatelessWidget {
             spacing: 10,
             runSpacing: 10,
             children: [
-              _buildTechChip('Flutter', Icons.mobile_friendly),
-              _buildTechChip('Dart', Icons.code),
-              _buildTechChip('Python', Icons.terminal),
-              _buildTechChip('Flask', Icons.science),
-              _buildTechChip('MySQL', Icons.storage),
-              _buildTechChip('JWT', Icons.security),
-              _buildTechChip('Brevo', Icons.email),
-              _buildTechChip('PM2', Icons.settings),
-              _buildTechChip('Contabo VPS', Icons.cloud),
+              _buildTechChip('Flutter', Icons.mobile_friendly, isDark),
+              _buildTechChip('Dart', Icons.code, isDark),
+              _buildTechChip('Python', Icons.terminal, isDark),
+              _buildTechChip('Flask', Icons.science, isDark),
+              _buildTechChip('MySQL', Icons.storage, isDark),
+              _buildTechChip('JWT', Icons.security, isDark),
+              _buildTechChip('Brevo', Icons.email, isDark),
+              _buildTechChip('PM2', Icons.settings, isDark),
+              _buildTechChip('Contabo VPS', Icons.cloud, isDark),
             ],
           ),
           const SizedBox(height: 16),
-          Divider(color: Colors.white.withOpacity(0.08)),
+          Divider(
+            color: isDark
+                ? Colors.white.withOpacity(0.08)
+                : Colors.grey.shade300,
+          ),
           const SizedBox(height: 12),
           Row(
             children: [
-              Icon(Icons.star, color: Colors.amber, size: 16),
+              const Icon(Icons.star, color: Colors.amber, size: 16),
               const SizedBox(width: 8),
               Text(
                 'Fully open source | Continuous updates',
                 style: TextStyle(
-                  color: Colors.white.withOpacity(0.4),
+                  color: isDark
+                      ? Colors.white.withOpacity(0.4)
+                      : Colors.grey.shade600,
                   fontSize: 11,
                 ),
               ),
@@ -283,7 +311,7 @@ class AboutUsPage extends StatelessWidget {
     );
   }
 
-  Widget _buildTechChip(String label, IconData icon) {
+  Widget _buildTechChip(String label, IconData icon, bool isDark) {
     return Container(
       padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 8),
       decoration: BoxDecoration(
@@ -312,8 +340,9 @@ class AboutUsPage extends StatelessWidget {
 
 class _DeveloperCard extends StatelessWidget {
   final Developer dev;
+  final bool isDark;
 
-  const _DeveloperCard({required this.dev});
+  const _DeveloperCard({required this.dev, required this.isDark});
 
   Future<void> _launchUrl(String url) async {
     final uri = Uri.tryParse(url);
@@ -328,33 +357,30 @@ class _DeveloperCard extends StatelessWidget {
       margin: const EdgeInsets.only(bottom: 16),
       padding: const EdgeInsets.all(16),
       decoration: BoxDecoration(
-        color: Colors.white.withOpacity(0.04),
+        color: isDark ? Colors.white.withOpacity(0.04) : Colors.grey.shade100,
         borderRadius: BorderRadius.circular(20),
-        border: Border.all(color: Colors.white.withOpacity(0.08)),
+        border: Border.all(
+          color: isDark ? Colors.white.withOpacity(0.08) : Colors.grey.shade300,
+        ),
       ),
       child: Row(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          Container(
-            width: 70,
-            height: 70,
-            decoration: const BoxDecoration(shape: BoxShape.circle),
-            child: CircleAvatar(
-              radius: 35,
-              backgroundColor: AppColors.primaryCyan.withOpacity(0.2),
-              backgroundImage: AssetImage(dev.imagePath),
-              onBackgroundImageError: (_, __) {},
-              child: dev.imagePath.isEmpty
-                  ? Text(
-                      dev.name.isNotEmpty ? dev.name[0] : '?',
-                      style: const TextStyle(
-                        color: AppColors.primaryCyan,
-                        fontWeight: FontWeight.bold,
-                        fontSize: 28,
-                      ),
-                    )
-                  : null,
-            ),
+          CircleAvatar(
+            radius: 35,
+            backgroundColor: AppColors.primaryCyan.withOpacity(0.2),
+            backgroundImage: AssetImage(dev.imagePath),
+            onBackgroundImageError: (_, __) {},
+            child: dev.imagePath.isEmpty
+                ? Text(
+                    Helpers.getInitials(dev.name),
+                    style: const TextStyle(
+                      color: AppColors.primaryCyan,
+                      fontWeight: FontWeight.bold,
+                      fontSize: 28,
+                    ),
+                  )
+                : null,
           ),
           const SizedBox(width: 16),
           Expanded(
@@ -363,10 +389,10 @@ class _DeveloperCard extends StatelessWidget {
               children: [
                 Text(
                   dev.name,
-                  style: const TextStyle(
-                    color: Colors.white,
+                  style: TextStyle(
                     fontWeight: FontWeight.bold,
                     fontSize: 16,
+                    color: isDark ? Colors.white : AppColors.lightText,
                   ),
                 ),
                 const SizedBox(height: 4),
@@ -392,7 +418,9 @@ class _DeveloperCard extends StatelessWidget {
                 Text(
                   dev.description,
                   style: TextStyle(
-                    color: Colors.white.withOpacity(0.55),
+                    color: isDark
+                        ? Colors.white.withOpacity(0.55)
+                        : AppColors.lightTextSecondary,
                     fontSize: 12,
                     height: 1.5,
                   ),
@@ -403,7 +431,7 @@ class _DeveloperCard extends StatelessWidget {
                     _buildSocialButton(
                       icon: Icons.code,
                       label: 'GitHub',
-                      color: Colors.white,
+                      color: isDark ? Colors.white : AppColors.lightText,
                       onTap: () =>
                           _launchUrl('https://github.com/${dev.github}'),
                     ),

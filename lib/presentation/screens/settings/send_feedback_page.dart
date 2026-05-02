@@ -1,6 +1,12 @@
 import 'package:flutter/material.dart';
+import 'package:provider/provider.dart';
 
-import '../../core/themes/app_theme.dart';
+import '../../../core/themes/app_theme.dart';
+import '../../../core/utils/helpers.dart';
+import '../../../data/datasources/remote/api_service.dart';
+import '../../../providers/auth_provider.dart';
+import '../../../providers/theme_provider.dart';
+import '../../widgets/shared/buttons.dart';
 
 class SendFeedbackPage extends StatefulWidget {
   const SendFeedbackPage({super.key});
@@ -10,12 +16,14 @@ class SendFeedbackPage extends StatefulWidget {
 }
 
 class _SendFeedbackPageState extends State<SendFeedbackPage> {
-  final _subjectCtrl = TextEditingController();
-  final _messageCtrl = TextEditingController();
+  final _subjectController = TextEditingController();
+  final _messageController = TextEditingController();
+  final ApiService _apiService = ApiService();
+
   String _selectedCategory = 'General';
   int _rating = 0;
-  bool _submitted = false;
-  bool _loading = false;
+  bool _isSubmitting = false;
+  bool _isSubmitted = false;
 
   final List<String> _categories = [
     'General',
@@ -25,52 +33,74 @@ class _SendFeedbackPageState extends State<SendFeedbackPage> {
     'Other',
   ];
 
-  @override
-  void dispose() {
-    _subjectCtrl.dispose();
-    _messageCtrl.dispose();
-    super.dispose();
-  }
-
-  Future<void> _submit() async {
-    if (_subjectCtrl.text.trim().isEmpty || _messageCtrl.text.trim().isEmpty) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('Please fill in all fields')),
-      );
+  Future<void> _submitFeedback() async {
+    if (_subjectController.text.trim().isEmpty) {
+      Helpers.showSnackBar(context, 'Please enter a subject', isError: true);
+      return;
+    }
+    if (_messageController.text.trim().isEmpty) {
+      Helpers.showSnackBar(context, 'Please enter a message', isError: true);
       return;
     }
 
-    setState(() => _loading = true);
+    setState(() => _isSubmitting = true);
 
-    // Simulate sending — replace with your actual API call
-    await Future.delayed(const Duration(seconds: 2));
+    final token = await context.read<AuthProvider>().getAccessToken();
+    if (token == null) {
+      Helpers.showSnackBar(
+        context,
+        'Please login to submit feedback',
+        isError: true,
+      );
+      setState(() => _isSubmitting = false);
+      return;
+    }
+
+    final response = await _apiService.submitFeedback(
+      token: token,
+      subject: _subjectController.text.trim(),
+      message: _messageController.text.trim(),
+      category: _selectedCategory,
+      rating: _rating > 0 ? _rating : null,
+    );
 
     if (mounted) {
-      setState(() {
-        _loading = false;
-        _submitted = true;
-      });
+      setState(() => _isSubmitting = false);
+
+      if (response['success'] == true) {
+        setState(() => _isSubmitted = true);
+      } else {
+        Helpers.showSnackBar(
+          context,
+          response['message'] ?? 'Failed to submit feedback',
+          isError: true,
+        );
+      }
     }
+  }
+
+  @override
+  void dispose() {
+    _subjectController.dispose();
+    _messageController.dispose();
+    super.dispose();
   }
 
   @override
   Widget build(BuildContext context) {
+    final themeProvider = context.watch<ThemeProvider>();
+    final isDark = themeProvider.isDarkMode;
+
     return Scaffold(
-      backgroundColor: AppColors.darkBackground,
-      appBar: AppBar(
-        backgroundColor: Colors.transparent,
-        iconTheme: const IconThemeData(color: Colors.white),
-        title: const Text(
-          'Send Feedback',
-          style: TextStyle(color: Colors.white, fontWeight: FontWeight.bold),
-        ),
-      ),
-      body: _submitted ? _buildSuccess() : _buildForm(),
+      backgroundColor: isDark
+          ? AppColors.darkBackground
+          : AppColors.lightBackground,
+      appBar: AppBar(title: const Text('Send Feedback')),
+      body: _isSubmitted ? _buildSuccessScreen(isDark) : _buildForm(isDark),
     );
   }
 
-  // ── Success state ──────────────────────────────────────
-  Widget _buildSuccess() {
+  Widget _buildSuccessScreen(bool isDark) {
     return Center(
       child: Padding(
         padding: const EdgeInsets.all(32),
@@ -94,12 +124,12 @@ class _SendFeedbackPageState extends State<SendFeedbackPage> {
               ),
             ),
             const SizedBox(height: 24),
-            const Text(
+            Text(
               'Thank you!',
               style: TextStyle(
-                color: Colors.white,
                 fontSize: 22,
                 fontWeight: FontWeight.bold,
+                color: isDark ? Colors.white : AppColors.lightText,
               ),
             ),
             const SizedBox(height: 10),
@@ -107,35 +137,18 @@ class _SendFeedbackPageState extends State<SendFeedbackPage> {
               'Your feedback has been received. Our team will review it and get back to you within 5 business days if needed.',
               textAlign: TextAlign.center,
               style: TextStyle(
-                color: Colors.white.withOpacity(0.5),
+                color: isDark
+                    ? Colors.white.withOpacity(0.5)
+                    : AppColors.lightTextSecondary,
                 fontSize: 14,
                 height: 1.65,
               ),
             ),
             const SizedBox(height: 32),
-            GestureDetector(
-              onTap: () => Navigator.pop(context),
-              child: Container(
-                padding: const EdgeInsets.symmetric(
-                  horizontal: 32,
-                  vertical: 14,
-                ),
-                decoration: BoxDecoration(
-                  color: AppColors.primaryCyan.withOpacity(0.12),
-                  borderRadius: BorderRadius.circular(14),
-                  border: Border.all(
-                    color: AppColors.primaryCyan.withOpacity(0.3),
-                  ),
-                ),
-                child: const Text(
-                  'Back to Settings',
-                  style: TextStyle(
-                    color: AppColors.primaryCyan,
-                    fontWeight: FontWeight.bold,
-                    fontSize: 14,
-                  ),
-                ),
-              ),
+            PrimaryButton(
+              text: 'Back to Settings',
+              onPressed: () => Navigator.pop(context),
+              isFullWidth: false,
             ),
           ],
         ),
@@ -143,14 +156,12 @@ class _SendFeedbackPageState extends State<SendFeedbackPage> {
     );
   }
 
-  // ── Form ───────────────────────────────────────────────
-  Widget _buildForm() {
+  Widget _buildForm(bool isDark) {
     return SingleChildScrollView(
       padding: const EdgeInsets.all(20),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          // ── Intro ──────────────────────────────────────
           Container(
             padding: const EdgeInsets.all(16),
             decoration: BoxDecoration(
@@ -162,7 +173,7 @@ class _SendFeedbackPageState extends State<SendFeedbackPage> {
             ),
             child: Row(
               children: [
-                Icon(
+                const Icon(
                   Icons.feedback_outlined,
                   color: AppColors.primaryCyan,
                   size: 20,
@@ -172,7 +183,9 @@ class _SendFeedbackPageState extends State<SendFeedbackPage> {
                   child: Text(
                     'We read every message. Your feedback helps us build a better Career Navigator.',
                     style: TextStyle(
-                      color: Colors.white.withOpacity(0.65),
+                      color: isDark
+                          ? Colors.white.withOpacity(0.65)
+                          : AppColors.lightTextSecondary,
                       fontSize: 13,
                       height: 1.6,
                     ),
@@ -181,41 +194,38 @@ class _SendFeedbackPageState extends State<SendFeedbackPage> {
               ],
             ),
           ),
-
           const SizedBox(height: 24),
-
-          // ── Rating ─────────────────────────────────────
-          _sectionLabel('How would you rate your experience?'),
+          _sectionLabel('How would you rate your experience?', isDark),
           const SizedBox(height: 12),
           Row(
             children: List.generate(5, (i) {
-              final filled = i < _rating;
               return GestureDetector(
                 onTap: () => setState(() => _rating = i + 1),
                 child: Padding(
                   padding: const EdgeInsets.only(right: 8),
                   child: Icon(
-                    filled ? Icons.star_rounded : Icons.star_outline_rounded,
-                    color: filled
+                    i < _rating
+                        ? Icons.star_rounded
+                        : Icons.star_outline_rounded,
+                    color: i < _rating
                         ? AppColors.primaryCyan
-                        : Colors.white.withOpacity(0.2),
+                        : (isDark
+                              ? Colors.white.withOpacity(0.2)
+                              : Colors.grey.shade400),
                     size: 34,
                   ),
                 ),
               );
             }),
           ),
-
           const SizedBox(height: 24),
-
-          // ── Category ───────────────────────────────────
-          _sectionLabel('Category'),
+          _sectionLabel('Category', isDark),
           const SizedBox(height: 12),
           Wrap(
             spacing: 8,
             runSpacing: 8,
             children: _categories.map((cat) {
-              final sel = _selectedCategory == cat;
+              final isSelected = _selectedCategory == cat;
               return GestureDetector(
                 onTap: () => setState(() => _selectedCategory = cat),
                 child: Container(
@@ -224,120 +234,112 @@ class _SendFeedbackPageState extends State<SendFeedbackPage> {
                     vertical: 8,
                   ),
                   decoration: BoxDecoration(
-                    color: sel
+                    color: isSelected
                         ? AppColors.primaryCyan.withOpacity(0.15)
-                        : Colors.white.withOpacity(0.04),
+                        : (isDark
+                              ? Colors.white.withOpacity(0.04)
+                              : Colors.grey.shade100),
                     borderRadius: BorderRadius.circular(20),
                     border: Border.all(
-                      color: sel
+                      color: isSelected
                           ? AppColors.primaryCyan.withOpacity(0.5)
-                          : Colors.white.withOpacity(0.08),
+                          : (isDark
+                                ? Colors.white.withOpacity(0.08)
+                                : Colors.grey.shade300),
                     ),
                   ),
                   child: Text(
                     cat,
                     style: TextStyle(
-                      color: sel
+                      color: isSelected
                           ? AppColors.primaryCyan
-                          : Colors.white.withOpacity(0.55),
+                          : (isDark
+                                ? Colors.white.withOpacity(0.55)
+                                : Colors.grey.shade600),
                       fontSize: 13,
-                      fontWeight: sel ? FontWeight.w600 : FontWeight.normal,
+                      fontWeight: isSelected
+                          ? FontWeight.w600
+                          : FontWeight.normal,
                     ),
                   ),
                 ),
               );
             }).toList(),
           ),
-
           const SizedBox(height: 24),
-
-          // ── Subject ────────────────────────────────────
-          _sectionLabel('Subject'),
+          _sectionLabel('Subject', isDark),
           const SizedBox(height: 10),
           TextField(
-            controller: _subjectCtrl,
-            style: const TextStyle(color: Colors.white, fontSize: 14),
-            decoration: _inputDecoration('e.g. App crashes on login'),
+            controller: _subjectController,
+            style: TextStyle(
+              color: isDark ? Colors.white : AppColors.lightText,
+              fontSize: 14,
+            ),
+            decoration: _inputDecoration('e.g. App suggestion...', isDark),
           ),
-
           const SizedBox(height: 20),
-
-          // ── Message ────────────────────────────────────
-          _sectionLabel('Message'),
+          _sectionLabel('Message', isDark),
           const SizedBox(height: 10),
           TextField(
-            controller: _messageCtrl,
-            style: const TextStyle(color: Colors.white, fontSize: 14),
+            controller: _messageController,
+            style: TextStyle(
+              color: isDark ? Colors.white : AppColors.lightText,
+              fontSize: 14,
+            ),
             maxLines: 6,
             decoration: _inputDecoration(
               'Describe your experience in detail...',
+              isDark,
             ),
           ),
-
           const SizedBox(height: 32),
-
-          // ── Submit ─────────────────────────────────────
-          ElevatedButton(
-            onPressed: _loading ? null : _submit,
-            style: ElevatedButton.styleFrom(
-              backgroundColor: AppColors.primaryCyan,
-              foregroundColor: Colors.black,
-              minimumSize: const Size(double.infinity, 52),
-              shape: RoundedRectangleBorder(
-                borderRadius: BorderRadius.circular(14),
-              ),
-            ),
-            child: _loading
-                ? const SizedBox(
-                    width: 22,
-                    height: 22,
-                    child: CircularProgressIndicator(
-                      strokeWidth: 2.5,
-                      color: Colors.black,
-                    ),
-                  )
-                : const Text(
-                    'SUBMIT FEEDBACK',
-                    style: TextStyle(fontWeight: FontWeight.bold, fontSize: 15),
-                  ),
+          PrimaryButton(
+            text: 'SUBMIT FEEDBACK',
+            onPressed: _submitFeedback,
+            isLoading: _isSubmitting,
           ),
-
           const SizedBox(height: 32),
         ],
       ),
     );
   }
 
-  Widget _sectionLabel(String text) => Text(
-    text,
-    style: const TextStyle(
-      color: AppColors.primaryCyan,
-      fontSize: 12,
-      fontWeight: FontWeight.bold,
-      letterSpacing: 1.1,
-    ),
-  );
-
-  InputDecoration _inputDecoration(String hint) => InputDecoration(
-    hintText: hint,
-    hintStyle: TextStyle(color: Colors.white.withOpacity(0.25), fontSize: 13),
-    filled: true,
-    fillColor: Colors.white.withOpacity(0.04),
-    contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
-    border: OutlineInputBorder(
-      borderRadius: BorderRadius.circular(14),
-      borderSide: BorderSide(color: Colors.white.withOpacity(0.07)),
-    ),
-    enabledBorder: OutlineInputBorder(
-      borderRadius: BorderRadius.circular(14),
-      borderSide: BorderSide(color: Colors.white.withOpacity(0.07)),
-    ),
-    focusedBorder: OutlineInputBorder(
-      borderRadius: BorderRadius.circular(14),
-      borderSide: BorderSide(
-        color: AppColors.primaryCyan.withOpacity(0.5),
-        width: 1.5,
+  Widget _sectionLabel(String label, bool isDark) {
+    return Text(
+      label,
+      style: const TextStyle(
+        color: AppColors.primaryCyan,
+        fontSize: 12,
+        fontWeight: FontWeight.bold,
+        letterSpacing: 1.1,
       ),
-    ),
-  );
+    );
+  }
+
+  InputDecoration _inputDecoration(String hint, bool isDark) {
+    return InputDecoration(
+      hintText: hint,
+      hintStyle: TextStyle(
+        color: isDark ? Colors.white.withOpacity(0.25) : Colors.grey.shade500,
+        fontSize: 13,
+      ),
+      filled: true,
+      fillColor: isDark ? Colors.white.withOpacity(0.04) : Colors.grey.shade100,
+      contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
+      border: OutlineInputBorder(
+        borderRadius: BorderRadius.circular(14),
+        borderSide: BorderSide.none,
+      ),
+      enabledBorder: OutlineInputBorder(
+        borderRadius: BorderRadius.circular(14),
+        borderSide: BorderSide(
+          color: isDark ? Colors.white.withOpacity(0.07) : Colors.grey.shade300,
+        ),
+      ),
+      focusedBorder: OutlineInputBorder(
+        borderRadius: BorderRadius.circular(14),
+        borderSide: const BorderSide(color: AppColors.primaryCyan, width: 1.5),
+      ),
+    );
+  }
 }
