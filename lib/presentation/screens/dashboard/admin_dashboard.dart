@@ -1,12 +1,16 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 
-import '../../services/api_service.dart';
-import '../../services/token_store.dart';
-import '../../core/themes/app_theme.dart';
-import '../widgets/shared_widgets.dart';
-import 'sign_in_page.dart';
-import 'settings_page.dart';
+import '../../../core/themes/app_theme.dart';
+import '../../../core/utils/helpers.dart';
+import '../../../data/datasources/remote/api_service.dart';
+import '../../../providers/auth_provider.dart';
+import '../../../providers/theme_provider.dart';
+import '../../widgets/shared/bottom_nav.dart';
+import '../../widgets/shared/buttons.dart';
+import '../../widgets/shared/cards.dart';
+import '../../widgets/shared/loading_widgets.dart';
+import '../settings/settings_page.dart';
 
 class AdminDashboard extends StatefulWidget {
   const AdminDashboard({super.key});
@@ -17,117 +21,53 @@ class AdminDashboard extends StatefulWidget {
 
 class _AdminDashboardState extends State<AdminDashboard> {
   int _currentIndex = 0;
-  Map<String, dynamic>? _profile;
-  bool _loading = true;
-  List<dynamic> _users = [];
-  List<dynamic> _feedbacks = [];
-  List<dynamic> _reports = [];
 
-  @override
-  void initState() {
-    super.initState();
-    _loadProfile();
-    _loadUsers();
-    _loadFeedback();
-    _loadReports();
-  }
-
-  Future<void> _loadProfile() async {
-    try {
-      final token = await TokenStore.getAccess();
-      if (token == null) {
-        _logout();
-        return;
-      }
-      final res = await ApiService.getProfile(token);
-      if (mounted) {
-        if (res['success'] == true) {
-          setState(() {
-            _profile = res['data'] as Map<String, dynamic>;
-            _loading = false;
-          });
-        } else {
-          _logout();
-        }
-      }
-    } catch (_) {
-      if (mounted) setState(() => _loading = false);
-    }
-  }
-
-  Future<void> _loadUsers() async {
-    // This would need a backend endpoint - for now, showing placeholder
-    setState(() {
-      _users = [];
-    });
-  }
-
-  Future<void> _loadFeedback() async {
-    // This would need a backend endpoint - for now, showing placeholder
-    setState(() {
-      _feedbacks = [];
-    });
-  }
-
-  Future<void> _loadReports() async {
-    // This would need a backend endpoint - for now, showing placeholder
-    setState(() {
-      _reports = [];
-    });
-  }
-
-  Future<void> _logout() async {
-    await TokenStore.clear();
-    if (mounted) {
-      Navigator.pushAndRemoveUntil(
-        context,
-        MaterialPageRoute(builder: (_) => const SignInPage()),
-        (_) => false,
-      );
-    }
-  }
+  final List<Widget> _pages = [
+    const _AdminHomePage(),
+    const _AdminUsersPage(),
+    const _AdminFeedbackPage(),
+    const SettingsPage(),
+  ];
 
   @override
   Widget build(BuildContext context) {
-    final theme = context.watch<AppThemeProvider>();
-    final pages = [
-      _AdminHomePage(
-        profile: _profile,
-        loading: _loading,
-        onRefresh: _loadProfile,
-      ),
-      _AdminUsersPage(users: _users, onRefresh: _loadUsers),
-      _AdminFeedbackPage(feedback: _feedbacks, onRefresh: _loadFeedback),
-      _AdminReportsPage(reports: _reports, onRefresh: _loadReports),
-      const SettingsPage(),
-    ];
+    final themeProvider = context.watch<ThemeProvider>();
+    final isDark = themeProvider.isDarkMode;
 
     return Scaffold(
-      backgroundColor: AppColors.darkBackground,
       body: Stack(
         children: [
           Container(
             decoration: BoxDecoration(
-              color: AppColors.darkBackground,
+              color: isDark
+                  ? AppColors.darkBackground
+                  : AppColors.lightBackground,
               image: DecorationImage(
-                image: AssetImage(theme.backgroundPath),
+                image: AssetImage(
+                  isDark
+                      ? 'assets/background/bg8.png'
+                      : 'assets/background/bg6.png',
+                ),
                 fit: BoxFit.cover,
                 opacity: 0.18,
               ),
             ),
           ),
-          Container(color: AppColors.darkBackground.withOpacity(0.80)),
-          SafeArea(child: pages[_currentIndex]),
+          Container(
+            color: isDark
+                ? AppColors.darkBackground.withOpacity(0.80)
+                : Colors.white.withOpacity(0.92),
+          ),
+          SafeArea(child: _pages[_currentIndex]),
         ],
       ),
       bottomNavigationBar: AppBottomNav(
         currentIndex: _currentIndex,
-        onTap: (i) => setState(() => _currentIndex = i),
+        onTap: (index) => setState(() => _currentIndex = index),
         items: const [
           NavItem(Icons.dashboard_outlined, Icons.dashboard, 'Dashboard'),
           NavItem(Icons.people_outline, Icons.people, 'Users'),
           NavItem(Icons.feedback_outlined, Icons.feedback, 'Feedback'),
-          NavItem(Icons.assessment_outlined, Icons.assessment, 'Reports'),
           NavItem(Icons.settings_outlined, Icons.settings, 'Settings'),
         ],
       ),
@@ -135,140 +75,317 @@ class _AdminDashboardState extends State<AdminDashboard> {
   }
 }
 
-class _AdminHomePage extends StatelessWidget {
-  final Map<String, dynamic>? profile;
-  final bool loading;
-  final VoidCallback onRefresh;
+class _AdminHomePage extends StatefulWidget {
+  const _AdminHomePage();
 
-  const _AdminHomePage({
-    required this.profile,
-    required this.loading,
-    required this.onRefresh,
-  });
+  @override
+  State<_AdminHomePage> createState() => _AdminHomePageState();
+}
+
+class _AdminHomePageState extends State<_AdminHomePage> {
+  Map<String, dynamic>? _stats;
+  bool _isLoading = true;
+
+  @override
+  void initState() {
+    super.initState();
+    _loadStats();
+  }
+
+  Future<void> _loadStats() async {
+    setState(() => _isLoading = true);
+    await Future.delayed(const Duration(seconds: 1));
+    setState(() {
+      _stats = {
+        'totalUsers': 156,
+        'mentors': 42,
+        'jobSeekers': 114,
+        'jobsPosted': 28,
+        'applications': 67,
+        'pendingFeedback': 12,
+      };
+      _isLoading = false;
+    });
+  }
 
   @override
   Widget build(BuildContext context) {
-    if (loading) {
-      return const Center(
-        child: CircularProgressIndicator(color: AppColors.primaryCyan),
-      );
+    final themeProvider = context.watch<ThemeProvider>();
+    final isDark = themeProvider.isDarkMode;
+
+    if (_isLoading) {
+      return const LoadingIndicator();
     }
 
-    final p = profile ?? {};
-    final name = p['full_name'] ?? 'Admin';
-    final email = p['email'] ?? '';
-
     return RefreshIndicator(
-      onRefresh: () async => onRefresh(),
+      onRefresh: _loadStats,
       color: AppColors.primaryCyan,
-      child: ListView(
+      child: SingleChildScrollView(
         padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 16),
-        children: [
-          Row(
-            mainAxisAlignment: MainAxisAlignment.spaceBetween,
-            children: [
-              Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  const Text(
-                    'CAREER NAVIGATOR',
-                    style: TextStyle(
-                      color: AppColors.primaryCyan,
-                      fontSize: 11,
-                      letterSpacing: 2,
-                      fontWeight: FontWeight.bold,
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Row(
+              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+              children: [
+                Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text(
+                      'CAREER NAVIGATOR',
+                      style: TextStyle(
+                        color: AppColors.primaryCyan,
+                        fontSize: 11,
+                        letterSpacing: 2,
+                        fontWeight: FontWeight.bold,
+                      ),
                     ),
-                  ),
-                  const SizedBox(height: 2),
-                  Text(
-                    'Admin Dashboard',
-                    style: TextStyle(
-                      color: Colors.white.withOpacity(0.5),
-                      fontSize: 12,
+                    const SizedBox(height: 2),
+                    Text(
+                      'Admin Dashboard',
+                      style: TextStyle(
+                        color: isDark
+                            ? Colors.white.withOpacity(0.5)
+                            : AppColors.lightTextSecondary,
+                        fontSize: 12,
+                      ),
                     ),
-                  ),
-                ],
-              ),
-            ],
-          ),
-          const SizedBox(height: 16),
-          ProfileCard(
-            name: name,
-            headline: 'System Administrator',
-            email: email,
-            pictureUrl: null,
-            badge: 'Admin',
-            badgeIcon: Icons.admin_panel_settings,
-          ),
-          const SizedBox(height: 24),
-          const SectionTitle(title: 'Platform Overview'),
-          const SizedBox(height: 12),
-          Row(
-            children: [
-              _AdminStatCard(
-                title: 'Total Users',
-                value: '156',
-                icon: Icons.people,
+                  ],
+                ),
+              ],
+            ),
+            const SizedBox(height: 16),
+            _buildAdminCard(isDark),
+            const SizedBox(height: 24),
+            const Text(
+              'Platform Overview',
+              style: TextStyle(
                 color: AppColors.primaryCyan,
+                fontSize: 12,
+                fontWeight: FontWeight.bold,
+                letterSpacing: 1,
               ),
-              const SizedBox(width: 12),
-              _AdminStatCard(
-                title: 'Mentors',
-                value: '42',
-                icon: Icons.school,
-                color: Colors.greenAccent,
+            ),
+            const SizedBox(height: 12),
+            Row(
+              children: [
+                _buildStatCard(
+                  'Total Users',
+                  '${_stats!['totalUsers']}',
+                  Icons.people,
+                  AppColors.primaryCyan,
+                  isDark,
+                ),
+                const SizedBox(width: 12),
+                _buildStatCard(
+                  'Mentors',
+                  '${_stats!['mentors']}',
+                  Icons.school,
+                  Colors.greenAccent,
+                  isDark,
+                ),
+                const SizedBox(width: 12),
+                _buildStatCard(
+                  'Job Seekers',
+                  '${_stats!['jobSeekers']}',
+                  Icons.search,
+                  Colors.amber,
+                  isDark,
+                ),
+              ],
+            ),
+            const SizedBox(height: 16),
+            Row(
+              children: [
+                _buildStatCard(
+                  'Jobs Posted',
+                  '${_stats!['jobsPosted']}',
+                  Icons.work,
+                  Colors.blueAccent,
+                  isDark,
+                ),
+                const SizedBox(width: 12),
+                _buildStatCard(
+                  'Applications',
+                  '${_stats!['applications']}',
+                  Icons.description,
+                  Colors.purpleAccent,
+                  isDark,
+                ),
+                const SizedBox(width: 12),
+                _buildStatCard(
+                  'Pending Feedback',
+                  '${_stats!['pendingFeedback']}',
+                  Icons.feedback,
+                  Colors.orangeAccent,
+                  isDark,
+                ),
+              ],
+            ),
+            const SizedBox(height: 24),
+            _buildActivitySection(isDark),
+            const SizedBox(height: 20),
+          ],
+        ),
+      ),
+    );
+  }
+
+  Widget _buildAdminCard(bool isDark) {
+    final authProvider = context.read<AuthProvider>();
+    final user = authProvider.currentUser;
+    final name = user?.fullName ?? 'Admin';
+    final email = user?.email ?? '';
+
+    return Container(
+      padding: const EdgeInsets.all(20),
+      decoration: BoxDecoration(
+        color: isDark ? Colors.white.withOpacity(0.06) : Colors.grey.shade100,
+        borderRadius: BorderRadius.circular(22),
+        border: Border.all(color: AppColors.primaryCyan.withOpacity(0.25)),
+      ),
+      child: Row(
+        children: [
+          CircleAvatar(
+            radius: 38,
+            backgroundColor: AppColors.primaryCyan.withOpacity(0.2),
+            child: Text(
+              Helpers.getInitials(name),
+              style: const TextStyle(
+                color: AppColors.primaryCyan,
+                fontWeight: FontWeight.bold,
+                fontSize: 28,
               ),
-              const SizedBox(width: 12),
-              _AdminStatCard(
-                title: 'Job Seekers',
-                value: '114',
-                icon: Icons.search,
-                color: Colors.amber,
-              ),
-            ],
+            ),
           ),
-          const SizedBox(height: 16),
-          Row(
-            children: [
-              _AdminStatCard(
-                title: 'Jobs Posted',
-                value: '28',
-                icon: Icons.work,
-                color: Colors.blueAccent,
-              ),
-              const SizedBox(width: 12),
-              _AdminStatCard(
-                title: 'Applications',
-                value: '67',
-                icon: Icons.description,
-                color: Colors.purpleAccent,
-              ),
-              const SizedBox(width: 12),
-              _AdminStatCard(
-                title: 'Pending Feedback',
-                value: '12',
-                icon: Icons.feedback,
-                color: Colors.orangeAccent,
-              ),
-            ],
+          const SizedBox(width: 16),
+          Expanded(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(
+                  name,
+                  style: TextStyle(
+                    color: isDark ? Colors.white : AppColors.lightText,
+                    fontSize: 18,
+                    fontWeight: FontWeight.bold,
+                  ),
+                ),
+                const SizedBox(height: 3),
+                Text(
+                  'System Administrator',
+                  style: const TextStyle(
+                    color: AppColors.primaryCyan,
+                    fontSize: 13,
+                  ),
+                ),
+                const SizedBox(height: 3),
+                Text(
+                  email,
+                  style: TextStyle(
+                    color: isDark
+                        ? Colors.white.withOpacity(0.4)
+                        : AppColors.lightTextSecondary,
+                    fontSize: 12,
+                  ),
+                ),
+                const SizedBox(height: 8),
+                _buildAdminBadge(),
+              ],
+            ),
           ),
-          const SizedBox(height: 24),
-          _buildActivitySection(),
-          const SizedBox(height: 20),
-          const ComingSoonBanner(),
-          const SizedBox(height: 20),
         ],
       ),
     );
   }
 
-  Widget _buildActivitySection() {
+  Widget _buildAdminBadge() {
+    return Container(
+      padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
+      decoration: BoxDecoration(
+        color: AppColors.primaryCyan.withOpacity(0.12),
+        borderRadius: BorderRadius.circular(20),
+        border: Border.all(color: AppColors.primaryCyan.withOpacity(0.3)),
+      ),
+      child: Row(
+        mainAxisSize: MainAxisSize.min,
+        children: const [
+          Icon(
+            Icons.admin_panel_settings,
+            color: AppColors.primaryCyan,
+            size: 12,
+          ),
+          SizedBox(width: 5),
+          Text(
+            'Admin',
+            style: TextStyle(
+              color: AppColors.primaryCyan,
+              fontSize: 11,
+              fontWeight: FontWeight.w600,
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildStatCard(
+    String title,
+    String value,
+    IconData icon,
+    Color color,
+    bool isDark,
+  ) {
+    return Expanded(
+      child: Container(
+        padding: const EdgeInsets.all(12),
+        decoration: BoxDecoration(
+          color: isDark ? Colors.white.withOpacity(0.04) : Colors.grey.shade100,
+          borderRadius: BorderRadius.circular(14),
+          border: Border.all(
+            color: isDark
+                ? Colors.white.withOpacity(0.07)
+                : Colors.grey.shade300,
+          ),
+        ),
+        child: Column(
+          children: [
+            Icon(icon, color: color, size: 24),
+            const SizedBox(height: 8),
+            Text(
+              value,
+              style: TextStyle(
+                color: isDark ? Colors.white : AppColors.lightText,
+                fontWeight: FontWeight.bold,
+                fontSize: 20,
+              ),
+            ),
+            const SizedBox(height: 4),
+            Text(
+              title,
+              textAlign: TextAlign.center,
+              style: TextStyle(
+                color: isDark
+                    ? Colors.white.withOpacity(0.5)
+                    : AppColors.lightTextSecondary,
+                fontSize: 10,
+              ),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+
+  Widget _buildActivitySection(bool isDark) {
     return Container(
       padding: const EdgeInsets.all(16),
       decoration: BoxDecoration(
-        color: Colors.white.withOpacity(0.04),
+        color: isDark ? Colors.white.withOpacity(0.04) : Colors.grey.shade100,
         borderRadius: BorderRadius.circular(16),
-        border: Border.all(color: Colors.white.withOpacity(0.07)),
+        border: Border.all(
+          color: isDark ? Colors.white.withOpacity(0.07) : Colors.grey.shade300,
+        ),
       ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
@@ -279,45 +396,49 @@ class _AdminHomePage extends StatelessWidget {
               SizedBox(width: 8),
               Text(
                 'Recent Activity',
-                style: TextStyle(
-                  color: Colors.white,
-                  fontWeight: FontWeight.bold,
-                  fontSize: 14,
-                ),
+                style: TextStyle(fontWeight: FontWeight.bold, fontSize: 14),
               ),
             ],
           ),
           const SizedBox(height: 12),
-          _activityItem(
+          _buildActivityItem(
             'New user registered',
             'john.doe@example.com joined as Job Seeker',
             '2 min ago',
+            isDark,
           ),
           const Divider(color: Colors.white10, height: 20),
-          _activityItem(
+          _buildActivityItem(
             'Job posted',
             'Tech Corp posted a Senior Developer position',
             '15 min ago',
+            isDark,
           ),
           const Divider(color: Colors.white10, height: 20),
-          _activityItem(
+          _buildActivityItem(
             'Mentor request accepted',
             'Sarah Johnson accepted a mentoring request',
             '1 hour ago',
+            isDark,
           ),
         ],
       ),
     );
   }
 
-  Widget _activityItem(String title, String subtitle, String time) {
+  Widget _buildActivityItem(
+    String title,
+    String subtitle,
+    String time,
+    bool isDark,
+  ) {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
         Text(
           title,
-          style: const TextStyle(
-            color: Colors.white,
+          style: TextStyle(
+            color: isDark ? Colors.white : AppColors.lightText,
             fontSize: 13,
             fontWeight: FontWeight.w500,
           ),
@@ -325,95 +446,63 @@ class _AdminHomePage extends StatelessWidget {
         const SizedBox(height: 2),
         Text(
           subtitle,
-          style: TextStyle(color: Colors.white.withOpacity(0.45), fontSize: 11),
+          style: TextStyle(
+            color: isDark
+                ? Colors.white.withOpacity(0.45)
+                : AppColors.lightTextSecondary,
+            fontSize: 11,
+          ),
         ),
         const SizedBox(height: 4),
         Text(
           time,
-          style: TextStyle(color: Colors.white.withOpacity(0.25), fontSize: 10),
+          style: TextStyle(
+            color: isDark
+                ? Colors.white.withOpacity(0.25)
+                : Colors.grey.shade500,
+            fontSize: 10,
+          ),
         ),
       ],
     );
   }
 }
 
-class _AdminStatCard extends StatelessWidget {
-  final String title;
-  final String value;
-  final IconData icon;
-  final Color color;
-
-  const _AdminStatCard({
-    required this.title,
-    required this.value,
-    required this.icon,
-    required this.color,
-  });
-
-  @override
-  Widget build(BuildContext context) {
-    return Expanded(
-      child: Container(
-        padding: const EdgeInsets.all(12),
-        decoration: BoxDecoration(
-          color: Colors.white.withOpacity(0.04),
-          borderRadius: BorderRadius.circular(14),
-          border: Border.all(color: Colors.white.withOpacity(0.07)),
-        ),
-        child: Column(
-          children: [
-            Icon(icon, color: color, size: 24),
-            const SizedBox(height: 8),
-            Text(
-              value,
-              style: const TextStyle(
-                color: Colors.white,
-                fontWeight: FontWeight.bold,
-                fontSize: 20,
-              ),
-            ),
-            const SizedBox(height: 4),
-            Text(
-              title,
-              textAlign: TextAlign.center,
-              style: TextStyle(
-                color: Colors.white.withOpacity(0.5),
-                fontSize: 10,
-              ),
-            ),
-          ],
-        ),
-      ),
-    );
-  }
-}
-
 class _AdminUsersPage extends StatelessWidget {
-  final List<dynamic> users;
-  final VoidCallback onRefresh;
-
-  const _AdminUsersPage({required this.users, required this.onRefresh});
+  const _AdminUsersPage();
 
   @override
   Widget build(BuildContext context) {
-    return RefreshIndicator(
-      onRefresh: () async => onRefresh(),
-      color: AppColors.primaryCyan,
-      child: ListView(
-        padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 16),
+    final themeProvider = context.watch<ThemeProvider>();
+    final isDark = themeProvider.isDarkMode;
+
+    return Center(
+      child: Column(
+        mainAxisAlignment: MainAxisAlignment.center,
         children: [
-          const PageHeader(
-            title: 'User Management',
-            subtitle: 'Manage platform users',
+          Icon(
+            Icons.people_outline,
+            size: 64,
+            color: isDark ? Colors.white24 : Colors.grey.shade400,
           ),
-          const SizedBox(height: 20),
-          if (users.isEmpty)
-            const EmptyState(
-              icon: Icons.people_outline,
-              message:
-                  'No users found.\nThis feature requires additional backend endpoints.',
+          const SizedBox(height: 16),
+          Text(
+            'User Management',
+            style: TextStyle(
+              fontSize: 20,
+              fontWeight: FontWeight.bold,
+              color: isDark ? Colors.white : AppColors.lightText,
             ),
-          const SizedBox(height: 20),
+          ),
+          const SizedBox(height: 8),
+          Text(
+            'Coming Soon',
+            style: TextStyle(
+              color: isDark
+                  ? Colors.white.withOpacity(0.5)
+                  : AppColors.lightTextSecondary,
+            ),
+          ),
         ],
       ),
     );
@@ -421,121 +510,38 @@ class _AdminUsersPage extends StatelessWidget {
 }
 
 class _AdminFeedbackPage extends StatelessWidget {
-  final List<dynamic> feedback;
-  final VoidCallback onRefresh;
-
-  const _AdminFeedbackPage({required this.feedback, required this.onRefresh});
+  const _AdminFeedbackPage();
 
   @override
   Widget build(BuildContext context) {
-    return RefreshIndicator(
-      onRefresh: () async => onRefresh(),
-      color: AppColors.primaryCyan,
-      child: ListView(
-        padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 16),
+    final themeProvider = context.watch<ThemeProvider>();
+    final isDark = themeProvider.isDarkMode;
+
+    return Center(
+      child: Column(
+        mainAxisAlignment: MainAxisAlignment.center,
         children: [
-          const PageHeader(
-            title: 'User Feedback',
-            subtitle: 'Review and respond to user feedback',
-          ),
-          const SizedBox(height: 20),
-          if (feedback.isEmpty)
-            const EmptyState(
-              icon: Icons.feedback_outlined,
-              message:
-                  'No feedback yet.\nThis feature requires additional backend endpoints.',
-            ),
-          const SizedBox(height: 20),
-        ],
-      ),
-    );
-  }
-}
-
-class _AdminReportsPage extends StatelessWidget {
-  final List<dynamic> reports;
-  final VoidCallback onRefresh;
-
-  const _AdminReportsPage({required this.reports, required this.onRefresh});
-
-  @override
-  Widget build(BuildContext context) {
-    return RefreshIndicator(
-      onRefresh: () async => onRefresh(),
-      color: AppColors.primaryCyan,
-      child: ListView(
-        padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 16),
-        children: [
-          const PageHeader(
-            title: 'Reports',
-            subtitle: 'Platform analytics and reports',
-          ),
-          const SizedBox(height: 20),
-          _buildReportCard(
-            'User Growth',
-            'Monthly active users: 156\nNew signups this month: 23',
-            Icons.trending_up,
+          Icon(
+            Icons.feedback_outlined,
+            size: 64,
+            color: isDark ? Colors.white24 : Colors.grey.shade400,
           ),
           const SizedBox(height: 16),
-          _buildReportCard(
-            'Job Statistics',
-            'Total jobs: 28\nActive jobs: 15\nApplications received: 67',
-            Icons.work,
-          ),
-          const SizedBox(height: 16),
-          _buildReportCard(
-            'Mentorship Activity',
-            'Active mentorship pairs: 38\nPending requests: 12\nCompleted sessions: 156',
-            Icons.school,
-          ),
-          const SizedBox(height: 20),
-        ],
-      ),
-    );
-  }
-
-  Widget _buildReportCard(String title, String content, IconData icon) {
-    return Container(
-      padding: const EdgeInsets.all(16),
-      decoration: BoxDecoration(
-        color: Colors.white.withOpacity(0.04),
-        borderRadius: BorderRadius.circular(16),
-        border: Border.all(color: Colors.white.withOpacity(0.07)),
-      ),
-      child: Row(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          Container(
-            padding: const EdgeInsets.all(10),
-            decoration: BoxDecoration(
-              color: AppColors.primaryCyan.withOpacity(0.1),
-              borderRadius: BorderRadius.circular(12),
+          Text(
+            'Feedback Management',
+            style: TextStyle(
+              fontSize: 20,
+              fontWeight: FontWeight.bold,
+              color: isDark ? Colors.white : AppColors.lightText,
             ),
-            child: Icon(icon, color: AppColors.primaryCyan, size: 20),
           ),
-          const SizedBox(width: 12),
-          Expanded(
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Text(
-                  title,
-                  style: const TextStyle(
-                    color: Colors.white,
-                    fontWeight: FontWeight.bold,
-                    fontSize: 14,
-                  ),
-                ),
-                const SizedBox(height: 8),
-                Text(
-                  content,
-                  style: TextStyle(
-                    color: Colors.white.withOpacity(0.55),
-                    fontSize: 12,
-                    height: 1.5,
-                  ),
-                ),
-              ],
+          const SizedBox(height: 8),
+          Text(
+            'Coming Soon',
+            style: TextStyle(
+              color: isDark
+                  ? Colors.white.withOpacity(0.5)
+                  : AppColors.lightTextSecondary,
             ),
           ),
         ],

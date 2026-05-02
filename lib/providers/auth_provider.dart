@@ -2,10 +2,12 @@ import 'package:flutter/material.dart';
 import '../data/repositories/auth_repository.dart';
 import '../data/repositories/user_repository.dart';
 import '../data/models/user_model.dart';
+import '../data/datasources/local/token_store.dart';
 
 class AuthProvider extends ChangeNotifier {
-  final AuthRepository _authRepository = AuthRepository();
-  final UserRepository _userRepository = UserRepository();
+  late final AuthRepository _authRepository;
+  late final UserRepository _userRepository;
+  final TokenStore _tokenStore = TokenStore();
 
   BaseUser? _currentUser;
   bool _isLoading = false;
@@ -15,6 +17,15 @@ class AuthProvider extends ChangeNotifier {
   bool get isLoading => _isLoading;
   String? get error => _error;
   bool get isAuthenticated => _currentUser != null;
+
+  AuthProvider() {
+    _authRepository = AuthRepository();
+    _userRepository = UserRepository();
+  }
+
+  Future<String?> getAccessToken() async {
+    return await _tokenStore.getAccess();
+  }
 
   Future<bool> login(String email, String password) async {
     _setLoading(true);

@@ -8,6 +8,8 @@ class LoadingIndicator extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final isDark = Theme.of(context).brightness == Brightness.dark;
+
     return Center(
       child: SizedBox(
         width: size,
@@ -37,6 +39,32 @@ class ShimmerLoading extends StatelessWidget {
       },
       blendMode: BlendMode.srcATop,
       child: child,
+    );
+  }
+}
+
+class ShimmerCard extends StatelessWidget {
+  final double height;
+  final double width;
+
+  const ShimmerCard({
+    super.key,
+    this.height = 100,
+    this.width = double.infinity,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    final isDark = Theme.of(context).brightness == Brightness.dark;
+
+    return Container(
+      height: height,
+      width: width,
+      margin: const EdgeInsets.only(bottom: 12),
+      decoration: BoxDecoration(
+        color: isDark ? Colors.white.withOpacity(0.05) : Colors.grey.shade200,
+        borderRadius: BorderRadius.circular(16),
+      ),
     );
   }
 }
