@@ -62,7 +62,7 @@ class _WorkExperienceFormPageState extends State<WorkExperienceFormPage> {
     setState(() => _isLoading = true);
 
     final authProvider = context.read<AuthProvider>();
-    final userRepo = authProvider._userRepository;
+    final userRepo = authProvider.userRepository; // FIXED: using public getter
 
     try {
       final work = WorkExperience(

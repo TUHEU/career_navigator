@@ -52,7 +52,7 @@ class _EducationFormPageState extends State<EducationFormPage> {
     setState(() => _isLoading = true);
 
     final authProvider = context.read<AuthProvider>();
-    final userRepo = authProvider._userRepository;
+    final userRepo = authProvider.userRepository; // FIXED: using public getter
 
     try {
       final education = Education(

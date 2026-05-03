@@ -81,7 +81,7 @@ class _EditProfilePageState extends State<EditProfilePage> {
     setState(() => _isSaving = true);
 
     final authProvider = context.read<AuthProvider>();
-    final userRepo = authProvider._userRepository;
+    final userRepo = authProvider.userRepository; // FIXED: using public getter
 
     try {
       final fields = <String, dynamic>{};

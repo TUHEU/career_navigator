@@ -56,16 +56,18 @@ class _MentorProfilePageState extends State<MentorProfilePage> {
     _accepting = mentorProfile['is_accepting_mentees'] != 0;
 
     final expertise = mentorProfile['expertise_areas'];
-    if (expertise is List)
+    if (expertise is List) {
       _expertiseController.text = expertise.join(', ');
-    else if (expertise is String)
+    } else if (expertise is String) {
       _expertiseController.text = expertise;
+    }
 
     final industries = mentorProfile['industries'];
-    if (industries is List)
+    if (industries is List) {
       _industriesController.text = industries.join(', ');
-    else if (industries is String)
+    } else if (industries is String) {
       _industriesController.text = industries;
+    }
   }
 
   Future<void> _save() async {
@@ -73,7 +75,7 @@ class _MentorProfilePageState extends State<MentorProfilePage> {
     setState(() => _isLoading = true);
 
     final authProvider = context.read<AuthProvider>();
-    final userRepo = authProvider._userRepository;
+    final userRepo = authProvider.userRepository; // FIXED: using public getter
 
     try {
       final expertiseList = _expertiseController.text

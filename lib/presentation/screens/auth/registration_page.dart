@@ -10,6 +10,7 @@ import '../../../providers/theme_provider.dart';
 import '../../widgets/shared/buttons.dart';
 import '../../widgets/shared/inputs.dart';
 import 'email_verification_page.dart';
+import 'sign_in_page.dart'; // FIXED: Added missing import
 
 class RegistrationPage extends StatefulWidget {
   const RegistrationPage({super.key});
