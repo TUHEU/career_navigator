@@ -6,6 +6,7 @@ import '../../../core/themes/app_theme.dart';
 import '../../../core/utils/helpers.dart';
 import '../../../providers/auth_provider.dart';
 import '../../../providers/theme_provider.dart';
+import '../../widgets/shared/buttons.dart';
 import 'profile_setup_page.dart';
 import 'sign_in_page.dart';
 
@@ -23,13 +24,6 @@ class _EmailVerificationPageState extends State<EmailVerificationPage> {
     (_) => TextEditingController(),
   );
   final List<FocusNode> _focusNodes = List.generate(6, (_) => FocusNode());
-
-  @override
-  void dispose() {
-    for (final c in _controllers) c.dispose();
-    for (final f in _focusNodes) f.dispose();
-    super.dispose();
-  }
 
   String get _fullCode => _controllers.map((c) => c.text).join();
 
@@ -118,10 +112,10 @@ class _EmailVerificationPageState extends State<EmailVerificationPage> {
                     ),
                   ),
                   GestureDetector(
-                    onTap: authProvider.isLoading ? null : _resend,
-                    child: Text(
+                    onTap: _resend,
+                    child: const Text(
                       'Resend',
-                      style: const TextStyle(
+                      style: TextStyle(
                         color: AppColors.primaryCyan,
                         fontWeight: FontWeight.bold,
                       ),
@@ -131,12 +125,10 @@ class _EmailVerificationPageState extends State<EmailVerificationPage> {
               ),
               const SizedBox(height: 16),
               TextButton(
-                onPressed: () {
-                  Navigator.pushReplacement(
-                    context,
-                    MaterialPageRoute(builder: (_) => const SignInPage()),
-                  );
-                },
+                onPressed: () => Navigator.pushReplacement(
+                  context,
+                  MaterialPageRoute(builder: (_) => const SignInPage()),
+                ),
                 child: Text(
                   '← Back to Sign In',
                   style: TextStyle(
@@ -146,7 +138,6 @@ class _EmailVerificationPageState extends State<EmailVerificationPage> {
                   ),
                 ),
               ),
-              const SizedBox(height: 20),
             ],
           ),
         ),
@@ -257,14 +248,11 @@ class _EmailVerificationPageState extends State<EmailVerificationPage> {
             ),
           ),
           onChanged: (val) {
-            if (val.isNotEmpty && i < 5) {
+            if (val.isNotEmpty && i < 5)
               FocusScope.of(context).requestFocus(_focusNodes[i + 1]);
-            } else if (val.isEmpty && i > 0) {
+            else if (val.isEmpty && i > 0)
               FocusScope.of(context).requestFocus(_focusNodes[i - 1]);
-            }
-            if (_fullCode.length == 6) {
-              _verify();
-            }
+            if (_fullCode.length == 6) _verify();
           },
         ),
       );

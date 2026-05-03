@@ -26,17 +26,8 @@ class _RegistrationPageState extends State<RegistrationPage> {
   bool _obscurePassword = true;
   bool _obscureConfirm = true;
 
-  @override
-  void dispose() {
-    _emailCtrl.dispose();
-    _passCtrl.dispose();
-    _confirmPassCtrl.dispose();
-    super.dispose();
-  }
-
   Future<void> _register() async {
     if (!_formKey.currentState!.validate()) return;
-
     if (_passCtrl.text != _confirmPassCtrl.text) {
       Helpers.showSnackBar(context, 'Passwords do not match', isError: true);
       return;
@@ -81,11 +72,7 @@ class _RegistrationPageState extends State<RegistrationPage> {
                   ? AppColors.darkBackground
                   : AppColors.lightBackground,
               image: DecorationImage(
-                image: AssetImage(
-                  isDark
-                      ? 'assets/background/bg8.png'
-                      : 'assets/background/bg6.png',
-                ),
+                image: AssetImage(themeProvider.backgroundPath),
                 fit: BoxFit.cover,
                 opacity: 0.35,
               ),
@@ -110,7 +97,6 @@ class _RegistrationPageState extends State<RegistrationPage> {
                     _buildGlassCard(isDark, authProvider.isLoading),
                     const SizedBox(height: 20),
                     _buildSignInRow(isDark),
-                    const SizedBox(height: 20),
                   ],
                 ),
               ),
@@ -237,42 +223,51 @@ class _RegistrationPageState extends State<RegistrationPage> {
     required bool obscure,
     required VoidCallback onToggle,
     required bool isDark,
-  }) => TextFormField(
-    controller: controller,
-    obscureText: obscure,
-    style: TextStyle(color: isDark ? Colors.white : Colors.grey.shade800),
-    validator: Validators.validatePassword,
-    decoration: InputDecoration(
-      prefixIcon: const Icon(Icons.lock_outline, color: AppColors.primaryCyan),
-      labelText: label,
-      labelStyle: TextStyle(
-        color: isDark ? Colors.white.withOpacity(0.6) : Colors.grey.shade600,
-      ),
-      filled: true,
-      fillColor: isDark ? Colors.white.withOpacity(0.05) : Colors.grey.shade100,
-      border: OutlineInputBorder(
-        borderRadius: BorderRadius.circular(15),
-        borderSide: BorderSide.none,
-      ),
-      enabledBorder: OutlineInputBorder(
-        borderRadius: BorderRadius.circular(15),
-        borderSide: BorderSide(
-          color: isDark ? Colors.white.withOpacity(0.15) : Colors.grey.shade300,
-        ),
-      ),
-      focusedBorder: OutlineInputBorder(
-        borderRadius: BorderRadius.circular(15),
-        borderSide: const BorderSide(color: AppColors.primaryCyan),
-      ),
-      suffixIcon: IconButton(
-        icon: Icon(
-          obscure ? Icons.visibility_off_outlined : Icons.visibility_outlined,
+  }) {
+    return TextFormField(
+      controller: controller,
+      obscureText: obscure,
+      style: TextStyle(color: isDark ? Colors.white : Colors.grey.shade800),
+      validator: Validators.validatePassword,
+      decoration: InputDecoration(
+        prefixIcon: const Icon(
+          Icons.lock_outline,
           color: AppColors.primaryCyan,
         ),
-        onPressed: onToggle,
+        labelText: label,
+        labelStyle: TextStyle(
+          color: isDark ? Colors.white.withOpacity(0.6) : Colors.grey.shade600,
+        ),
+        filled: true,
+        fillColor: isDark
+            ? Colors.white.withOpacity(0.05)
+            : Colors.grey.shade100,
+        border: OutlineInputBorder(
+          borderRadius: BorderRadius.circular(15),
+          borderSide: BorderSide.none,
+        ),
+        enabledBorder: OutlineInputBorder(
+          borderRadius: BorderRadius.circular(15),
+          borderSide: BorderSide(
+            color: isDark
+                ? Colors.white.withOpacity(0.15)
+                : Colors.grey.shade300,
+          ),
+        ),
+        focusedBorder: OutlineInputBorder(
+          borderRadius: BorderRadius.circular(15),
+          borderSide: const BorderSide(color: AppColors.primaryCyan),
+        ),
+        suffixIcon: IconButton(
+          icon: Icon(
+            obscure ? Icons.visibility_off_outlined : Icons.visibility_outlined,
+            color: AppColors.primaryCyan,
+          ),
+          onPressed: onToggle,
+        ),
       ),
-    ),
-  );
+    );
+  }
 
   Widget _buildSignInRow(bool isDark) => Row(
     mainAxisAlignment: MainAxisAlignment.center,

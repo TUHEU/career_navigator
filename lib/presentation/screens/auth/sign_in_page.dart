@@ -21,37 +21,11 @@ class SignInPage extends StatefulWidget {
   State<SignInPage> createState() => _SignInPageState();
 }
 
-class _SignInPageState extends State<SignInPage>
-    with SingleTickerProviderStateMixin {
+class _SignInPageState extends State<SignInPage> {
   final _formKey = GlobalKey<FormState>();
   final _emailCtrl = TextEditingController();
   final _passCtrl = TextEditingController();
   bool _obscure = true;
-
-  late AnimationController _slideCtrl;
-  late Animation<Offset> _slideAnim;
-
-  @override
-  void initState() {
-    super.initState();
-    _slideCtrl = AnimationController(
-      vsync: this,
-      duration: const Duration(milliseconds: 300),
-    );
-    _slideAnim = Tween<Offset>(
-      begin: const Offset(-0.08, 0),
-      end: Offset.zero,
-    ).animate(CurvedAnimation(parent: _slideCtrl, curve: Curves.easeOut));
-    _slideCtrl.forward();
-  }
-
-  @override
-  void dispose() {
-    _emailCtrl.dispose();
-    _passCtrl.dispose();
-    _slideCtrl.dispose();
-    super.dispose();
-  }
 
   Future<void> _signIn() async {
     if (!_formKey.currentState!.validate()) return;
@@ -106,11 +80,7 @@ class _SignInPageState extends State<SignInPage>
                   ? AppColors.darkBackground
                   : AppColors.lightBackground,
               image: DecorationImage(
-                image: AssetImage(
-                  isDark
-                      ? 'assets/background/bg8.png'
-                      : 'assets/background/bg6.png',
-                ),
+                image: AssetImage(themeProvider.backgroundPath),
                 fit: BoxFit.cover,
                 opacity: 0.35,
               ),
@@ -128,18 +98,14 @@ class _SignInPageState extends State<SignInPage>
                   horizontal: 24,
                   vertical: 20,
                 ),
-                child: SlideTransition(
-                  position: _slideAnim,
-                  child: Column(
-                    children: [
-                      _buildHeader(isDark),
-                      const SizedBox(height: 28),
-                      _buildGlassCard(isDark, authProvider.isLoading),
-                      const SizedBox(height: 28),
-                      _buildSignUpRow(isDark),
-                      const SizedBox(height: 20),
-                    ],
-                  ),
+                child: Column(
+                  children: [
+                    _buildHeader(isDark),
+                    const SizedBox(height: 28),
+                    _buildGlassCard(isDark, authProvider.isLoading),
+                    const SizedBox(height: 28),
+                    _buildSignUpRow(isDark),
+                  ],
                 ),
               ),
             ),

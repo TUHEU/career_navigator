@@ -8,6 +8,7 @@ import '../../../core/utils/helpers.dart';
 import '../../../providers/auth_provider.dart';
 import '../../../providers/theme_provider.dart';
 import '../../widgets/shared/buttons.dart';
+import '../../widgets/shared/inputs.dart';
 import '../dashboard/job_seeker_dashboard.dart';
 import '../dashboard/mentor_dashboard.dart';
 
@@ -37,9 +38,7 @@ class _ProfileSetupPageState extends State<ProfileSetupPage> {
       firstDate: DateTime(1950),
       lastDate: DateTime.now(),
     );
-    if (picked != null) {
-      setState(() => _selectedDate = picked);
-    }
+    if (picked != null) setState(() => _selectedDate = picked);
   }
 
   Future<void> _finish() async {
@@ -84,12 +83,6 @@ class _ProfileSetupPageState extends State<ProfileSetupPage> {
         isError: true,
       );
     }
-  }
-
-  @override
-  void dispose() {
-    _nameController.dispose();
-    super.dispose();
   }
 
   @override
@@ -268,7 +261,6 @@ class _RoleCard extends StatelessWidget {
   final bool selected;
   final VoidCallback onTap;
   final bool isDark;
-
   const _RoleCard({
     required this.icon,
     required this.title,
