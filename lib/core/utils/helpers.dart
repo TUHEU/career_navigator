@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import '../../core/themes/app_theme.dart';
 
 class Helpers {
   static String formatDate(DateTime? date) {
@@ -11,9 +12,7 @@ class Helpers {
     try {
       final parts = dateTimeStr.split(' ');
       if (parts.length >= 2) {
-        final date = parts[0];
-        final time = parts[1].substring(0, 5);
-        return '$date $time';
+        return '${parts[0]} ${parts[1].substring(0, 5)}';
       }
       return dateTimeStr;
     } catch (e) {
@@ -53,11 +52,6 @@ class Helpers {
     return name[0].toUpperCase();
   }
 
-  static String truncate(String text, int maxLength) {
-    if (text.length <= maxLength) return text;
-    return '${text.substring(0, maxLength)}...';
-  }
-
   static void showSnackBar(
     BuildContext context,
     String message, {
@@ -82,11 +76,27 @@ class Helpers {
     String cancelText = 'Cancel',
     Color confirmColor = Colors.redAccent,
   }) async {
+    final isDark = Theme.of(context).brightness == Brightness.dark;
+
     return await showDialog<bool>(
           context: context,
           builder: (context) => AlertDialog(
-            title: Text(title),
-            content: Text(message),
+            backgroundColor: isDark ? AppColors.darkSurface : Colors.white,
+            shape: RoundedRectangleBorder(
+              borderRadius: BorderRadius.circular(16),
+            ),
+            title: Text(
+              title,
+              style: TextStyle(
+                color: isDark ? Colors.white : AppColors.lightText,
+              ),
+            ),
+            content: Text(
+              message,
+              style: TextStyle(
+                color: isDark ? Colors.white70 : AppColors.lightTextSecondary,
+              ),
+            ),
             actions: [
               TextButton(
                 onPressed: () => Navigator.pop(context, false),
@@ -94,26 +104,11 @@ class Helpers {
               ),
               TextButton(
                 onPressed: () => Navigator.pop(context, true),
-                style: TextButton.styleFrom(foregroundColor: confirmColor),
-                child: Text(confirmText),
+                child: Text(confirmText, style: TextStyle(color: confirmColor)),
               ),
             ],
           ),
         ) ??
         false;
-  }
-
-  static void showLoadingDialog(BuildContext context) {
-    showDialog(
-      context: context,
-      barrierDismissible: false,
-      builder: (context) => const Center(
-        child: CircularProgressIndicator(color: AppColors.primaryCyan),
-      ),
-    );
-  }
-
-  static void hideLoadingDialog(BuildContext context) {
-    Navigator.of(context).pop();
   }
 }

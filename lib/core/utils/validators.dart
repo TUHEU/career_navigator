@@ -20,16 +20,6 @@ class Validators {
     return null;
   }
 
-  static String? validateConfirmPassword(String? value, String password) {
-    if (value == null || value.isEmpty) {
-      return 'Please confirm your password';
-    }
-    if (value != password) {
-      return 'Passwords do not match';
-    }
-    return null;
-  }
-
   static String? validateRequired(String? value, String fieldName) {
     if (value == null || value.isEmpty) {
       return '$fieldName is required';
@@ -50,24 +40,11 @@ class Validators {
 
   static String? validatePhone(String? value) {
     if (value == null || value.isEmpty) {
-      return null; // Phone is optional
+      return null;
     }
     final phoneRegex = RegExp(r'^[0-9+\-\s()]{8,20}$');
     if (!phoneRegex.hasMatch(value)) {
       return 'Enter a valid phone number';
-    }
-    return null;
-  }
-
-  static String? validateUrl(String? value) {
-    if (value == null || value.isEmpty) {
-      return null; // URL is optional
-    }
-    final urlRegex = RegExp(
-      r'^https?:\/\/(www\.)?[-a-zA-Z0-9@:%._\+~#=]{1,256}\.[a-zA-Z0-9()]{1,6}\b([-a-zA-Z0-9()@:%_\+.~#?&//=]*)',
-    );
-    if (!urlRegex.hasMatch(value)) {
-      return 'Enter a valid URL';
     }
     return null;
   }

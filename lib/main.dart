@@ -69,56 +69,12 @@ class MyApp extends StatelessWidget {
           fontWeight: FontWeight.w600,
         ),
       ),
-      cardTheme: CardTheme(
-        color: isDark ? AppColors.darkCard : AppColors.lightCard,
-        elevation: 0,
-        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
-      ),
-      inputDecorationTheme: InputDecorationTheme(
-        filled: true,
-        fillColor: isDark
-            ? Colors.white.withOpacity(0.05)
-            : Colors.grey.shade100,
-        border: OutlineInputBorder(
-          borderRadius: BorderRadius.circular(15),
-          borderSide: BorderSide.none,
-        ),
-        enabledBorder: OutlineInputBorder(
-          borderRadius: BorderRadius.circular(15),
-          borderSide: BorderSide(
-            color: isDark
-                ? Colors.white.withOpacity(0.15)
-                : Colors.grey.shade300,
-          ),
-        ),
-        focusedBorder: OutlineInputBorder(
-          borderRadius: BorderRadius.circular(15),
-          borderSide: const BorderSide(color: AppColors.primaryCyan),
-        ),
-        errorBorder: OutlineInputBorder(
-          borderRadius: BorderRadius.circular(15),
-          borderSide: const BorderSide(color: Colors.redAccent),
-        ),
-        labelStyle: TextStyle(
-          color: isDark ? Colors.white.withOpacity(0.6) : Colors.grey.shade600,
-        ),
-      ),
       elevatedButtonTheme: ElevatedButtonThemeData(
         style: ElevatedButton.styleFrom(
           backgroundColor: AppColors.primaryCyan,
           foregroundColor: Colors.black,
           shape: RoundedRectangleBorder(
             borderRadius: BorderRadius.circular(15),
-          ),
-          elevation: 0,
-        ),
-      ),
-      outlinedButtonTheme: OutlinedButtonThemeData(
-        style: OutlinedButton.styleFrom(
-          foregroundColor: AppColors.primaryCyan,
-          side: const BorderSide(color: AppColors.primaryCyan),
-          shape: RoundedRectangleBorder(
-            borderRadius: BorderRadius.circular(12),
           ),
         ),
       ),

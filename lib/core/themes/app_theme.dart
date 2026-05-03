@@ -7,7 +7,6 @@ class AppColors {
   static const Color darkSurface = Color(0xFF0D2137);
   static const Color darkCard = Color(0xFF112240);
 
-  // Light theme colors
   static const Color lightBackground = Color(0xFFF5F7FA);
   static const Color lightSurface = Color(0xFFFFFFFF);
   static const Color lightCard = Color(0xFFF0F2F5);
@@ -15,10 +14,7 @@ class AppColors {
   static const Color lightTextSecondary = Color(0xFF4A5568);
 }
 
-enum AppBackground {
-  bg8, // Dark theme (Cosmos)
-  bg6, // Light theme (Aurora)
-}
+enum AppBackground { bg8, bg6 }
 
 enum ThemeMode { dark, light }
 
@@ -31,91 +27,30 @@ extension AppBackgroundExt on AppBackground {
         return 'assets/background/bg6.png';
     }
   }
-
-  String get label {
-    switch (this) {
-      case AppBackground.bg8:
-        return 'Dark Mode';
-      case AppBackground.bg6:
-        return 'Light Mode';
-    }
-  }
 }
 
-class AppThemeProvider extends ChangeNotifier {
-  ThemeMode _themeMode = ThemeMode.dark;
-  AppBackground _background = AppBackground.bg8;
+class ThemeProvider extends ChangeNotifier {
+  bool _isDarkMode = true;
 
-  ThemeMode get themeMode => _themeMode;
-  AppBackground get background => _background;
-  String get backgroundPath => _background.assetPath;
+  bool get isDarkMode => _isDarkMode;
+  String get backgroundPath =>
+      _isDarkMode ? 'assets/background/bg8.png' : 'assets/background/bg6.png';
 
-  bool get isDarkMode => _themeMode == ThemeMode.dark;
-
-  AppThemeProvider() {
-    _load();
+  ThemeProvider() {
+    _loadTheme();
   }
 
-  Future<void> _load() async {
+  Future<void> _loadTheme() async {
     final prefs = await SharedPreferences.getInstance();
-    final themeModeStr = prefs.getString('theme_mode') ?? 'dark';
-    _themeMode = themeModeStr == 'dark' ? ThemeMode.dark : ThemeMode.light;
-    _background = _themeMode == ThemeMode.dark
-        ? AppBackground.bg8
-        : AppBackground.bg6;
+    final savedTheme = prefs.getString('theme_mode');
+    _isDarkMode = savedTheme != 'light';
     notifyListeners();
   }
 
   Future<void> toggleTheme() async {
-    _themeMode = _themeMode == ThemeMode.dark
-        ? ThemeMode.light
-        : ThemeMode.dark;
-    _background = _themeMode == ThemeMode.dark
-        ? AppBackground.bg8
-        : AppBackground.bg6;
-    notifyListeners();
-
+    _isDarkMode = !_isDarkMode;
     final prefs = await SharedPreferences.getInstance();
-    await prefs.setString(
-      'theme_mode',
-      _themeMode == ThemeMode.dark ? 'dark' : 'light',
-    );
+    await prefs.setString('theme_mode', _isDarkMode ? 'dark' : 'light');
+    notifyListeners();
   }
-}
-
-InputDecoration buildInputDecoration({
-  required IconData icon,
-  required String label,
-  Widget? suffix,
-  bool isDarkMode = true,
-}) {
-  return InputDecoration(
-    prefixIcon: Icon(icon, color: AppColors.primaryCyan),
-    labelText: label,
-    labelStyle: TextStyle(
-      color: isDarkMode ? Colors.white.withOpacity(0.6) : Colors.grey.shade600,
-    ),
-    filled: true,
-    fillColor: isDarkMode
-        ? Colors.white.withOpacity(0.05)
-        : Colors.grey.shade100,
-    border: OutlineInputBorder(borderRadius: BorderRadius.circular(15)),
-    enabledBorder: OutlineInputBorder(
-      borderRadius: BorderRadius.circular(15),
-      borderSide: BorderSide(
-        color: isDarkMode
-            ? Colors.white.withOpacity(0.15)
-            : Colors.grey.shade300,
-      ),
-    ),
-    focusedBorder: OutlineInputBorder(
-      borderRadius: BorderRadius.circular(15),
-      borderSide: const BorderSide(color: AppColors.primaryCyan),
-    ),
-    errorBorder: OutlineInputBorder(
-      borderRadius: BorderRadius.circular(15),
-      borderSide: const BorderSide(color: Colors.redAccent),
-    ),
-    suffixIcon: suffix,
-  );
 }
