@@ -1,12 +1,12 @@
 import 'package:flutter/material.dart';
 import 'package:shared_preferences/shared_preferences.dart';
-import '../core/constants/app_constants.dart';
-import '../core/themes/app_theme.dart';
 
 class ThemeProvider extends ChangeNotifier {
   bool _isDarkMode = true;
 
   bool get isDarkMode => _isDarkMode;
+  String get backgroundPath =>
+      _isDarkMode ? 'assets/background/bg8.png' : 'assets/background/bg6.png';
 
   ThemeProvider() {
     _loadTheme();
@@ -14,7 +14,7 @@ class ThemeProvider extends ChangeNotifier {
 
   Future<void> _loadTheme() async {
     final prefs = await SharedPreferences.getInstance();
-    final savedTheme = prefs.getString(AppConstants.themeModeKey);
+    final savedTheme = prefs.getString('theme_mode');
     _isDarkMode = savedTheme != 'light';
     notifyListeners();
   }
@@ -22,24 +22,7 @@ class ThemeProvider extends ChangeNotifier {
   Future<void> toggleTheme() async {
     _isDarkMode = !_isDarkMode;
     final prefs = await SharedPreferences.getInstance();
-    await prefs.setString(
-      AppConstants.themeModeKey,
-      _isDarkMode ? 'dark' : 'light',
-    );
+    await prefs.setString('theme_mode', _isDarkMode ? 'dark' : 'light');
     notifyListeners();
   }
-
-  Color get backgroundColor =>
-      _isDarkMode ? AppColors.darkBackground : AppColors.lightBackground;
-
-  Color get surfaceColor =>
-      _isDarkMode ? AppColors.darkSurface : AppColors.lightSurface;
-
-  Color get cardColor => _isDarkMode ? AppColors.darkCard : AppColors.lightCard;
-
-  Color get textColor => _isDarkMode ? Colors.white : AppColors.lightText;
-
-  Color get textSecondaryColor => _isDarkMode
-      ? Colors.white.withOpacity(0.6)
-      : AppColors.lightTextSecondary;
 }

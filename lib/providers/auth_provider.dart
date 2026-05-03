@@ -1,27 +1,20 @@
 import 'package:flutter/material.dart';
-import '../data/repositories/auth_repository.dart';
-import '../data/repositories/user_repository.dart';
-import '../data/models/user_model.dart';
 import '../data/datasources/local/token_store.dart';
+import '../data/datasources/remote/api_service.dart';
+import '../data/models/user_model.dart';
 
 class AuthProvider extends ChangeNotifier {
-  late final AuthRepository _authRepository;
-  late final UserRepository _userRepository;
+  final ApiService _apiService = ApiService();
   final TokenStore _tokenStore = TokenStore();
 
-  BaseUser? _currentUser;
+  User? _currentUser;
   bool _isLoading = false;
   String? _error;
 
-  BaseUser? get currentUser => _currentUser;
+  User? get currentUser => _currentUser;
   bool get isLoading => _isLoading;
   String? get error => _error;
   bool get isAuthenticated => _currentUser != null;
-
-  AuthProvider() {
-    _authRepository = AuthRepository();
-    _userRepository = UserRepository();
-  }
 
   Future<String?> getAccessToken() async {
     return await _tokenStore.getAccess();
@@ -31,9 +24,11 @@ class AuthProvider extends ChangeNotifier {
     _setLoading(true);
     _clearError();
 
-    final response = await _authRepository.login(email, password);
+    final response = await _apiService.login(email, password);
 
     if (response['success'] == true) {
+      final data = response['data'] as Map<String, dynamic>;
+      await _tokenStore.save(data['access_token'], data['refresh_token']);
       final success = await loadUserProfile();
       _setLoading(false);
       return success;
@@ -45,22 +40,23 @@ class AuthProvider extends ChangeNotifier {
   }
 
   Future<bool> loadUserProfile() async {
-    try {
-      _currentUser = await _userRepository.getProfile();
+    final token = await _tokenStore.getAccess();
+    if (token == null) return false;
+
+    final response = await _apiService.getProfile(token);
+    if (response['success'] == true) {
+      _currentUser = User.fromJson(response['data'] as Map<String, dynamic>);
       notifyListeners();
       return true;
-    } catch (e) {
-      _error = e.toString();
-      notifyListeners();
-      return false;
     }
+    return false;
   }
 
   Future<bool> register(String email, String password) async {
     _setLoading(true);
     _clearError();
 
-    final response = await _authRepository.register(email, password);
+    final response = await _apiService.register(email, password);
     _setLoading(false);
 
     if (response['success'] != true) {
@@ -73,9 +69,11 @@ class AuthProvider extends ChangeNotifier {
     _setLoading(true);
     _clearError();
 
-    final response = await _authRepository.verifyEmail(email, code);
+    final response = await _apiService.verifyEmail(email, code);
 
     if (response['success'] == true) {
+      final data = response['data'] as Map<String, dynamic>;
+      await _tokenStore.save(data['access_token'], data['refresh_token']);
       final success = await loadUserProfile();
       _setLoading(false);
       return success;
@@ -90,7 +88,7 @@ class AuthProvider extends ChangeNotifier {
     _setLoading(true);
     _clearError();
 
-    final response = await _authRepository.resendCode(email);
+    final response = await _apiService.resendCode(email);
     _setLoading(false);
 
     if (response['success'] != true) {
@@ -103,7 +101,7 @@ class AuthProvider extends ChangeNotifier {
     _setLoading(true);
     _clearError();
 
-    final response = await _authRepository.forgotPassword(email);
+    final response = await _apiService.forgotPassword(email);
     _setLoading(false);
 
     if (response['success'] != true) {
@@ -116,11 +114,7 @@ class AuthProvider extends ChangeNotifier {
     _setLoading(true);
     _clearError();
 
-    final response = await _authRepository.resetPassword(
-      email: email,
-      code: code,
-      password: password,
-    );
+    final response = await _apiService.resetPassword(email, code, password);
     _setLoading(false);
 
     if (response['success'] != true) {
@@ -129,32 +123,8 @@ class AuthProvider extends ChangeNotifier {
     return response['success'] == true;
   }
 
-  Future<bool> setupProfile({
-    required String fullName,
-    required String dob,
-    required String role,
-  }) async {
-    _setLoading(true);
-    _clearError();
-
-    try {
-      await _userRepository.setupProfile(
-        fullName: fullName,
-        dob: dob,
-        role: role,
-      );
-      final success = await loadUserProfile();
-      _setLoading(false);
-      return success;
-    } catch (e) {
-      _error = e.toString();
-      _setLoading(false);
-      return false;
-    }
-  }
-
   Future<void> logout() async {
-    await _authRepository.logout();
+    await _tokenStore.clear();
     _currentUser = null;
     notifyListeners();
   }

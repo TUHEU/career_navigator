@@ -3,8 +3,6 @@ import 'package:http/http.dart' as http;
 import '../../../core/constants/app_constants.dart';
 
 class ApiService {
-  final Map<String, String> _jsonHeaders = {'Content-Type': 'application/json'};
-
   Map<String, String> _authHeaders(String token) => {
     'Content-Type': 'application/json',
     'Authorization': 'Bearer $token',
@@ -12,21 +10,17 @@ class ApiService {
 
   dynamic _handleResponse(http.Response response) {
     try {
-      final data = jsonDecode(response.body) as Map<String, dynamic>;
-      return data;
+      return jsonDecode(response.body) as Map<String, dynamic>;
     } catch (e) {
       return {'success': false, 'message': 'Invalid response from server'};
     }
   }
 
-  // =============================================
-  // AUTH ENDPOINTS
-  // =============================================
-
+  // Auth
   Future<Map<String, dynamic>> register(String email, String password) async {
     final response = await http.post(
       Uri.parse('${AppConstants.baseUrl}${ApiEndpoints.register}'),
-      headers: _jsonHeaders,
+      headers: {'Content-Type': 'application/json'},
       body: jsonEncode({'email': email, 'password': password}),
     );
     return _handleResponse(response);
@@ -35,7 +29,7 @@ class ApiService {
   Future<Map<String, dynamic>> verifyEmail(String email, String code) async {
     final response = await http.post(
       Uri.parse('${AppConstants.baseUrl}${ApiEndpoints.verifyEmail}'),
-      headers: _jsonHeaders,
+      headers: {'Content-Type': 'application/json'},
       body: jsonEncode({'email': email, 'code': code}),
     );
     return _handleResponse(response);
@@ -44,7 +38,7 @@ class ApiService {
   Future<Map<String, dynamic>> resendCode(String email) async {
     final response = await http.post(
       Uri.parse('${AppConstants.baseUrl}${ApiEndpoints.resendCode}'),
-      headers: _jsonHeaders,
+      headers: {'Content-Type': 'application/json'},
       body: jsonEncode({'email': email}),
     );
     return _handleResponse(response);
@@ -53,7 +47,7 @@ class ApiService {
   Future<Map<String, dynamic>> login(String email, String password) async {
     final response = await http.post(
       Uri.parse('${AppConstants.baseUrl}${ApiEndpoints.login}'),
-      headers: _jsonHeaders,
+      headers: {'Content-Type': 'application/json'},
       body: jsonEncode({'email': email, 'password': password}),
     );
     return _handleResponse(response);
@@ -62,7 +56,7 @@ class ApiService {
   Future<Map<String, dynamic>> forgotPassword(String email) async {
     final response = await http.post(
       Uri.parse('${AppConstants.baseUrl}${ApiEndpoints.forgotPassword}'),
-      headers: _jsonHeaders,
+      headers: {'Content-Type': 'application/json'},
       body: jsonEncode({'email': email}),
     );
     return _handleResponse(response);
@@ -75,7 +69,7 @@ class ApiService {
   ) async {
     final response = await http.post(
       Uri.parse('${AppConstants.baseUrl}${ApiEndpoints.resetPassword}'),
-      headers: _jsonHeaders,
+      headers: {'Content-Type': 'application/json'},
       body: jsonEncode({'email': email, 'code': code, 'password': password}),
     );
     return _handleResponse(response);
@@ -89,10 +83,7 @@ class ApiService {
     return _handleResponse(response);
   }
 
-  // =============================================
-  // PROFILE ENDPOINTS
-  // =============================================
-
+  // Profile
   Future<Map<String, dynamic>> getProfile(String token) async {
     final response = await http.get(
       Uri.parse('${AppConstants.baseUrl}${ApiEndpoints.getProfile}'),
@@ -143,10 +134,7 @@ class ApiService {
     return _handleResponse(response);
   }
 
-  // =============================================
-  // EDUCATION ENDPOINTS
-  // =============================================
-
+  // Education
   Future<Map<String, dynamic>> addEducation({
     required String token,
     required Map<String, dynamic> data,
@@ -183,10 +171,7 @@ class ApiService {
     return _handleResponse(response);
   }
 
-  // =============================================
-  // WORK EXPERIENCE ENDPOINTS
-  // =============================================
-
+  // Work Experience
   Future<Map<String, dynamic>> addWorkExperience({
     required String token,
     required Map<String, dynamic> data,
@@ -223,10 +208,7 @@ class ApiService {
     return _handleResponse(response);
   }
 
-  // =============================================
-  // MENTOR REQUESTS
-  // =============================================
-
+  // Mentor Requests
   Future<Map<String, dynamic>> sendMentorRequest({
     required String token,
     required int mentorId,
@@ -240,18 +222,7 @@ class ApiService {
     return _handleResponse(response);
   }
 
-  Future<Map<String, dynamic>> getMyRequests(String token) async {
-    final response = await http.get(
-      Uri.parse('${AppConstants.baseUrl}${ApiEndpoints.requests}'),
-      headers: _authHeaders(token),
-    );
-    return _handleResponse(response);
-  }
-
-  // =============================================
-  // JOB ENDPOINTS
-  // =============================================
-
+  // Jobs
   Future<Map<String, dynamic>> getJobs({
     String? location,
     String? employmentType,
@@ -278,6 +249,13 @@ class ApiService {
     return _handleResponse(response);
   }
 
+  Future<Map<String, dynamic>> getJobDetail(int jobId) async {
+    final response = await http.get(
+      Uri.parse('${AppConstants.baseUrl}${ApiEndpoints.jobs}/$jobId'),
+    );
+    return _handleResponse(response);
+  }
+
   Future<Map<String, dynamic>> applyForJob({
     required String token,
     required int jobId,
@@ -291,10 +269,15 @@ class ApiService {
     return _handleResponse(response);
   }
 
-  // =============================================
-  // NOTIFICATION ENDPOINTS
-  // =============================================
+  Future<Map<String, dynamic>> getMyApplications(String token) async {
+    final response = await http.get(
+      Uri.parse('${AppConstants.baseUrl}${ApiEndpoints.myApplications}'),
+      headers: _authHeaders(token),
+    );
+    return _handleResponse(response);
+  }
 
+  // Notifications
   Future<Map<String, dynamic>> getNotifications(String token) async {
     final response = await http.get(
       Uri.parse('${AppConstants.baseUrl}${ApiEndpoints.notifications}'),
@@ -314,10 +297,7 @@ class ApiService {
     return _handleResponse(response);
   }
 
-  // =============================================
-  // CHAT ENDPOINTS
-  // =============================================
-
+  // Chat
   Future<Map<String, dynamic>> getConversations(String token) async {
     final response = await http.get(
       Uri.parse('${AppConstants.baseUrl}${ApiEndpoints.conversations}'),
@@ -352,10 +332,7 @@ class ApiService {
     return _handleResponse(response);
   }
 
-  // =============================================
-  // SEARCH ENDPOINT
-  // =============================================
-
+  // Search
   Future<Map<String, dynamic>> search({
     required String token,
     required String query,
@@ -367,10 +344,7 @@ class ApiService {
     return _handleResponse(response);
   }
 
-  // =============================================
-  // FEEDBACK ENDPOINT
-  // =============================================
-
+  // Feedback
   Future<Map<String, dynamic>> submitFeedback({
     required String token,
     required String subject,
