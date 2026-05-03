@@ -25,40 +25,40 @@ class PrivacyPolicyPage extends StatelessWidget {
           _buildSection('01', Icons.inventory_2_outlined, 'Information We Collect', [
             'When you use Career Navigator, we may collect the following types of information:',
             '• Account data: Your name, email address, and password when you create an account.',
-            '• Profile data: Career goals, skills, education history, and professional information you choose to provide.',
-            '• Device information: Device model, operating system version, unique device identifiers, and crash reports.',
-            '• Usage data: Features you interact with, session duration, and in-app actions.',
-            '• Location data: Approximate location data, only when you explicitly grant permission.',
+            '• Profile data: Career goals, skills, education history, and professional information.',
+            '• Device information: Device model, operating system, and unique device identifiers.',
+            '• Usage data: Features you interact with and in-app actions.',
+            '• Location data: Approximate location, only when you explicitly grant permission.',
           ], isDark),
           _buildSection('02', Icons.settings_outlined, 'How We Use Your Data', [
             'We use your data solely to operate and improve Career Navigator:',
             '• Authenticate your identity and manage your account securely.',
-            '• Personalize career recommendations, job matches, and in-app content.',
-            '• Send transactional notifications, security alerts, and important product updates.',
-            '• Analyze usage patterns to improve app performance and features.',
-            '• Detect, investigate, and prevent fraudulent or unauthorized activity.',
+            '• Personalize career recommendations and in-app content.',
+            '• Send transactional notifications and important updates.',
+            '• Analyze usage patterns to improve app features.',
+            '• Detect and prevent fraudulent activity.',
           ], isDark),
           _buildSection('03', Icons.link_outlined, 'Data Sharing & Disclosure', [
             'We do not sell, trade, or rent your personal data. We may share it only in limited circumstances:',
-            '• Service providers: Trusted third-party vendors who assist us in operating the app.',
-            '• Legal requirements: When required by applicable law or enforceable governmental request.',
-            '• Safety & protection: To protect the rights, property, or safety of our team, users, or the public.',
-            '• Business transfers: In the event of a merger or acquisition, your data may be transferred.',
+            '• Service providers: Trusted third-party vendors who assist us.',
+            '• Legal requirements: When required by applicable law.',
+            '• Safety & protection: To protect rights and safety.',
+            '• Business transfers: In the event of a merger or acquisition.',
           ], isDark),
           _buildSection('04', Icons.lock_outline, 'Data Retention & Security', [
-            'We retain your personal data for as long as your account is active. When you delete your account, we will delete or anonymize your data within 30 days.',
-            'We implement industry-standard security measures including:',
+            'We retain your personal data for as long as your account is active. When you delete your account, we will delete your data within 30 days.',
+            'We implement industry-standard security measures:',
             '• Encryption of data in transit (TLS) and at rest (AES-256).',
-            '• Secure authentication, token management, and session expiry controls.',
+            '• Secure authentication and token management.',
             '• Regular security reviews and access controls.',
           ], isDark),
           _buildSection('05', Icons.tune_outlined, 'Your Rights', [
             'In accordance with applicable law, you have the following rights:',
-            '• Access: Request a copy of the personal data we hold about you.',
-            '• Correction: Request correction of inaccurate or incomplete data.',
-            '• Deletion: Request deletion of your personal data ("right to be forgotten").',
-            '• Portability: Request your data in a structured, machine-readable format.',
-            '• Objection: Object to processing of your data for certain purposes.',
+            '• Access: Request a copy of your personal data.',
+            '• Correction: Request correction of inaccurate data.',
+            '• Deletion: Request deletion of your personal data.',
+            '• Portability: Request your data in a machine-readable format.',
+            '• Objection: Object to processing for certain purposes.',
             '• Withdraw consent: Withdraw your consent at any time.',
           ], isDark),
           _buildSection('06', Icons.mail_outline, 'Contact Us', [
@@ -110,14 +110,14 @@ class PrivacyPolicyPage extends StatelessWidget {
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           Row(
-            children: [
-              const Icon(
+            children: const [
+              Icon(
                 Icons.shield_outlined,
                 color: AppColors.primaryCyan,
                 size: 20,
               ),
-              const SizedBox(width: 8),
-              const Text(
+              SizedBox(width: 8),
+              Text(
                 'Career Navigator',
                 style: TextStyle(
                   color: AppColors.primaryCyan,

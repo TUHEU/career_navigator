@@ -40,14 +40,30 @@ class SettingsPage extends StatelessWidget {
             ),
             const SizedBox(height: 24),
 
-            // Appearance Section
-            _sectionLabel('Appearance', isDark),
+            // Appearance
+            Text(
+              'Appearance',
+              style: const TextStyle(
+                color: AppColors.primaryCyan,
+                fontSize: 12,
+                fontWeight: FontWeight.bold,
+                letterSpacing: 1.2,
+              ),
+            ),
             const SizedBox(height: 12),
             _buildThemeTile(isDark, themeProvider),
             const SizedBox(height: 28),
 
-            // Account Section
-            _sectionLabel('Account', isDark),
+            // Account
+            Text(
+              'Account',
+              style: const TextStyle(
+                color: AppColors.primaryCyan,
+                fontSize: 12,
+                fontWeight: FontWeight.bold,
+                letterSpacing: 1.2,
+              ),
+            ),
             const SizedBox(height: 12),
             _buildSettingsTile(
               icon: Icons.person_outline,
@@ -69,8 +85,16 @@ class SettingsPage extends StatelessWidget {
             ),
             const SizedBox(height: 28),
 
-            // Support Section
-            _sectionLabel('Support', isDark),
+            // Support
+            Text(
+              'Support',
+              style: const TextStyle(
+                color: AppColors.primaryCyan,
+                fontSize: 12,
+                fontWeight: FontWeight.bold,
+                letterSpacing: 1.2,
+              ),
+            ),
             const SizedBox(height: 12),
             _buildSettingsTile(
               icon: Icons.help_outline,
@@ -111,7 +135,15 @@ class SettingsPage extends StatelessWidget {
             const SizedBox(height: 28),
 
             // Account Actions
-            _sectionLabel('Account Actions', isDark),
+            Text(
+              'Account Actions',
+              style: const TextStyle(
+                color: AppColors.primaryCyan,
+                fontSize: 12,
+                fontWeight: FontWeight.bold,
+                letterSpacing: 1.2,
+              ),
+            ),
             const SizedBox(height: 12),
             _buildSettingsTile(
               icon: Icons.delete_outline,
@@ -132,9 +164,9 @@ class SettingsPage extends StatelessWidget {
                 ),
                 child: Row(
                   mainAxisAlignment: MainAxisAlignment.center,
-                  children: [
-                    const Icon(Icons.logout, color: Colors.redAccent, size: 20),
-                    const SizedBox(width: 10),
+                  children: const [
+                    Icon(Icons.logout, color: Colors.redAccent, size: 20),
+                    SizedBox(width: 10),
                     Text(
                       'Log Out',
                       style: TextStyle(
@@ -148,8 +180,6 @@ class SettingsPage extends StatelessWidget {
               ),
             ),
             const SizedBox(height: 30),
-
-            // Version Info
             Center(
               child: Text(
                 'Version 2.0.0',
@@ -161,21 +191,8 @@ class SettingsPage extends StatelessWidget {
                 ),
               ),
             ),
-            const SizedBox(height: 20),
           ],
         ),
-      ),
-    );
-  }
-
-  Widget _sectionLabel(String label, bool isDark) {
-    return Text(
-      label,
-      style: const TextStyle(
-        color: AppColors.primaryCyan,
-        fontSize: 12,
-        fontWeight: FontWeight.bold,
-        letterSpacing: 1.2,
       ),
     );
   }
@@ -273,10 +290,8 @@ class SettingsPage extends StatelessWidget {
       message: 'Are you sure you want to log out?',
       confirmText: 'Log Out',
     );
-
     if (confirmed) {
-      final authProvider = context.read<AuthProvider>();
-      await authProvider.logout();
+      await context.read<AuthProvider>().logout();
       if (context.mounted) {
         Navigator.pushAndRemoveUntil(
           context,
@@ -324,8 +339,7 @@ class SettingsPage extends StatelessWidget {
                 final apiService = ApiService();
                 final response = await apiService.deleteAccount(token);
                 if (response['success'] == true) {
-                  final authProvider = context.read<AuthProvider>();
-                  await authProvider.logout();
+                  await context.read<AuthProvider>().logout();
                   if (context.mounted) {
                     Helpers.showSnackBar(context, 'Account deleted');
                     Navigator.pushAndRemoveUntil(
@@ -354,7 +368,6 @@ class SettingsPage extends StatelessWidget {
   }
 }
 
-// Change Password Page
 class ChangePasswordPage extends StatefulWidget {
   const ChangePasswordPage({super.key});
 
@@ -367,7 +380,6 @@ class _ChangePasswordPageState extends State<ChangePasswordPage> {
   final _codeController = TextEditingController();
   final _passwordController = TextEditingController();
   final _confirmController = TextEditingController();
-
   bool _codeSent = false;
   bool _isLoading = false;
   bool _obscurePassword = true;
@@ -379,12 +391,10 @@ class _ChangePasswordPageState extends State<ChangePasswordPage> {
       Helpers.showSnackBar(context, 'Enter a valid email', isError: true);
       return;
     }
-
     setState(() => _isLoading = true);
     final authProvider = context.read<AuthProvider>();
     final success = await authProvider.forgotPassword(email);
     setState(() => _isLoading = false);
-
     if (success) {
       setState(() => _codeSent = true);
       Helpers.showSnackBar(context, 'Reset code sent! Check your email.');
@@ -402,7 +412,6 @@ class _ChangePasswordPageState extends State<ChangePasswordPage> {
     final code = _codeController.text.trim();
     final password = _passwordController.text;
     final confirm = _confirmController.text;
-
     if (code.isEmpty || code.length < 6) {
       Helpers.showSnackBar(context, 'Enter the 6-digit code', isError: true);
       return;
@@ -419,12 +428,10 @@ class _ChangePasswordPageState extends State<ChangePasswordPage> {
       Helpers.showSnackBar(context, 'Passwords do not match', isError: true);
       return;
     }
-
     setState(() => _isLoading = true);
     final authProvider = context.read<AuthProvider>();
     final success = await authProvider.resetPassword(email, code, password);
     setState(() => _isLoading = false);
-
     if (success) {
       Helpers.showSnackBar(context, 'Password changed! Please log in.');
       await authProvider.logout();
@@ -448,7 +455,6 @@ class _ChangePasswordPageState extends State<ChangePasswordPage> {
   Widget build(BuildContext context) {
     final themeProvider = context.watch<ThemeProvider>();
     final isDark = themeProvider.isDarkMode;
-
     return Scaffold(
       backgroundColor: isDark
           ? AppColors.darkBackground

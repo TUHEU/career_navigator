@@ -106,13 +106,9 @@ class _HelpFaqPageState extends State<HelpFaqPage> {
           ...List.generate(_faqs.length, (index) {
             final isExpanded = _expandedIndex == index;
             final faq = _faqs[index];
-
             return GestureDetector(
-              onTap: () {
-                setState(() {
-                  _expandedIndex = isExpanded ? null : index;
-                });
-              },
+              onTap: () =>
+                  setState(() => _expandedIndex = isExpanded ? null : index),
               child: Container(
                 margin: const EdgeInsets.only(bottom: 10),
                 decoration: BoxDecoration(

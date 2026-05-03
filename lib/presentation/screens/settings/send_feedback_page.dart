@@ -66,7 +66,6 @@ class _SendFeedbackPageState extends State<SendFeedbackPage> {
 
     if (mounted) {
       setState(() => _isSubmitting = false);
-
       if (response['success'] == true) {
         setState(() => _isSubmitted = true);
       } else {
@@ -77,13 +76,6 @@ class _SendFeedbackPageState extends State<SendFeedbackPage> {
         );
       }
     }
-  }
-
-  @override
-  void dispose() {
-    _subjectController.dispose();
-    _messageController.dispose();
-    super.dispose();
   }
 
   @override
@@ -195,11 +187,20 @@ class _SendFeedbackPageState extends State<SendFeedbackPage> {
             ),
           ),
           const SizedBox(height: 24),
-          _sectionLabel('How would you rate your experience?', isDark),
+          Text(
+            'How would you rate your experience?',
+            style: const TextStyle(
+              color: AppColors.primaryCyan,
+              fontSize: 12,
+              fontWeight: FontWeight.bold,
+              letterSpacing: 1.1,
+            ),
+          ),
           const SizedBox(height: 12),
           Row(
-            children: List.generate(5, (i) {
-              return GestureDetector(
+            children: List.generate(
+              5,
+              (i) => GestureDetector(
                 onTap: () => setState(() => _rating = i + 1),
                 child: Padding(
                   padding: const EdgeInsets.only(right: 8),
@@ -215,11 +216,19 @@ class _SendFeedbackPageState extends State<SendFeedbackPage> {
                     size: 34,
                   ),
                 ),
-              );
-            }),
+              ),
+            ),
           ),
           const SizedBox(height: 24),
-          _sectionLabel('Category', isDark),
+          Text(
+            'Category',
+            style: const TextStyle(
+              color: AppColors.primaryCyan,
+              fontSize: 12,
+              fontWeight: FontWeight.bold,
+              letterSpacing: 1.1,
+            ),
+          ),
           const SizedBox(height: 12),
           Wrap(
             spacing: 8,
@@ -267,7 +276,15 @@ class _SendFeedbackPageState extends State<SendFeedbackPage> {
             }).toList(),
           ),
           const SizedBox(height: 24),
-          _sectionLabel('Subject', isDark),
+          Text(
+            'Subject',
+            style: const TextStyle(
+              color: AppColors.primaryCyan,
+              fontSize: 12,
+              fontWeight: FontWeight.bold,
+              letterSpacing: 1.1,
+            ),
+          ),
           const SizedBox(height: 10),
           TextField(
             controller: _subjectController,
@@ -278,7 +295,15 @@ class _SendFeedbackPageState extends State<SendFeedbackPage> {
             decoration: _inputDecoration('e.g. App suggestion...', isDark),
           ),
           const SizedBox(height: 20),
-          _sectionLabel('Message', isDark),
+          Text(
+            'Message',
+            style: const TextStyle(
+              color: AppColors.primaryCyan,
+              fontSize: 12,
+              fontWeight: FontWeight.bold,
+              letterSpacing: 1.1,
+            ),
+          ),
           const SizedBox(height: 10),
           TextField(
             controller: _messageController,
@@ -298,48 +323,33 @@ class _SendFeedbackPageState extends State<SendFeedbackPage> {
             onPressed: _submitFeedback,
             isLoading: _isSubmitting,
           ),
-          const SizedBox(height: 32),
         ],
       ),
     );
   }
 
-  Widget _sectionLabel(String label, bool isDark) {
-    return Text(
-      label,
-      style: const TextStyle(
-        color: AppColors.primaryCyan,
-        fontSize: 12,
-        fontWeight: FontWeight.bold,
-        letterSpacing: 1.1,
+  InputDecoration _inputDecoration(String hint, bool isDark) => InputDecoration(
+    hintText: hint,
+    hintStyle: TextStyle(
+      color: isDark ? Colors.white.withOpacity(0.25) : Colors.grey.shade500,
+      fontSize: 13,
+    ),
+    filled: true,
+    fillColor: isDark ? Colors.white.withOpacity(0.04) : Colors.grey.shade100,
+    contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
+    border: OutlineInputBorder(
+      borderRadius: BorderRadius.circular(14),
+      borderSide: BorderSide.none,
+    ),
+    enabledBorder: OutlineInputBorder(
+      borderRadius: BorderRadius.circular(14),
+      borderSide: BorderSide(
+        color: isDark ? Colors.white.withOpacity(0.07) : Colors.grey.shade300,
       ),
-    );
-  }
-
-  InputDecoration _inputDecoration(String hint, bool isDark) {
-    return InputDecoration(
-      hintText: hint,
-      hintStyle: TextStyle(
-        color: isDark ? Colors.white.withOpacity(0.25) : Colors.grey.shade500,
-        fontSize: 13,
-      ),
-      filled: true,
-      fillColor: isDark ? Colors.white.withOpacity(0.04) : Colors.grey.shade100,
-      contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
-      border: OutlineInputBorder(
-        borderRadius: BorderRadius.circular(14),
-        borderSide: BorderSide.none,
-      ),
-      enabledBorder: OutlineInputBorder(
-        borderRadius: BorderRadius.circular(14),
-        borderSide: BorderSide(
-          color: isDark ? Colors.white.withOpacity(0.07) : Colors.grey.shade300,
-        ),
-      ),
-      focusedBorder: OutlineInputBorder(
-        borderRadius: BorderRadius.circular(14),
-        borderSide: const BorderSide(color: AppColors.primaryCyan, width: 1.5),
-      ),
-    );
-  }
+    ),
+    focusedBorder: OutlineInputBorder(
+      borderRadius: BorderRadius.circular(14),
+      borderSide: const BorderSide(color: AppColors.primaryCyan, width: 1.5),
+    ),
+  );
 }
