@@ -64,6 +64,7 @@ class SecondaryButton extends StatelessWidget {
   final String text;
   final VoidCallback onPressed;
   final IconData? icon;
+
   const SecondaryButton({
     super.key,
     required this.text,

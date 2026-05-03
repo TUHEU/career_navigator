@@ -27,8 +27,8 @@ class _JobSeekerDashboardState extends State<JobSeekerDashboard> {
   final List<Widget> _pages = [
     const _HomePage(),
     const _JobsPage(),
-    const _ChatPage(),
-    const _SearchPage(),
+    const ConversationsPage(),
+    const SearchPage(),
     const SettingsPage(),
   ];
 
@@ -125,7 +125,7 @@ class _HomePage extends StatelessWidget {
                 ),
                 onPressed: () => Navigator.push(
                   context,
-                  MaterialPageRoute(builder: (_) => const _SearchPage()),
+                  MaterialPageRoute(builder: (_) => const SearchPage()),
                 ),
               ),
             ],
@@ -274,20 +274,4 @@ class _JobsPage extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) => const JobListingsPage();
-}
-
-class _ChatPage extends StatelessWidget {
-  const _ChatPage();
-
-  @override
-  Widget build(BuildContext context) =>
-      const Scaffold(body: Center(child: Text('Chat Page - Coming Soon')));
-}
-
-class _SearchPage extends StatelessWidget {
-  const _SearchPage();
-
-  @override
-  Widget build(BuildContext context) =>
-      const Scaffold(body: Center(child: Text('Search Page - Coming Soon')));
 }

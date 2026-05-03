@@ -12,6 +12,7 @@ class AppBottomNav extends StatelessWidget {
   final int currentIndex;
   final ValueChanged<int> onTap;
   final List<NavItem> items;
+
   const AppBottomNav({
     super.key,
     required this.currentIndex,

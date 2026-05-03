@@ -10,6 +10,7 @@ class CustomTextField extends StatelessWidget {
   final String? Function(String?)? validator;
   final Widget? suffixIcon;
   final int maxLines;
+  final bool enabled;
   final bool isDark;
 
   const CustomTextField({
@@ -22,6 +23,7 @@ class CustomTextField extends StatelessWidget {
     this.validator,
     this.suffixIcon,
     this.maxLines = 1,
+    this.enabled = true,
     this.isDark = true,
   });
 
@@ -33,6 +35,7 @@ class CustomTextField extends StatelessWidget {
       keyboardType: keyboardType,
       validator: validator,
       maxLines: maxLines,
+      enabled: enabled,
       style: TextStyle(color: isDark ? Colors.white : Colors.grey.shade800),
       decoration: InputDecoration(
         prefixIcon: Icon(icon, color: AppColors.primaryCyan),
@@ -65,6 +68,60 @@ class CustomTextField extends StatelessWidget {
           borderSide: const BorderSide(color: Colors.redAccent),
         ),
         suffixIcon: suffixIcon,
+      ),
+    );
+  }
+}
+
+class SearchField extends StatelessWidget {
+  final TextEditingController controller;
+  final Function(String) onSubmitted;
+  final VoidCallback? onClear;
+  final bool isDark;
+
+  const SearchField({
+    super.key,
+    required this.controller,
+    required this.onSubmitted,
+    this.onClear,
+    this.isDark = true,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    return TextField(
+      controller: controller,
+      style: TextStyle(color: isDark ? Colors.white : Colors.grey.shade800),
+      onSubmitted: onSubmitted,
+      decoration: InputDecoration(
+        hintText: 'Search...',
+        hintStyle: TextStyle(
+          color: isDark ? Colors.white.withOpacity(0.35) : Colors.grey.shade500,
+        ),
+        prefixIcon: const Icon(Icons.search, color: AppColors.primaryCyan),
+        suffixIcon: controller.text.isNotEmpty && onClear != null
+            ? IconButton(
+                icon: Icon(
+                  Icons.clear,
+                  color: isDark
+                      ? Colors.white.withOpacity(0.5)
+                      : Colors.grey.shade500,
+                ),
+                onPressed: onClear,
+              )
+            : null,
+        filled: true,
+        fillColor: isDark
+            ? Colors.white.withOpacity(0.06)
+            : Colors.grey.shade100,
+        border: OutlineInputBorder(
+          borderRadius: BorderRadius.circular(16),
+          borderSide: BorderSide.none,
+        ),
+        focusedBorder: OutlineInputBorder(
+          borderRadius: BorderRadius.circular(16),
+          borderSide: const BorderSide(color: AppColors.primaryCyan),
+        ),
       ),
     );
   }

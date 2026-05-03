@@ -11,6 +11,7 @@ import '../../widgets/shared/loading_widgets.dart';
 import '../profile/edit_profile_page.dart';
 import '../profile/mentor_profile_page.dart';
 import '../jobs/job_listings_page.dart';
+import '../chat/chat_page.dart';
 import '../search/search_page.dart';
 import '../settings/settings_page.dart';
 
@@ -27,7 +28,8 @@ class _MentorDashboardState extends State<MentorDashboard> {
   final List<Widget> _pages = [
     const _HomePage(),
     const _JobsPage(),
-    const _SearchPage(),
+    const ConversationsPage(),
+    const SearchPage(),
     const SettingsPage(),
   ];
 
@@ -65,6 +67,7 @@ class _MentorDashboardState extends State<MentorDashboard> {
         items: const [
           NavItem(Icons.home_outlined, Icons.home, 'Home'),
           NavItem(Icons.work_outline, Icons.work, 'Jobs'),
+          NavItem(Icons.chat_bubble_outline, Icons.chat_bubble, 'Chat'),
           NavItem(Icons.search_outlined, Icons.search, 'Search'),
           NavItem(Icons.settings_outlined, Icons.settings, 'Settings'),
         ],
@@ -123,7 +126,7 @@ class _HomePage extends StatelessWidget {
                 ),
                 onPressed: () => Navigator.push(
                   context,
-                  MaterialPageRoute(builder: (_) => const _SearchPage()),
+                  MaterialPageRoute(builder: (_) => const SearchPage()),
                 ),
               ),
             ],
@@ -242,12 +245,4 @@ class _JobsPage extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) => const JobListingsPage();
-}
-
-class _SearchPage extends StatelessWidget {
-  const _SearchPage();
-
-  @override
-  Widget build(BuildContext context) =>
-      const Scaffold(body: Center(child: Text('Search Page - Coming Soon')));
 }
