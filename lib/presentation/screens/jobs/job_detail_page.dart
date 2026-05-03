@@ -11,7 +11,6 @@ import '../../widgets/shared/loading_widgets.dart';
 
 class JobDetailPage extends StatefulWidget {
   final JobListing job;
-
   const JobDetailPage({super.key, required this.job});
 
   @override
@@ -31,14 +30,11 @@ class _JobDetailPageState extends State<JobDetailPage> {
   Future<void> _checkApplicationStatus() async {
     final jobProvider = context.read<JobProvider>();
     final applied = await jobProvider.hasApplied(widget.job.id);
-    if (mounted) {
-      setState(() => _hasApplied = applied);
-    }
+    if (mounted) setState(() => _hasApplied = applied);
   }
 
   Future<void> _apply() async {
     final coverLetterController = TextEditingController();
-
     showModalBottomSheet(
       context: context,
       isScrollControlled: true,
@@ -72,7 +68,6 @@ class _JobDetailPageState extends State<JobDetailPage> {
               controller: coverLetterController,
               maxLines: 5,
               decoration: InputDecoration(
-                hintText: 'Write your cover letter here...',
                 border: OutlineInputBorder(
                   borderRadius: BorderRadius.circular(12),
                 ),
@@ -159,14 +154,6 @@ class _JobDetailPageState extends State<JobDetailPage> {
                     const SizedBox(height: 16),
                     _buildSection('Benefits', job.benefits!),
                   ],
-                  if (job.skillsRequired != null &&
-                      job.skillsRequired!.isNotEmpty) ...[
-                    const SizedBox(height: 16),
-                    _buildSection(
-                      'Skills Required',
-                      job.skillsRequired!.join(', '),
-                    ),
-                  ],
                   const SizedBox(height: 24),
                   if (_hasApplied)
                     Container(
@@ -191,7 +178,6 @@ class _JobDetailPageState extends State<JobDetailPage> {
                     )
                   else
                     PrimaryButton(text: 'Apply Now', onPressed: _apply),
-                  const SizedBox(height: 20),
                 ],
               ),
             ),
@@ -292,7 +278,7 @@ class _JobDetailPageState extends State<JobDetailPage> {
               ),
               const SizedBox(width: 4),
               Text(
-                job.experienceLevelDisplay,
+                job.experienceLevel,
                 style: TextStyle(
                   fontSize: 12,
                   color: isDark ? Colors.white70 : AppColors.lightTextSecondary,
@@ -314,24 +300,6 @@ class _JobDetailPageState extends State<JobDetailPage> {
               ),
             ],
           ),
-          const SizedBox(height: 8),
-          Row(
-            children: [
-              Icon(
-                Icons.location_city,
-                size: 16,
-                color: isDark ? Colors.white54 : Colors.grey.shade600,
-              ),
-              const SizedBox(width: 4),
-              Text(
-                job.locationTypeDisplay,
-                style: TextStyle(
-                  fontSize: 12,
-                  color: isDark ? Colors.white70 : AppColors.lightTextSecondary,
-                ),
-              ),
-            ],
-          ),
         ],
       ),
     );
@@ -339,7 +307,6 @@ class _JobDetailPageState extends State<JobDetailPage> {
 
   Widget _buildSection(String title, String content) {
     final isDark = Theme.of(context).brightness == Brightness.dark;
-
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [

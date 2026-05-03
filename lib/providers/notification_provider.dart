@@ -1,62 +1,43 @@
 import 'package:flutter/material.dart';
-import '../data/datasources/remote/api_service.dart';
-import '../data/datasources/local/token_store.dart';
+import '../data/models/chat_model.dart';
+import '../data/repositories/notification_repository.dart';
 
 class NotificationProvider extends ChangeNotifier {
-  final ApiService _apiService = ApiService();
-  final TokenStore _tokenStore = TokenStore();
+  final NotificationRepository _notificationRepository =
+      NotificationRepository();
 
-  List<Map<String, dynamic>> _notifications = [];
+  List<NotificationModel> _notifications = [];
   int _unreadCount = 0;
   bool _isLoading = false;
 
-  List<Map<String, dynamic>> get notifications => _notifications;
+  List<NotificationModel> get notifications => _notifications;
   int get unreadCount => _unreadCount;
   bool get isLoading => _isLoading;
 
   Future<void> loadNotifications() async {
-    final token = await _tokenStore.getAccess();
-    if (token == null) return;
-
-    _isLoading = true;
-    notifyListeners();
-
+    _setLoading(true);
     try {
-      final response = await _apiService.getNotifications(token);
-      if (response['success'] == true) {
-        final data = response['data'] as Map<String, dynamic>;
-        _notifications = List<Map<String, dynamic>>.from(
-          data['notifications'] ?? [],
-        );
-        _unreadCount = data['unread_count'] ?? 0;
-      }
+      _notifications = await _notificationRepository.getNotifications();
+      _unreadCount = await _notificationRepository.getUnreadCount();
+      _setLoading(false);
     } catch (e) {
-      debugPrint('Error loading notifications: $e');
-    } finally {
-      _isLoading = false;
-      notifyListeners();
+      _setLoading(false);
     }
   }
 
   Future<void> markAllAsRead() async {
-    final token = await _tokenStore.getAccess();
-    if (token == null) return;
-
     try {
-      await _apiService.markNotificationsRead(token: token);
-      for (var notification in _notifications) {
-        notification['is_read'] = 1;
-      }
+      await _notificationRepository.markAllAsRead();
       _unreadCount = 0;
+      for (var n in _notifications) {
+        n.isRead = true;
+      }
       notifyListeners();
-    } catch (e) {
-      debugPrint('Error marking notifications as read: $e');
-    }
+    } catch (e) {}
   }
 
-  void addNotification(Map<String, dynamic> notification) {
-    _notifications.insert(0, notification);
-    _unreadCount++;
+  void _setLoading(bool loading) {
+    _isLoading = loading;
     notifyListeners();
   }
 }

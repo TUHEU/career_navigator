@@ -2,7 +2,6 @@ import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 
 import '../../../core/themes/app_theme.dart';
-import '../../../core/utils/helpers.dart';
 import '../../../data/models/chat_model.dart';
 import '../../../providers/notification_provider.dart';
 import '../../../providers/theme_provider.dart';
@@ -84,10 +83,8 @@ class _NotificationsPageState extends State<NotificationsPage> {
                   vertical: 12,
                 ),
                 itemCount: notifications.length,
-                itemBuilder: (_, index) {
-                  final notification = notifications[index];
-                  return _buildNotificationCard(notification, isDark);
-                },
+                itemBuilder: (_, index) =>
+                    _buildNotificationCard(notifications[index], isDark),
               ),
             ),
     );
