@@ -71,9 +71,8 @@ class JobListing {
 
   String get salaryText {
     if (salaryMin == null && salaryMax == null) return 'Salary not specified';
-    if (salaryMin != null && salaryMax != null) {
+    if (salaryMin != null && salaryMax != null)
       return '$salaryCurrency ${salaryMin.toString()} - ${salaryMax.toString()}';
-    }
     if (salaryMin != null) return '$salaryCurrency ${salaryMin.toString()}+';
     return 'Up to $salaryCurrency ${salaryMax.toString()}';
   }

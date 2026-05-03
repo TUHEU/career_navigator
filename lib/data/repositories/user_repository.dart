@@ -6,13 +6,13 @@ class UserRepository {
   final ApiService _apiService = ApiService();
   final TokenStore _tokenStore = TokenStore();
 
-  Future<BaseUser> getProfile() async {
+  Future<User> getProfile() async {
     final token = await _tokenStore.getAccess();
     if (token == null) throw Exception('Not authenticated');
 
     final response = await _apiService.getProfile(token);
     if (response['success'] == true) {
-      return UserFactory.createUser(response['data'] as Map<String, dynamic>);
+      return User.fromJson(response['data'] as Map<String, dynamic>);
     }
     throw Exception(response['message'] ?? 'Failed to load profile');
   }
@@ -31,7 +31,6 @@ class UserRepository {
       dob: dob,
       role: role,
     );
-
     if (response['success'] != true) {
       throw Exception(response['message'] ?? 'Failed to setup profile');
     }
@@ -45,7 +44,6 @@ class UserRepository {
       token: token,
       fields: fields,
     );
-
     if (response['success'] != true) {
       throw Exception(response['message'] ?? 'Failed to update profile');
     }
@@ -59,7 +57,6 @@ class UserRepository {
       token: token,
       fields: fields,
     );
-
     if (response['success'] != true) {
       throw Exception(response['message'] ?? 'Failed to update mentor profile');
     }
@@ -73,7 +70,6 @@ class UserRepository {
       token: token,
       data: education.toJson(),
     );
-
     if (response['success'] != true) {
       throw Exception(response['message'] ?? 'Failed to add education');
     }
@@ -88,7 +84,6 @@ class UserRepository {
       id: id,
       data: education.toJson(),
     );
-
     if (response['success'] != true) {
       throw Exception(response['message'] ?? 'Failed to update education');
     }
@@ -112,7 +107,6 @@ class UserRepository {
       token: token,
       data: work.toJson(),
     );
-
     if (response['success'] != true) {
       throw Exception(response['message'] ?? 'Failed to add work experience');
     }
@@ -127,7 +121,6 @@ class UserRepository {
       id: id,
       data: work.toJson(),
     );
-
     if (response['success'] != true) {
       throw Exception(
         response['message'] ?? 'Failed to update work experience',

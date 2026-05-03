@@ -5,6 +5,24 @@ class User {
   final String? profilePictureUrl;
   final String role;
   final bool isVerified;
+  final String? phone;
+  final String? location;
+  final String? headline;
+  final String? bio;
+  final String? currentJobTitle;
+  final String? desiredJobTitle;
+  final int? yearsOfExperience;
+  final String? availability;
+  final List<Education> education;
+  final List<WorkExperience> workExperience;
+
+  // Mentor specific
+  final String? currentCompany;
+  final List<String>? expertiseAreas;
+  final double? sessionPrice;
+  final bool isAcceptingMentees;
+  final double? rating;
+  final int? totalSessions;
 
   User({
     required this.id,
@@ -13,9 +31,27 @@ class User {
     this.profilePictureUrl,
     required this.role,
     required this.isVerified,
+    this.phone,
+    this.location,
+    this.headline,
+    this.bio,
+    this.currentJobTitle,
+    this.desiredJobTitle,
+    this.yearsOfExperience,
+    this.availability,
+    this.education = const [],
+    this.workExperience = const [],
+    this.currentCompany,
+    this.expertiseAreas,
+    this.sessionPrice,
+    this.isAcceptingMentees = true,
+    this.rating,
+    this.totalSessions,
   });
 
   factory User.fromJson(Map<String, dynamic> json) {
+    final mentorProfile = json['mentor_profile'] as Map<String, dynamic>? ?? {};
+
     return User(
       id: json['id'] as int,
       email: json['email'] as String,
@@ -23,19 +59,49 @@ class User {
       profilePictureUrl: json['profile_picture_url'] as String?,
       role: json['role'] as String? ?? 'job_seeker',
       isVerified: json['is_verified'] == 1,
+      phone: json['phone'] as String? ?? mentorProfile['phone'],
+      location: json['location'] as String? ?? mentorProfile['location'],
+      headline: json['headline'] as String? ?? mentorProfile['headline'],
+      bio: json['bio'] as String? ?? mentorProfile['bio'],
+      currentJobTitle:
+          json['current_job_title'] as String? ??
+          mentorProfile['current_job_title'],
+      desiredJobTitle: json['desired_job_title'] as String?,
+      yearsOfExperience:
+          (json['years_of_experience'] ?? mentorProfile['years_of_experience'])
+              as int?,
+      availability: json['availability'] as String?,
+      education:
+          (json['education'] as List?)
+              ?.map((e) => Education.fromJson(e))
+              .toList() ??
+          [],
+      workExperience:
+          (json['work_experience'] as List?)
+              ?.map((w) => WorkExperience.fromJson(w))
+              .toList() ??
+          [],
+      currentCompany: mentorProfile['current_company'],
+      expertiseAreas: mentorProfile['expertise_areas'] != null
+          ? List<String>.from(mentorProfile['expertise_areas'])
+          : null,
+      sessionPrice: mentorProfile['session_price'] != null
+          ? double.tryParse(mentorProfile['session_price'].toString())
+          : null,
+      isAcceptingMentees: mentorProfile['is_accepting_mentees'] == 1,
+      rating: mentorProfile['rating'] != null
+          ? double.tryParse(mentorProfile['rating'].toString())
+          : null,
+      totalSessions: mentorProfile['total_sessions'] as int?,
     );
   }
 
   String get displayName => fullName ?? email.split('@').first;
-  String get initials => _getInitials(displayName);
-
-  String _getInitials(String name) {
-    if (name.isEmpty) return '?';
-    final parts = name.trim().split(' ');
-    if (parts.length >= 2) {
-      return '${parts[0][0]}${parts[1][0]}'.toUpperCase();
-    }
-    return name[0].toUpperCase();
+  String get initials {
+    if (displayName.isEmpty) return '?';
+    final parts = displayName.trim().split(' ');
+    if (parts.length >= 2) return '${parts[0][0]}${parts[1][0]}'.toUpperCase();
+    return displayName[0].toUpperCase();
   }
 }
 

@@ -27,7 +27,7 @@ class MyApp extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final themeProvider = context.watch<ThemeProvider>();
+    final themeProvider = Provider.of<ThemeProvider>(context);
 
     return MaterialApp(
       debugShowCheckedModeBanner: false,
@@ -38,13 +38,13 @@ class MyApp extends StatelessWidget {
   }
 
   ThemeData _buildTheme(bool isDark) {
-    final baseTheme = isDark ? ThemeData.dark() : ThemeData.light();
-
-    return baseTheme.copyWith(
+    return ThemeData(
       useMaterial3: true,
+      brightness: isDark ? Brightness.dark : Brightness.light,
       scaffoldBackgroundColor: isDark
           ? AppColors.darkBackground
           : AppColors.lightBackground,
+      primaryColor: AppColors.primaryCyan,
       colorScheme: ColorScheme(
         brightness: isDark ? Brightness.dark : Brightness.light,
         primary: AppColors.primaryCyan,

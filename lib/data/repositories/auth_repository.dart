@@ -69,9 +69,8 @@ class AuthRepository {
 
   Future<Map<String, dynamic>> deleteAccount() async {
     final token = await _tokenStore.getAccess();
-    if (token == null) {
+    if (token == null)
       return {'success': false, 'message': 'Not authenticated'};
-    }
     try {
       return await _apiService.deleteAccount(token);
     } catch (e) {

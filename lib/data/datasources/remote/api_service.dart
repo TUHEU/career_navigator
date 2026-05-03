@@ -222,6 +222,14 @@ class ApiService {
     return _handleResponse(response);
   }
 
+  Future<Map<String, dynamic>> getMyRequests(String token) async {
+    final response = await http.get(
+      Uri.parse('${AppConstants.baseUrl}${ApiEndpoints.requests}'),
+      headers: _authHeaders(token),
+    );
+    return _handleResponse(response);
+  }
+
   // Jobs
   Future<Map<String, dynamic>> getJobs({
     String? location,

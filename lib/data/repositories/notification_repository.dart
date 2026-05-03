@@ -1,6 +1,6 @@
 import '../datasources/remote/api_service.dart';
 import '../datasources/local/token_store.dart';
-import '../models/chat_model.dart';
+import '../models/notification_model.dart';
 
 class NotificationRepository {
   final ApiService _apiService = ApiService();
