@@ -5,7 +5,6 @@ class NavItem {
   final IconData outlinedIcon;
   final IconData filledIcon;
   final String label;
-
   const NavItem(this.outlinedIcon, this.filledIcon, this.label);
 }
 
@@ -13,7 +12,6 @@ class AppBottomNav extends StatelessWidget {
   final int currentIndex;
   final ValueChanged<int> onTap;
   final List<NavItem> items;
-
   const AppBottomNav({
     super.key,
     required this.currentIndex,
@@ -54,7 +52,6 @@ class AppBottomNav extends StatelessWidget {
               final sel = i == currentIndex;
               return GestureDetector(
                 onTap: () => onTap(i),
-                behavior: HitTestBehavior.opaque,
                 child: AnimatedContainer(
                   duration: const Duration(milliseconds: 200),
                   padding: const EdgeInsets.symmetric(

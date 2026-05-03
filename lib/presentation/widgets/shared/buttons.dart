@@ -6,7 +6,6 @@ class PrimaryButton extends StatelessWidget {
   final VoidCallback? onPressed;
   final bool isLoading;
   final bool isFullWidth;
-  final double? width;
   final IconData? icon;
 
   const PrimaryButton({
@@ -15,14 +14,13 @@ class PrimaryButton extends StatelessWidget {
     this.onPressed,
     this.isLoading = false,
     this.isFullWidth = true,
-    this.width,
     this.icon,
   });
 
   @override
   Widget build(BuildContext context) {
     return SizedBox(
-      width: isFullWidth ? double.infinity : width,
+      width: isFullWidth ? double.infinity : null,
       height: 52,
       child: ElevatedButton(
         onPressed: isLoading ? null : onPressed,
@@ -44,13 +42,10 @@ class PrimaryButton extends StatelessWidget {
                 ),
               )
             : Row(
-                mainAxisSize: isFullWidth ? MainAxisSize.max : MainAxisSize.min,
                 mainAxisAlignment: MainAxisAlignment.center,
                 children: [
-                  if (icon != null) ...[
-                    Icon(icon, size: 18),
-                    const SizedBox(width: 8),
-                  ],
+                  if (icon != null) Icon(icon, size: 18),
+                  if (icon != null) const SizedBox(width: 8),
                   Text(
                     text,
                     style: const TextStyle(
@@ -69,7 +64,6 @@ class SecondaryButton extends StatelessWidget {
   final String text;
   final VoidCallback onPressed;
   final IconData? icon;
-
   const SecondaryButton({
     super.key,
     required this.text,
@@ -87,38 +81,6 @@ class SecondaryButton extends StatelessWidget {
         foregroundColor: AppColors.primaryCyan,
         side: const BorderSide(color: AppColors.primaryCyan),
         padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
-        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
-      ),
-    );
-  }
-}
-
-class SocialButton extends StatelessWidget {
-  final String text;
-  final VoidCallback onPressed;
-  final IconData icon;
-  final Color color;
-
-  const SocialButton({
-    super.key,
-    required this.text,
-    required this.onPressed,
-    required this.icon,
-    required this.color,
-  });
-
-  @override
-  Widget build(BuildContext context) {
-    final isDark = Theme.of(context).brightness == Brightness.dark;
-
-    return OutlinedButton.icon(
-      onPressed: onPressed,
-      icon: Icon(icon, color: color),
-      label: Text(text),
-      style: OutlinedButton.styleFrom(
-        foregroundColor: isDark ? Colors.white : Colors.black87,
-        side: BorderSide(color: color.withOpacity(0.5)),
-        padding: const EdgeInsets.symmetric(vertical: 12),
         shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
       ),
     );
