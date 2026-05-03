@@ -12,7 +12,6 @@ import '../../widgets/shared/inputs.dart';
 
 class EducationFormPage extends StatefulWidget {
   final Map<String, dynamic>? existing;
-
   const EducationFormPage({super.key, this.existing});
 
   @override
@@ -30,7 +29,6 @@ class _EducationFormPageState extends State<EducationFormPage> {
 
   bool _isCurrent = false;
   bool _isLoading = false;
-
   bool get _isEdit => widget.existing != null;
 
   @override
@@ -51,8 +49,8 @@ class _EducationFormPageState extends State<EducationFormPage> {
 
   Future<void> _save() async {
     if (!_formKey.currentState!.validate()) return;
-
     setState(() => _isLoading = true);
+
     final authProvider = context.read<AuthProvider>();
     final userRepo = authProvider._userRepository;
 
@@ -76,13 +74,10 @@ class _EducationFormPageState extends State<EducationFormPage> {
         await userRepo.addEducation(education);
       }
 
-      if (mounted) {
-        Navigator.pop(context, true);
-      }
+      if (mounted) Navigator.pop(context, true);
     } catch (e) {
-      if (mounted) {
+      if (mounted)
         Helpers.showSnackBar(context, 'Failed to save: $e', isError: true);
-      }
     } finally {
       if (mounted) setState(() => _isLoading = false);
     }
@@ -119,15 +114,15 @@ class _EducationFormPageState extends State<EducationFormPage> {
                 controller: _institutionController,
                 icon: Icons.account_balance_outlined,
                 label: 'Institution / University',
-                validator: (v) => Validators.validateRequired(v, 'Institution'),
+                validator: (v) => v == null || v.isEmpty ? 'Required' : null,
                 isDark: isDark,
               ),
               const SizedBox(height: 16),
               CustomTextField(
                 controller: _degreeController,
                 icon: Icons.military_tech_outlined,
-                label: 'Degree (e.g. BSc, MBA)',
-                validator: (v) => Validators.validateRequired(v, 'Degree'),
+                label: 'Degree',
+                validator: (v) => v == null || v.isEmpty ? 'Required' : null,
                 isDark: isDark,
               ),
               const SizedBox(height: 16),
@@ -135,8 +130,7 @@ class _EducationFormPageState extends State<EducationFormPage> {
                 controller: _fieldController,
                 icon: Icons.book_outlined,
                 label: 'Field of Study',
-                validator: (v) =>
-                    Validators.validateRequired(v, 'Field of Study'),
+                validator: (v) => v == null || v.isEmpty ? 'Required' : null,
                 isDark: isDark,
               ),
               const SizedBox(height: 16),
@@ -148,7 +142,8 @@ class _EducationFormPageState extends State<EducationFormPage> {
                       icon: Icons.calendar_today_outlined,
                       label: 'Start Year',
                       keyboardType: TextInputType.number,
-                      validator: Validators.validateYear,
+                      validator: (v) =>
+                          v == null || v.isEmpty ? 'Required' : null,
                       isDark: isDark,
                     ),
                   ),

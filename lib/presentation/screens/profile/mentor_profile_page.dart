@@ -3,7 +3,6 @@ import 'package:provider/provider.dart';
 
 import '../../../core/themes/app_theme.dart';
 import '../../../core/utils/helpers.dart';
-import '../../../data/models/user_model.dart';
 import '../../../providers/auth_provider.dart';
 import '../../../providers/theme_provider.dart';
 import '../../widgets/shared/buttons.dart';
@@ -11,7 +10,6 @@ import '../../widgets/shared/inputs.dart';
 
 class MentorProfilePage extends StatefulWidget {
   final Map<String, dynamic> profile;
-
   const MentorProfilePage({super.key, required this.profile});
 
   @override
@@ -43,7 +41,6 @@ class _MentorProfilePageState extends State<MentorProfilePage> {
     super.initState();
     final mentorProfile =
         widget.profile['mentor_profile'] as Map<String, dynamic>? ?? {};
-
     _headlineController.text = mentorProfile['headline'] ?? '';
     _bioController.text = mentorProfile['bio'] ?? '';
     _phoneController.text = mentorProfile['phone'] ?? '';
@@ -59,24 +56,22 @@ class _MentorProfilePageState extends State<MentorProfilePage> {
     _accepting = mentorProfile['is_accepting_mentees'] != 0;
 
     final expertise = mentorProfile['expertise_areas'];
-    if (expertise is List) {
+    if (expertise is List)
       _expertiseController.text = expertise.join(', ');
-    } else if (expertise is String) {
+    else if (expertise is String)
       _expertiseController.text = expertise;
-    }
 
     final industries = mentorProfile['industries'];
-    if (industries is List) {
+    if (industries is List)
       _industriesController.text = industries.join(', ');
-    } else if (industries is String) {
+    else if (industries is String)
       _industriesController.text = industries;
-    }
   }
 
   Future<void> _save() async {
     if (!_formKey.currentState!.validate()) return;
-
     setState(() => _isLoading = true);
+
     final authProvider = context.read<AuthProvider>();
     final userRepo = authProvider._userRepository;
 
@@ -86,7 +81,6 @@ class _MentorProfilePageState extends State<MentorProfilePage> {
           .map((s) => s.trim())
           .where((s) => s.isNotEmpty)
           .toList();
-
       final industriesList = _industriesController.text
           .split(',')
           .map((s) => s.trim())
@@ -116,9 +110,8 @@ class _MentorProfilePageState extends State<MentorProfilePage> {
         Navigator.pop(context);
       }
     } catch (e) {
-      if (mounted) {
+      if (mounted)
         Helpers.showSnackBar(context, 'Failed to save: $e', isError: true);
-      }
     } finally {
       if (mounted) setState(() => _isLoading = false);
     }
@@ -165,14 +158,14 @@ class _MentorProfilePageState extends State<MentorProfilePage> {
               CustomTextField(
                 controller: _headlineController,
                 icon: Icons.title,
-                label: 'Headline (e.g. Senior Engineer @ Google)',
+                label: 'Headline',
                 isDark: isDark,
               ),
               const SizedBox(height: 14),
               CustomTextField(
                 controller: _bioController,
                 icon: Icons.notes_outlined,
-                label: 'Bio / About Me',
+                label: 'Bio',
                 maxLines: 4,
                 isDark: isDark,
               ),
@@ -235,7 +228,7 @@ class _MentorProfilePageState extends State<MentorProfilePage> {
               CustomTextField(
                 controller: _phoneController,
                 icon: Icons.phone_outlined,
-                label: 'Phone (optional)',
+                label: 'Phone',
                 isDark: isDark,
               ),
               const SizedBox(height: 14),
@@ -263,7 +256,7 @@ class _MentorProfilePageState extends State<MentorProfilePage> {
               CustomTextField(
                 controller: _websiteController,
                 icon: Icons.language,
-                label: 'Website / Portfolio URL',
+                label: 'Website URL',
                 isDark: isDark,
               ),
               const SizedBox(height: 22),
@@ -311,7 +304,6 @@ class _MentorProfilePageState extends State<MentorProfilePage> {
                 onPressed: _save,
                 isLoading: _isLoading,
               ),
-              const SizedBox(height: 20),
             ],
           ),
         ),

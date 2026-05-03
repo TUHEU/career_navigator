@@ -12,7 +12,6 @@ import '../../widgets/shared/inputs.dart';
 
 class WorkExperienceFormPage extends StatefulWidget {
   final Map<String, dynamic>? existing;
-
   const WorkExperienceFormPage({super.key, this.existing});
 
   @override
@@ -31,7 +30,6 @@ class _WorkExperienceFormPageState extends State<WorkExperienceFormPage> {
   bool _isCurrent = false;
   bool _isLoading = false;
   String _employmentType = 'full_time';
-
   final List<String> _employmentTypes = [
     'full_time',
     'part_time',
@@ -40,7 +38,6 @@ class _WorkExperienceFormPageState extends State<WorkExperienceFormPage> {
     'freelance',
     'volunteer',
   ];
-
   bool get _isEdit => widget.existing != null;
 
   @override
@@ -62,8 +59,8 @@ class _WorkExperienceFormPageState extends State<WorkExperienceFormPage> {
 
   Future<void> _save() async {
     if (!_formKey.currentState!.validate()) return;
-
     setState(() => _isLoading = true);
+
     final authProvider = context.read<AuthProvider>();
     final userRepo = authProvider._userRepository;
 
@@ -94,13 +91,10 @@ class _WorkExperienceFormPageState extends State<WorkExperienceFormPage> {
         await userRepo.addWorkExperience(work);
       }
 
-      if (mounted) {
-        Navigator.pop(context, true);
-      }
+      if (mounted) Navigator.pop(context, true);
     } catch (e) {
-      if (mounted) {
+      if (mounted)
         Helpers.showSnackBar(context, 'Failed to save: $e', isError: true);
-      }
     } finally {
       if (mounted) setState(() => _isLoading = false);
     }
@@ -139,7 +133,7 @@ class _WorkExperienceFormPageState extends State<WorkExperienceFormPage> {
                 controller: _companyController,
                 icon: Icons.business_outlined,
                 label: 'Company / Organization',
-                validator: (v) => Validators.validateRequired(v, 'Company'),
+                validator: (v) => v == null || v.isEmpty ? 'Required' : null,
                 isDark: isDark,
               ),
               const SizedBox(height: 16),
@@ -147,7 +141,7 @@ class _WorkExperienceFormPageState extends State<WorkExperienceFormPage> {
                 controller: _titleController,
                 icon: Icons.badge_outlined,
                 label: 'Job Title',
-                validator: (v) => Validators.validateRequired(v, 'Job Title'),
+                validator: (v) => v == null || v.isEmpty ? 'Required' : null,
                 isDark: isDark,
               ),
               const SizedBox(height: 16),
@@ -196,15 +190,17 @@ class _WorkExperienceFormPageState extends State<WorkExperienceFormPage> {
                     borderSide: const BorderSide(color: AppColors.primaryCyan),
                   ),
                 ),
-                items: _employmentTypes.map((type) {
-                  return DropdownMenuItem(
-                    value: type,
-                    child: Text(
-                      type.replaceAll('_', ' ').toUpperCase(),
-                      style: const TextStyle(fontSize: 13),
-                    ),
-                  );
-                }).toList(),
+                items: _employmentTypes
+                    .map(
+                      (type) => DropdownMenuItem(
+                        value: type,
+                        child: Text(
+                          type.replaceAll('_', ' ').toUpperCase(),
+                          style: const TextStyle(fontSize: 13),
+                        ),
+                      ),
+                    )
+                    .toList(),
                 onChanged: (value) => setState(() => _employmentType = value!),
               ),
               const SizedBox(height: 16),
@@ -216,7 +212,7 @@ class _WorkExperienceFormPageState extends State<WorkExperienceFormPage> {
                       icon: Icons.calendar_today_outlined,
                       label: 'Start Date (YYYY-MM-DD)',
                       validator: (v) =>
-                          Validators.validateRequired(v, 'Start Date'),
+                          v == null || v.isEmpty ? 'Required' : null,
                       isDark: isDark,
                     ),
                   ),

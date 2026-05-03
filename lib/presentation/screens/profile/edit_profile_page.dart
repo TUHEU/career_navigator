@@ -55,24 +55,14 @@ class _EditProfilePageState extends State<EditProfilePage> {
         _role = user.role;
         _nameController.text = user.fullName ?? '';
         _pictureUrl = user.profilePictureUrl;
-
-        if (user is JobSeeker) {
-          _phoneController.text = user.phone ?? '';
-          _locationController.text = user.location ?? '';
-          _headlineController.text = user.headline ?? '';
-          _bioController.text = user.bio ?? '';
-          _currentJobController.text = user.currentJobTitle ?? '';
-          _desiredJobController.text = user.desiredJobTitle ?? '';
-          _yearsController.text = user.yearsOfExperience?.toString() ?? '';
-          _availabilityController.text = user.availability ?? '';
-        } else if (user is Mentor) {
-          _phoneController.text = user.phone ?? '';
-          _locationController.text = user.location ?? '';
-          _headlineController.text = user.headline ?? '';
-          _bioController.text = user.bio ?? '';
-          _currentJobController.text = user.currentJobTitle ?? '';
-          _yearsController.text = user.yearsOfExperience?.toString() ?? '';
-        }
+        _phoneController.text = user.phone ?? '';
+        _locationController.text = user.location ?? '';
+        _headlineController.text = user.headline ?? '';
+        _bioController.text = user.bio ?? '';
+        _currentJobController.text = user.currentJobTitle ?? '';
+        _desiredJobController.text = user.desiredJobTitle ?? '';
+        _yearsController.text = user.yearsOfExperience?.toString() ?? '';
+        _availabilityController.text = user.availability ?? '';
       }
       _isLoading = false;
     }
@@ -83,61 +73,47 @@ class _EditProfilePageState extends State<EditProfilePage> {
       source: ImageSource.gallery,
       imageQuality: 80,
     );
-    if (picked != null) {
-      setState(() => _image = File(picked.path));
-    }
+    if (picked != null) setState(() => _image = File(picked.path));
   }
 
   Future<void> _save() async {
     if (!_formKey.currentState!.validate()) return;
-
     setState(() => _isSaving = true);
+
     final authProvider = context.read<AuthProvider>();
     final userRepo = authProvider._userRepository;
 
     try {
       final fields = <String, dynamic>{};
-
-      if (_phoneController.text.trim().isNotEmpty) {
+      if (_phoneController.text.trim().isNotEmpty)
         fields['phone'] = _phoneController.text.trim();
-      }
-      if (_locationController.text.trim().isNotEmpty) {
+      if (_locationController.text.trim().isNotEmpty)
         fields['location'] = _locationController.text.trim();
-      }
-      if (_headlineController.text.trim().isNotEmpty) {
+      if (_headlineController.text.trim().isNotEmpty)
         fields['headline'] = _headlineController.text.trim();
-      }
-      if (_bioController.text.trim().isNotEmpty) {
+      if (_bioController.text.trim().isNotEmpty)
         fields['bio'] = _bioController.text.trim();
-      }
 
       if (_role == 'job_seeker') {
-        if (_currentJobController.text.trim().isNotEmpty) {
+        if (_currentJobController.text.trim().isNotEmpty)
           fields['current_job_title'] = _currentJobController.text.trim();
-        }
-        if (_desiredJobController.text.trim().isNotEmpty) {
+        if (_desiredJobController.text.trim().isNotEmpty)
           fields['desired_job_title'] = _desiredJobController.text.trim();
-        }
-        if (_yearsController.text.trim().isNotEmpty) {
+        if (_yearsController.text.trim().isNotEmpty)
           fields['years_of_experience'] =
               int.tryParse(_yearsController.text.trim()) ?? 0;
-        }
-        if (_availabilityController.text.trim().isNotEmpty) {
+        if (_availabilityController.text.trim().isNotEmpty)
           fields['availability'] = _availabilityController.text.trim();
-        }
         await userRepo.updateJobSeekerProfile(fields);
       } else if (_role == 'mentor') {
-        if (_currentJobController.text.trim().isNotEmpty) {
+        if (_currentJobController.text.trim().isNotEmpty)
           fields['current_job_title'] = _currentJobController.text.trim();
-        }
-        if (_yearsController.text.trim().isNotEmpty) {
+        if (_yearsController.text.trim().isNotEmpty)
           fields['years_of_experience'] =
               int.tryParse(_yearsController.text.trim()) ?? 0;
-        }
         await userRepo.updateMentorProfile(fields);
       }
 
-      // Update name
       if (_nameController.text.trim().isNotEmpty) {
         await userRepo.setupProfile(
           fullName: _nameController.text.trim(),
@@ -151,13 +127,12 @@ class _EditProfilePageState extends State<EditProfilePage> {
         Navigator.pop(context);
       }
     } catch (e) {
-      if (mounted) {
+      if (mounted)
         Helpers.showSnackBar(
           context,
           'Failed to update profile: $e',
           isError: true,
         );
-      }
     } finally {
       if (mounted) setState(() => _isSaving = false);
     }
@@ -227,7 +202,8 @@ class _EditProfilePageState extends State<EditProfilePage> {
                       controller: _nameController,
                       icon: Icons.person_outline,
                       label: 'Full Name',
-                      validator: Validators.validateRequired,
+                      validator: (v) =>
+                          v == null || v.isEmpty ? 'Required' : null,
                       isDark: isDark,
                     ),
                     const SizedBox(height: 16),
@@ -235,7 +211,6 @@ class _EditProfilePageState extends State<EditProfilePage> {
                       controller: _phoneController,
                       icon: Icons.phone_outlined,
                       label: 'Phone',
-                      validator: Validators.validatePhone,
                       isDark: isDark,
                     ),
                     const SizedBox(height: 16),
