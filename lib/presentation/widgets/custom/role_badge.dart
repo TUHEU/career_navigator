@@ -3,15 +3,19 @@ import '../../../core/themes/app_theme.dart';
 
 class RoleBadge extends StatelessWidget {
   final String role;
-  final bool isDark;
-
-  const RoleBadge({super.key, required this.role, this.isDark = true});
+  const RoleBadge({super.key, required this.role});
 
   @override
   Widget build(BuildContext context) {
-    final icon = _getIcon();
-    final label = _getLabel();
-    final color = _getColor();
+    final icon = role == 'mentor'
+        ? Icons.school_outlined
+        : (role == 'admin' ? Icons.admin_panel_settings : Icons.search_rounded);
+    final label = role == 'mentor'
+        ? 'Mentor'
+        : (role == 'admin' ? 'Admin' : 'Job Seeker');
+    final color = role == 'mentor'
+        ? Colors.greenAccent
+        : (role == 'admin' ? Colors.orangeAccent : AppColors.primaryCyan);
 
     return Container(
       padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
@@ -37,44 +41,10 @@ class RoleBadge extends StatelessWidget {
       ),
     );
   }
-
-  IconData _getIcon() {
-    switch (role.toLowerCase()) {
-      case 'mentor':
-        return Icons.school_outlined;
-      case 'admin':
-        return Icons.admin_panel_settings;
-      default:
-        return Icons.search_rounded;
-    }
-  }
-
-  String _getLabel() {
-    switch (role.toLowerCase()) {
-      case 'mentor':
-        return 'Mentor';
-      case 'admin':
-        return 'Admin';
-      default:
-        return 'Job Seeker';
-    }
-  }
-
-  Color _getColor() {
-    switch (role.toLowerCase()) {
-      case 'mentor':
-        return Colors.greenAccent;
-      case 'admin':
-        return Colors.orangeAccent;
-      default:
-        return AppColors.primaryCyan;
-    }
-  }
 }
 
 class ExpertiseChip extends StatelessWidget {
   final String label;
-
   const ExpertiseChip({super.key, required this.label});
 
   @override
@@ -92,47 +62,6 @@ class ExpertiseChip extends StatelessWidget {
           color: AppColors.primaryCyan,
           fontSize: 12,
           fontWeight: FontWeight.w500,
-        ),
-      ),
-    );
-  }
-}
-
-class StatusBadge extends StatelessWidget {
-  final String status;
-  final bool isDark;
-
-  const StatusBadge({super.key, required this.status, this.isDark = true});
-
-  @override
-  Widget build(BuildContext context) {
-    Color color;
-    switch (status.toLowerCase()) {
-      case 'accepted':
-        color = Colors.green;
-        break;
-      case 'pending':
-        color = Colors.orange;
-        break;
-      case 'rejected':
-        color = Colors.red;
-        break;
-      default:
-        color = Colors.grey;
-    }
-
-    return Container(
-      padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 3),
-      decoration: BoxDecoration(
-        color: color.withOpacity(0.15),
-        borderRadius: BorderRadius.circular(12),
-      ),
-      child: Text(
-        status.toUpperCase(),
-        style: TextStyle(
-          color: color,
-          fontSize: 10,
-          fontWeight: FontWeight.w600,
         ),
       ),
     );

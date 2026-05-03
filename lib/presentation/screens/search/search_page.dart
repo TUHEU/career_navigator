@@ -74,7 +74,6 @@ class _SearchPageState extends State<SearchPage> {
       _isSending = true;
       _sendingTo = userId;
     });
-
     final token = await context.read<AuthProvider>().getAccessToken();
     if (token == null) {
       setState(() => _isSending = false);
@@ -85,13 +84,11 @@ class _SearchPageState extends State<SearchPage> {
       );
       return;
     }
-
     final response = await _apiService.sendMentorRequest(
       token: token,
       mentorId: userId,
       message: 'I would like to connect with you as my mentor.',
     );
-
     if (mounted) {
       setState(() => _isSending = false);
       if (response['success'] == true) {
@@ -104,21 +101,6 @@ class _SearchPageState extends State<SearchPage> {
         );
       }
     }
-  }
-
-  void _clearSearch() {
-    _searchController.clear();
-    setState(() {
-      _mentors = [];
-      _seekers = [];
-      _hasSearched = false;
-    });
-  }
-
-  @override
-  void dispose() {
-    _searchController.dispose();
-    super.dispose();
   }
 
   @override
@@ -138,7 +120,14 @@ class _SearchPageState extends State<SearchPage> {
             child: SearchField(
               controller: _searchController,
               onSubmitted: (_) => _search(),
-              onClear: _clearSearch,
+              onClear: () {
+                _searchController.clear();
+                setState(() {
+                  _mentors = [];
+                  _seekers = [];
+                  _hasSearched = false;
+                });
+              },
               isDark: isDark,
             ),
           ),
@@ -187,7 +176,15 @@ class _SearchPageState extends State<SearchPage> {
                     ),
                     children: [
                       if (_mentors.isNotEmpty) ...[
-                        _sectionTitle('Mentors (${_mentors.length})', isDark),
+                        Text(
+                          'Mentors (${_mentors.length})',
+                          style: const TextStyle(
+                            color: AppColors.primaryCyan,
+                            fontSize: 12,
+                            fontWeight: FontWeight.bold,
+                            letterSpacing: 1,
+                          ),
+                        ),
                         const SizedBox(height: 10),
                         ..._mentors.map(
                           (mentor) => _buildUserCard(mentor, true, isDark),
@@ -195,9 +192,14 @@ class _SearchPageState extends State<SearchPage> {
                         const SizedBox(height: 20),
                       ],
                       if (_seekers.isNotEmpty) ...[
-                        _sectionTitle(
+                        Text(
                           'Job Seekers (${_seekers.length})',
-                          isDark,
+                          style: const TextStyle(
+                            color: AppColors.primaryCyan,
+                            fontSize: 12,
+                            fontWeight: FontWeight.bold,
+                            letterSpacing: 1,
+                          ),
                         ),
                         const SizedBox(height: 10),
                         ..._seekers.map(
@@ -208,18 +210,6 @@ class _SearchPageState extends State<SearchPage> {
                   ),
           ),
         ],
-      ),
-    );
-  }
-
-  Widget _sectionTitle(String title, bool isDark) {
-    return Text(
-      title,
-      style: const TextStyle(
-        color: AppColors.primaryCyan,
-        fontSize: 12,
-        fontWeight: FontWeight.bold,
-        letterSpacing: 1,
       ),
     );
   }

@@ -2,16 +2,14 @@ import 'package:flutter/material.dart';
 import '../../../core/themes/app_theme.dart';
 
 class Dialogs {
-  static Future<bool> showConfirmDialog(
+  static Future<bool> confirm(
     BuildContext context, {
     required String title,
     required String message,
     String confirmText = 'Confirm',
     String cancelText = 'Cancel',
-    Color confirmColor = Colors.redAccent,
   }) async {
     final isDark = Theme.of(context).brightness == Brightness.dark;
-
     return await showDialog<bool>(
           context: context,
           builder: (context) => AlertDialog(
@@ -28,31 +26,19 @@ class Dialogs {
             content: Text(
               message,
               style: TextStyle(
-                color: isDark
-                    ? Colors.white.withOpacity(0.7)
-                    : AppColors.lightTextSecondary,
+                color: isDark ? Colors.white70 : AppColors.lightTextSecondary,
               ),
             ),
             actions: [
               TextButton(
                 onPressed: () => Navigator.pop(context, false),
-                child: Text(
-                  cancelText,
-                  style: TextStyle(
-                    color: isDark
-                        ? Colors.white.withOpacity(0.6)
-                        : Colors.grey.shade600,
-                  ),
-                ),
+                child: Text(cancelText),
               ),
               TextButton(
                 onPressed: () => Navigator.pop(context, true),
                 child: Text(
                   confirmText,
-                  style: TextStyle(
-                    color: confirmColor,
-                    fontWeight: FontWeight.bold,
-                  ),
+                  style: const TextStyle(color: Colors.redAccent),
                 ),
               ),
             ],
@@ -61,9 +47,8 @@ class Dialogs {
         false;
   }
 
-  static Future<void> showLoadingDialog(BuildContext context) async {
+  static Future<void> loading(BuildContext context) async {
     final isDark = Theme.of(context).brightness == Brightness.dark;
-
     return showDialog(
       context: context,
       barrierDismissible: false,
@@ -96,108 +81,7 @@ class Dialogs {
     );
   }
 
-  static void hideLoadingDialog(BuildContext context) {
+  static void hideLoading(BuildContext context) {
     Navigator.of(context).pop();
-  }
-
-  static Future<void> showErrorDialog(
-    BuildContext context,
-    String message, {
-    String title = 'Error',
-  }) async {
-    final isDark = Theme.of(context).brightness == Brightness.dark;
-
-    return showDialog(
-      context: context,
-      builder: (context) => AlertDialog(
-        backgroundColor: isDark ? AppColors.darkSurface : Colors.white,
-        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
-        title: Row(
-          children: [
-            const Icon(Icons.error_outline, color: Colors.redAccent),
-            const SizedBox(width: 8),
-            Text(
-              title,
-              style: TextStyle(
-                color: isDark ? Colors.white : AppColors.lightText,
-              ),
-            ),
-          ],
-        ),
-        content: Text(
-          message,
-          style: TextStyle(
-            color: isDark
-                ? Colors.white.withOpacity(0.7)
-                : AppColors.lightTextSecondary,
-          ),
-        ),
-        actions: [
-          TextButton(
-            onPressed: () => Navigator.pop(context),
-            child: const Text('OK'),
-          ),
-        ],
-      ),
-    );
-  }
-
-  static Future<void> showSuccessDialog(
-    BuildContext context,
-    String message, {
-    String title = 'Success',
-  }) async {
-    final isDark = Theme.of(context).brightness == Brightness.dark;
-
-    return showDialog(
-      context: context,
-      builder: (context) => AlertDialog(
-        backgroundColor: isDark ? AppColors.darkSurface : Colors.white,
-        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
-        title: Row(
-          children: [
-            const Icon(Icons.check_circle, color: Colors.green),
-            const SizedBox(width: 8),
-            Text(
-              title,
-              style: TextStyle(
-                color: isDark ? Colors.white : AppColors.lightText,
-              ),
-            ),
-          ],
-        ),
-        content: Text(
-          message,
-          style: TextStyle(
-            color: isDark
-                ? Colors.white.withOpacity(0.7)
-                : AppColors.lightTextSecondary,
-          ),
-        ),
-        actions: [
-          TextButton(
-            onPressed: () => Navigator.pop(context),
-            child: const Text('OK'),
-          ),
-        ],
-      ),
-    );
-  }
-
-  static void showSnackBar(
-    BuildContext context,
-    String message, {
-    bool isError = false,
-    Duration duration = const Duration(seconds: 3),
-  }) {
-    ScaffoldMessenger.of(context).showSnackBar(
-      SnackBar(
-        content: Text(message),
-        backgroundColor: isError ? Colors.redAccent : Colors.green,
-        behavior: SnackBarBehavior.floating,
-        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
-        duration: duration,
-      ),
-    );
   }
 }
