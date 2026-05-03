@@ -2,7 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 
 import '../../../core/themes/app_theme.dart';
-import '../../../data/models/chat_model.dart';
+import '../../../data/models/notification_model.dart';
 import '../../../providers/notification_provider.dart';
 import '../../../providers/theme_provider.dart';
 import '../../widgets/shared/loading_widgets.dart';

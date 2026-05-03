@@ -142,8 +142,7 @@ class _EducationFormPageState extends State<EducationFormPage> {
                       icon: Icons.calendar_today_outlined,
                       label: 'Start Year',
                       keyboardType: TextInputType.number,
-                      validator: (v) =>
-                          v == null || v.isEmpty ? 'Required' : null,
+                      validator: Validators.validateYear,
                       isDark: isDark,
                     ),
                   ),
@@ -154,7 +153,6 @@ class _EducationFormPageState extends State<EducationFormPage> {
                       icon: Icons.calendar_month_outlined,
                       label: _isCurrent ? 'End Year (Present)' : 'End Year',
                       keyboardType: TextInputType.number,
-                      enabled: !_isCurrent,
                       isDark: isDark,
                     ),
                   ),

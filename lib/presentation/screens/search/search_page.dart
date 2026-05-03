@@ -103,6 +103,15 @@ class _SearchPageState extends State<SearchPage> {
     }
   }
 
+  void _clearSearch() {
+    _searchController.clear();
+    setState(() {
+      _mentors = [];
+      _seekers = [];
+      _hasSearched = false;
+    });
+  }
+
   @override
   Widget build(BuildContext context) {
     final themeProvider = context.watch<ThemeProvider>();
@@ -120,14 +129,7 @@ class _SearchPageState extends State<SearchPage> {
             child: SearchField(
               controller: _searchController,
               onSubmitted: (_) => _search(),
-              onClear: () {
-                _searchController.clear();
-                setState(() {
-                  _mentors = [];
-                  _seekers = [];
-                  _hasSearched = false;
-                });
-              },
+              onClear: _clearSearch,
               isDark: isDark,
             ),
           ),

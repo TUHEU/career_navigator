@@ -222,7 +222,6 @@ class _WorkExperienceFormPageState extends State<WorkExperienceFormPage> {
                       controller: _endController,
                       icon: Icons.calendar_month_outlined,
                       label: _isCurrent ? 'End Date (Present)' : 'End Date',
-                      enabled: !_isCurrent,
                       isDark: isDark,
                     ),
                   ),

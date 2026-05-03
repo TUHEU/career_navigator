@@ -7,6 +7,7 @@ import '../../../data/datasources/remote/api_service.dart';
 import '../../../providers/auth_provider.dart';
 import '../../../providers/theme_provider.dart';
 import '../../widgets/shared/buttons.dart';
+import '../../widgets/shared/inputs.dart';
 import 'about_us_page.dart';
 import 'help_faq_page.dart';
 import 'privacy_policy_page.dart';
@@ -39,8 +40,6 @@ class SettingsPage extends StatelessWidget {
               ),
             ),
             const SizedBox(height: 24),
-
-            // Appearance
             Text(
               'Appearance',
               style: const TextStyle(
@@ -53,8 +52,6 @@ class SettingsPage extends StatelessWidget {
             const SizedBox(height: 12),
             _buildThemeTile(isDark, themeProvider),
             const SizedBox(height: 28),
-
-            // Account
             Text(
               'Account',
               style: const TextStyle(
@@ -84,8 +81,6 @@ class SettingsPage extends StatelessWidget {
               isDark: isDark,
             ),
             const SizedBox(height: 28),
-
-            // Support
             Text(
               'Support',
               style: const TextStyle(
@@ -133,8 +128,6 @@ class SettingsPage extends StatelessWidget {
               isDark: isDark,
             ),
             const SizedBox(height: 28),
-
-            // Account Actions
             Text(
               'Account Actions',
               style: const TextStyle(
@@ -162,9 +155,9 @@ class SettingsPage extends StatelessWidget {
                   borderRadius: BorderRadius.circular(14),
                   border: Border.all(color: Colors.redAccent.withOpacity(0.35)),
                 ),
-                child: Row(
+                child: const Row(
                   mainAxisAlignment: MainAxisAlignment.center,
-                  children: const [
+                  children: [
                     Icon(Icons.logout, color: Colors.redAccent, size: 20),
                     SizedBox(width: 10),
                     Text(
