@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import '../data/models/chat_model.dart';
+import '../data/models/notification_model.dart';
 import '../data/repositories/notification_repository.dart';
 
 class NotificationProvider extends ChangeNotifier {
@@ -29,8 +29,8 @@ class NotificationProvider extends ChangeNotifier {
     try {
       await _notificationRepository.markAllAsRead();
       _unreadCount = 0;
-      for (var n in _notifications) {
-        n.isRead = true;
+      for (var notification in _notifications) {
+        notification.isRead = true;
       }
       notifyListeners();
     } catch (e) {}

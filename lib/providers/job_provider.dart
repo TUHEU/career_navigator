@@ -58,6 +58,14 @@ class JobProvider extends ChangeNotifier {
     }
   }
 
+  Future<bool> hasApplied(int jobId) async {
+    try {
+      return await _jobRepository.hasApplied(jobId);
+    } catch (e) {
+      return false;
+    }
+  }
+
   void setLocationFilter(String location) {
     _selectedLocation = location;
     loadJobs();

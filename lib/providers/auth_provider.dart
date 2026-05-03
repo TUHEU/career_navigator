@@ -2,10 +2,12 @@ import 'package:flutter/material.dart';
 import '../data/datasources/local/token_store.dart';
 import '../data/datasources/remote/api_service.dart';
 import '../data/models/user_model.dart';
+import '../data/repositories/user_repository.dart';
 
 class AuthProvider extends ChangeNotifier {
   final ApiService _apiService = ApiService();
   final TokenStore _tokenStore = TokenStore();
+  final UserRepository _userRepository = UserRepository();
 
   User? _currentUser;
   bool _isLoading = false;
@@ -121,6 +123,38 @@ class AuthProvider extends ChangeNotifier {
       _error = response['message'] ?? 'Failed to reset password';
     }
     return response['success'] == true;
+  }
+
+  Future<bool> setupProfile({
+    required String fullName,
+    required String dob,
+    required String role,
+  }) async {
+    _setLoading(true);
+    _clearError();
+
+    final token = await _tokenStore.getAccess();
+    if (token == null) {
+      _error = 'Not authenticated';
+      _setLoading(false);
+      return false;
+    }
+
+    final response = await _apiService.setupProfile(
+      token: token,
+      fullName: fullName,
+      dob: dob,
+      role: role,
+    );
+    _setLoading(false);
+
+    if (response['success'] == true) {
+      await loadUserProfile();
+      return true;
+    } else {
+      _error = response['message'] ?? 'Failed to setup profile';
+      return false;
+    }
   }
 
   Future<void> logout() async {
