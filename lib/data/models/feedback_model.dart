@@ -38,22 +38,7 @@ class FeedbackModel {
     );
   }
 
-  Map<String, dynamic> toJson() {
-    return {
-      'user_id': userId,
-      'subject': subject,
-      'message': message,
-      'category': category,
-      'rating': rating,
-      'status': status,
-    };
-  }
-
-  String get ratingText {
-    if (rating == null) return 'No rating';
-    return '⭐' * rating!;
-  }
-
+  String get ratingText => rating != null ? '⭐' * rating! : 'No rating';
   bool get isPending => status == 'pending';
   bool get isReviewed => status == 'reviewed';
   bool get isResolved => status == 'resolved';

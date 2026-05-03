@@ -18,7 +18,6 @@ class JobRepository {
       search: search,
       page: page,
     );
-
     if (response['success'] == true) {
       final List<dynamic> data = response['data'] ?? [];
       return data.map((json) => JobListing.fromJson(json)).toList();
@@ -28,7 +27,6 @@ class JobRepository {
 
   Future<JobListing> getJobDetail(int jobId) async {
     final response = await _apiService.getJobDetail(jobId);
-
     if (response['success'] == true) {
       return JobListing.fromJson(response['data'] as Map<String, dynamic>);
     }
@@ -38,13 +36,11 @@ class JobRepository {
   Future<void> applyForJob(int jobId, {String? coverLetter}) async {
     final token = await _tokenStore.getAccess();
     if (token == null) throw Exception('Not authenticated');
-
     final response = await _apiService.applyForJob(
       token: token,
       jobId: jobId,
       coverLetter: coverLetter,
     );
-
     if (response['success'] != true) {
       throw Exception(response['message'] ?? 'Failed to apply for job');
     }
@@ -53,9 +49,7 @@ class JobRepository {
   Future<List<JobApplication>> getMyApplications() async {
     final token = await _tokenStore.getAccess();
     if (token == null) throw Exception('Not authenticated');
-
     final response = await _apiService.getMyApplications(token);
-
     if (response['success'] == true) {
       final List<dynamic> data = response['data'] ?? [];
       return data.map((json) => JobApplication.fromJson(json)).toList();

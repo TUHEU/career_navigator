@@ -1,6 +1,5 @@
 import '../datasources/remote/api_service.dart';
 import '../datasources/local/token_store.dart';
-import '../models/feedback_model.dart';
 
 class FeedbackRepository {
   final ApiService _apiService = ApiService();
@@ -14,7 +13,6 @@ class FeedbackRepository {
   }) async {
     final token = await _tokenStore.getAccess();
     if (token == null) throw Exception('Not authenticated');
-
     final response = await _apiService.submitFeedback(
       token: token,
       subject: subject,
@@ -22,29 +20,8 @@ class FeedbackRepository {
       category: category,
       rating: rating,
     );
-
     if (response['success'] != true) {
       throw Exception(response['message'] ?? 'Failed to submit feedback');
     }
-  }
-
-  // Admin only
-  Future<List<FeedbackModel>> getAllFeedback() async {
-    final token = await _tokenStore.getAccess();
-    if (token == null) throw Exception('Not authenticated');
-
-    // This would need an admin endpoint
-    // For now, return empty list
-    return [];
-  }
-
-  // Admin only
-  Future<void> updateFeedbackStatus(int feedbackId, String status) async {
-    final token = await _tokenStore.getAccess();
-    if (token == null) throw Exception('Not authenticated');
-
-    // This would need an admin endpoint
-    // For now, just return
-    return;
   }
 }

@@ -9,9 +9,7 @@ class NotificationRepository {
   Future<List<NotificationModel>> getNotifications() async {
     final token = await _tokenStore.getAccess();
     if (token == null) throw Exception('Not authenticated');
-
     final response = await _apiService.getNotifications(token);
-
     if (response['success'] == true) {
       final data = response['data'] as Map<String, dynamic>;
       final List<dynamic> notifications = data['notifications'] ?? [];
@@ -25,9 +23,7 @@ class NotificationRepository {
   Future<int> getUnreadCount() async {
     final token = await _tokenStore.getAccess();
     if (token == null) return 0;
-
     final response = await _apiService.getNotifications(token);
-
     if (response['success'] == true) {
       final data = response['data'] as Map<String, dynamic>;
       return data['unread_count'] as int? ?? 0;
@@ -38,9 +34,7 @@ class NotificationRepository {
   Future<void> markAllAsRead() async {
     final token = await _tokenStore.getAccess();
     if (token == null) throw Exception('Not authenticated');
-
     final response = await _apiService.markNotificationsRead(token: token);
-
     if (response['success'] != true) {
       throw Exception(response['message'] ?? 'Failed to mark as read');
     }

@@ -19,8 +19,6 @@ class ChatProvider extends ChangeNotifier {
 
   Future<void> loadConversations() async {
     _setLoading(true);
-    _clearError();
-
     try {
       _conversations = await _chatRepository.getConversations();
       _setLoading(false);
@@ -32,8 +30,6 @@ class ChatProvider extends ChangeNotifier {
 
   Future<void> loadMessages(int conversationId) async {
     _setLoading(true);
-    _clearError();
-
     try {
       _messages = await _chatRepository.getMessages(conversationId);
       _setLoading(false);
@@ -45,12 +41,10 @@ class ChatProvider extends ChangeNotifier {
 
   Future<bool> sendMessage(int recipientId, String content) async {
     _setLoading(true);
-    _clearError();
-
     try {
-      final response = await _chatRepository.sendMessage(recipientId, content);
+      await _chatRepository.sendMessage(recipientId, content);
       _setLoading(false);
-      return response['success'] == true;
+      return true;
     } catch (e) {
       _error = e.toString();
       _setLoading(false);
@@ -58,22 +52,8 @@ class ChatProvider extends ChangeNotifier {
     }
   }
 
-  Future<void> refresh() async {
-    await loadConversations();
-  }
-
-  void clearMessages() {
-    _messages = [];
-    notifyListeners();
-  }
-
   void _setLoading(bool loading) {
     _isLoading = loading;
-    notifyListeners();
-  }
-
-  void _clearError() {
-    _error = null;
     notifyListeners();
   }
 }

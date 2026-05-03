@@ -17,14 +17,9 @@ class JobProvider extends ChangeNotifier {
   List<JobApplication> get applications => _applications;
   bool get isLoading => _isLoading;
   String? get error => _error;
-  String get selectedLocation => _selectedLocation;
-  String get selectedType => _selectedType;
-  String get searchQuery => _searchQuery;
 
   Future<void> loadJobs() async {
     _setLoading(true);
-    _clearError();
-
     try {
       _jobs = await _jobRepository.getJobs(
         location: _selectedLocation != 'All' ? _selectedLocation : null,
@@ -40,8 +35,6 @@ class JobProvider extends ChangeNotifier {
 
   Future<void> loadApplications() async {
     _setLoading(true);
-    _clearError();
-
     try {
       _applications = await _jobRepository.getMyApplications();
       _setLoading(false);
@@ -53,8 +46,6 @@ class JobProvider extends ChangeNotifier {
 
   Future<bool> applyForJob(int jobId, {String? coverLetter}) async {
     _setLoading(true);
-    _clearError();
-
     try {
       await _jobRepository.applyForJob(jobId, coverLetter: coverLetter);
       await loadApplications();
@@ -65,10 +56,6 @@ class JobProvider extends ChangeNotifier {
       _setLoading(false);
       return false;
     }
-  }
-
-  Future<bool> hasApplied(int jobId) async {
-    return await _jobRepository.hasApplied(jobId);
   }
 
   void setLocationFilter(String location) {
@@ -95,11 +82,6 @@ class JobProvider extends ChangeNotifier {
 
   void _setLoading(bool loading) {
     _isLoading = loading;
-    notifyListeners();
-  }
-
-  void _clearError() {
-    _error = null;
     notifyListeners();
   }
 }
