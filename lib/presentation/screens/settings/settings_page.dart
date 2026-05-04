@@ -3,6 +3,7 @@ import 'package:provider/provider.dart';
 
 import '../../../core/themes/app_theme.dart';
 import '../../../core/utils/helpers.dart';
+import '../../../core/utils/validators.dart';
 import '../../../data/datasources/remote/api_service.dart';
 import '../../../providers/auth_provider.dart';
 import '../../../providers/theme_provider.dart';
@@ -361,6 +362,7 @@ class SettingsPage extends StatelessWidget {
   }
 }
 
+// COMPLETE CHANGE PASSWORD PAGE WITH PROPER FLOW
 class ChangePasswordPage extends StatefulWidget {
   const ChangePasswordPage({super.key});
 
@@ -371,12 +373,13 @@ class ChangePasswordPage extends StatefulWidget {
 class _ChangePasswordPageState extends State<ChangePasswordPage> {
   final _emailController = TextEditingController();
   final _codeController = TextEditingController();
-  final _passwordController = TextEditingController();
-  final _confirmController = TextEditingController();
+  final _newPasswordController = TextEditingController();
+  final _confirmPasswordController = TextEditingController();
+
   bool _codeSent = false;
   bool _isLoading = false;
-  bool _obscurePassword = true;
-  bool _obscureConfirm = true;
+  bool _obscureNewPassword = true;
+  bool _obscureConfirmPassword = true;
 
   Future<void> _sendCode() async {
     final email = _emailController.text.trim();
@@ -384,10 +387,12 @@ class _ChangePasswordPageState extends State<ChangePasswordPage> {
       Helpers.showSnackBar(context, 'Enter a valid email', isError: true);
       return;
     }
+
     setState(() => _isLoading = true);
     final authProvider = context.read<AuthProvider>();
     final success = await authProvider.forgotPassword(email);
     setState(() => _isLoading = false);
+
     if (success) {
       setState(() => _codeSent = true);
       Helpers.showSnackBar(context, 'Reset code sent! Check your email.');
@@ -403,13 +408,23 @@ class _ChangePasswordPageState extends State<ChangePasswordPage> {
   Future<void> _resetPassword() async {
     final email = _emailController.text.trim();
     final code = _codeController.text.trim();
-    final password = _passwordController.text;
-    final confirm = _confirmController.text;
+    final newPassword = _newPasswordController.text;
+    final confirmPassword = _confirmPasswordController.text;
+
+    // Validation
     if (code.isEmpty || code.length < 6) {
       Helpers.showSnackBar(context, 'Enter the 6-digit code', isError: true);
       return;
     }
-    if (password.length < 6) {
+    if (newPassword.isEmpty) {
+      Helpers.showSnackBar(
+        context,
+        'Please enter a new password',
+        isError: true,
+      );
+      return;
+    }
+    if (newPassword.length < 6) {
       Helpers.showSnackBar(
         context,
         'Password must be at least 6 characters',
@@ -417,24 +432,44 @@ class _ChangePasswordPageState extends State<ChangePasswordPage> {
       );
       return;
     }
-    if (password != confirm) {
+    if (newPassword != confirmPassword) {
       Helpers.showSnackBar(context, 'Passwords do not match', isError: true);
       return;
     }
+
     setState(() => _isLoading = true);
     final authProvider = context.read<AuthProvider>();
-    final success = await authProvider.resetPassword(email, code, password);
+    final success = await authProvider.resetPassword(email, code, newPassword);
     setState(() => _isLoading = false);
+
     if (success) {
-      Helpers.showSnackBar(context, 'Password changed! Please log in.');
-      await authProvider.logout();
-      if (context.mounted) {
-        Navigator.pushAndRemoveUntil(
-          context,
-          MaterialPageRoute(builder: (_) => const SignInPage()),
-          (_) => false,
-        );
-      }
+      // Show success message
+      showDialog(
+        context: context,
+        barrierDismissible: false,
+        builder: (ctx) => AlertDialog(
+          title: const Text('Success!'),
+          content: const Text(
+            'Your password has been changed successfully. Please log in with your new password.',
+          ),
+          actions: [
+            TextButton(
+              onPressed: () async {
+                Navigator.pop(ctx);
+                await authProvider.logout();
+                if (context.mounted) {
+                  Navigator.pushAndRemoveUntil(
+                    context,
+                    MaterialPageRoute(builder: (_) => const SignInPage()),
+                    (_) => false,
+                  );
+                }
+              },
+              child: const Text('OK'),
+            ),
+          ],
+        ),
+      );
     } else {
       Helpers.showSnackBar(
         context,
@@ -445,9 +480,19 @@ class _ChangePasswordPageState extends State<ChangePasswordPage> {
   }
 
   @override
+  void dispose() {
+    _emailController.dispose();
+    _codeController.dispose();
+    _newPasswordController.dispose();
+    _confirmPasswordController.dispose();
+    super.dispose();
+  }
+
+  @override
   Widget build(BuildContext context) {
     final themeProvider = context.watch<ThemeProvider>();
     final isDark = themeProvider.isDarkMode;
+
     return Scaffold(
       backgroundColor: isDark
           ? AppColors.darkBackground
@@ -458,19 +503,44 @@ class _ChangePasswordPageState extends State<ChangePasswordPage> {
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            Text(
-              _codeSent
-                  ? 'Enter the reset code sent to your email and choose a new password.'
-                  : 'Enter your email to receive a reset code.',
-              style: TextStyle(
-                color: isDark
-                    ? Colors.white.withOpacity(0.6)
-                    : AppColors.lightTextSecondary,
-                fontSize: 14,
-                height: 1.5,
+            // Header text
+            Container(
+              padding: const EdgeInsets.all(16),
+              decoration: BoxDecoration(
+                color: AppColors.primaryCyan.withOpacity(0.08),
+                borderRadius: BorderRadius.circular(12),
+                border: Border.all(
+                  color: AppColors.primaryCyan.withOpacity(0.25),
+                ),
+              ),
+              child: Row(
+                children: [
+                  Icon(
+                    Icons.lock_reset,
+                    color: AppColors.primaryCyan,
+                    size: 24,
+                  ),
+                  const SizedBox(width: 12),
+                  Expanded(
+                    child: Text(
+                      _codeSent
+                          ? 'Enter the 6-digit reset code sent to your email, then create a new password.'
+                          : 'Enter your email address and we\'ll send you a 6-digit reset code.',
+                      style: TextStyle(
+                        color: isDark
+                            ? Colors.white.withOpacity(0.7)
+                            : AppColors.lightTextSecondary,
+                        fontSize: 13,
+                        height: 1.5,
+                      ),
+                    ),
+                  ),
+                ],
               ),
             ),
             const SizedBox(height: 28),
+
+            // Email field (always visible)
             CustomTextField(
               controller: _emailController,
               icon: Icons.email_outlined,
@@ -478,6 +548,8 @@ class _ChangePasswordPageState extends State<ChangePasswordPage> {
               enabled: !_codeSent,
               isDark: isDark,
             ),
+
+            // Reset code field (visible after code sent)
             if (_codeSent) ...[
               const SizedBox(height: 16),
               CustomTextField(
@@ -487,56 +559,74 @@ class _ChangePasswordPageState extends State<ChangePasswordPage> {
                 keyboardType: TextInputType.number,
                 isDark: isDark,
               ),
+            ],
+
+            // New password fields (visible after code sent)
+            if (_codeSent) ...[
               const SizedBox(height: 16),
               CustomTextField(
-                controller: _passwordController,
+                controller: _newPasswordController,
                 icon: Icons.lock_outline,
                 label: 'New Password',
-                obscureText: _obscurePassword,
+                obscureText: _obscureNewPassword,
                 suffixIcon: IconButton(
                   icon: Icon(
-                    _obscurePassword
+                    _obscureNewPassword
                         ? Icons.visibility_off_outlined
                         : Icons.visibility_outlined,
                     color: AppColors.primaryCyan,
                   ),
-                  onPressed: () =>
-                      setState(() => _obscurePassword = !_obscurePassword),
+                  onPressed: () => setState(
+                    () => _obscureNewPassword = !_obscureNewPassword,
+                  ),
                 ),
                 isDark: isDark,
               ),
               const SizedBox(height: 16),
               CustomTextField(
-                controller: _confirmController,
+                controller: _confirmPasswordController,
                 icon: Icons.lock_outline,
                 label: 'Confirm New Password',
-                obscureText: _obscureConfirm,
+                obscureText: _obscureConfirmPassword,
                 suffixIcon: IconButton(
                   icon: Icon(
-                    _obscureConfirm
+                    _obscureConfirmPassword
                         ? Icons.visibility_off_outlined
                         : Icons.visibility_outlined,
                     color: AppColors.primaryCyan,
                   ),
-                  onPressed: () =>
-                      setState(() => _obscureConfirm = !_obscureConfirm),
+                  onPressed: () => setState(
+                    () => _obscureConfirmPassword = !_obscureConfirmPassword,
+                  ),
                 ),
                 isDark: isDark,
               ),
             ],
+
             const SizedBox(height: 32),
+
+            // Submit button
             PrimaryButton(
               text: _codeSent ? 'RESET PASSWORD' : 'SEND RESET CODE',
               onPressed: _codeSent ? _resetPassword : _sendCode,
               isLoading: _isLoading,
             ),
+
+            // Back to email button (when code sent)
             if (_codeSent) ...[
               const SizedBox(height: 14),
               Center(
                 child: TextButton(
-                  onPressed: () => setState(() => _codeSent = false),
+                  onPressed: () {
+                    setState(() {
+                      _codeSent = false;
+                      _codeController.clear();
+                      _newPasswordController.clear();
+                      _confirmPasswordController.clear();
+                    });
+                  },
                   child: Text(
-                    '← Change email',
+                    '← Use a different email',
                     style: TextStyle(
                       color: isDark
                           ? Colors.white.withOpacity(0.5)
