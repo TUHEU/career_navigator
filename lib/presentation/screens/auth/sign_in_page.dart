@@ -27,6 +27,13 @@ class _SignInPageState extends State<SignInPage> {
   final _passCtrl = TextEditingController();
   bool _obscure = true;
 
+  @override
+  void dispose() {
+    _emailCtrl.dispose();
+    _passCtrl.dispose();
+    super.dispose();
+  }
+
   Future<void> _signIn() async {
     if (!_formKey.currentState!.validate()) return;
 
@@ -80,7 +87,11 @@ class _SignInPageState extends State<SignInPage> {
                   ? AppColors.darkBackground
                   : AppColors.lightBackground,
               image: DecorationImage(
-                image: AssetImage(themeProvider.backgroundPath),
+                image: AssetImage(
+                  isDark
+                      ? 'assets/background/bg8.png'
+                      : 'assets/background/bg6.png',
+                ),
                 fit: BoxFit.cover,
                 opacity: 0.35,
               ),
@@ -105,6 +116,7 @@ class _SignInPageState extends State<SignInPage> {
                     _buildGlassCard(isDark, authProvider.isLoading),
                     const SizedBox(height: 28),
                     _buildSignUpRow(isDark),
+                    const SizedBox(height: 20),
                   ],
                 ),
               ),
@@ -217,7 +229,7 @@ class _SignInPageState extends State<SignInPage> {
               Align(
                 alignment: Alignment.centerRight,
                 child: GestureDetector(
-                  onTap: () => _showForgotSheet(isDark),
+                  onTap: () => _showForgotPasswordDialog(isDark),
                   child: const Text(
                     'Forgot Password?',
                     style: TextStyle(
@@ -269,8 +281,18 @@ class _SignInPageState extends State<SignInPage> {
     ],
   );
 
-  void _showForgotSheet(bool isDark) {
-    final emailCtrl = TextEditingController();
+  // COMPLETE FORGOT PASSWORD FLOW
+  void _showForgotPasswordDialog(bool isDark) {
+    final emailController = TextEditingController();
+    final codeController = TextEditingController();
+    final newPasswordController = TextEditingController();
+    final confirmPasswordController = TextEditingController();
+
+    bool codeSent = false;
+    bool isLoading = false;
+    bool obscureNewPassword = true;
+    bool obscureConfirmPassword = true;
+
     showModalBottomSheet(
       context: context,
       isScrollControlled: true,
@@ -280,7 +302,6 @@ class _SignInPageState extends State<SignInPage> {
       ),
       builder: (ctx) => StatefulBuilder(
         builder: (ctx, setSheetState) {
-          bool sending = false;
           return Padding(
             padding: EdgeInsets.only(
               left: 24,
@@ -292,59 +313,295 @@ class _SignInPageState extends State<SignInPage> {
               mainAxisSize: MainAxisSize.min,
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                Text(
-                  'Reset Password',
-                  style: TextStyle(
-                    color: isDark ? Colors.white : AppColors.lightText,
-                    fontSize: 22,
-                    fontWeight: FontWeight.bold,
-                  ),
+                // Header
+                Row(
+                  children: [
+                    Icon(
+                      Icons.lock_reset,
+                      color: AppColors.primaryCyan,
+                      size: 28,
+                    ),
+                    const SizedBox(width: 12),
+                    Text(
+                      'Reset Password',
+                      style: TextStyle(
+                        color: isDark ? Colors.white : AppColors.lightText,
+                        fontSize: 22,
+                        fontWeight: FontWeight.bold,
+                      ),
+                    ),
+                  ],
                 ),
                 const SizedBox(height: 8),
                 Text(
-                  "Enter your email and we'll send a reset code.",
+                  codeSent
+                      ? 'Enter the 6-digit reset code sent to your email, then create a new password.'
+                      : 'Enter your email address and we\'ll send you a 6-digit reset code.',
                   style: TextStyle(
                     color: isDark
                         ? Colors.white.withOpacity(0.55)
                         : AppColors.lightTextSecondary,
+                    fontSize: 13,
+                    height: 1.5,
                   ),
                 ),
                 const SizedBox(height: 20),
+
+                // Email Field (always visible)
                 CustomTextField(
-                  controller: emailCtrl,
+                  controller: emailController,
                   icon: Icons.email_outlined,
                   label: 'Email Address',
-                  keyboardType: TextInputType.emailAddress,
+                  enabled: !codeSent,
                   isDark: isDark,
                 ),
-                const SizedBox(height: 20),
-                PrimaryButton(
-                  text: 'SEND RESET CODE',
-                  onPressed: sending
-                      ? null
-                      : () async {
-                          setSheetState(() => sending = true);
-                          final authProvider = context.read<AuthProvider>();
-                          final success = await authProvider.forgotPassword(
-                            emailCtrl.text.trim(),
-                          );
-                          setSheetState(() => sending = false);
-                          Navigator.pop(ctx);
-                          if (success) {
-                            Helpers.showSnackBar(
-                              ctx,
-                              'Reset code sent! Check your email.',
-                            );
-                          } else {
-                            Helpers.showSnackBar(
-                              ctx,
-                              authProvider.error ?? 'Failed to send code',
-                              isError: true,
-                            );
-                          }
-                        },
-                  isLoading: sending,
+
+                // Reset Code Field (visible after code sent)
+                if (codeSent) ...[
+                  const SizedBox(height: 16),
+                  CustomTextField(
+                    controller: codeController,
+                    icon: Icons.lock_clock_outlined,
+                    label: '6-digit Reset Code',
+                    keyboardType: TextInputType.number,
+                    isDark: isDark,
+                  ),
+                ],
+
+                // New Password Fields (visible after code sent)
+                if (codeSent) ...[
+                  const SizedBox(height: 16),
+                  CustomTextField(
+                    controller: newPasswordController,
+                    icon: Icons.lock_outline,
+                    label: 'New Password',
+                    obscureText: obscureNewPassword,
+                    suffixIcon: IconButton(
+                      icon: Icon(
+                        obscureNewPassword
+                            ? Icons.visibility_off_outlined
+                            : Icons.visibility_outlined,
+                        color: AppColors.primaryCyan,
+                      ),
+                      onPressed: () => setSheetState(
+                        () => obscureNewPassword = !obscureNewPassword,
+                      ),
+                    ),
+                    isDark: isDark,
+                  ),
+                  const SizedBox(height: 16),
+                  CustomTextField(
+                    controller: confirmPasswordController,
+                    icon: Icons.lock_outline,
+                    label: 'Confirm New Password',
+                    obscureText: obscureConfirmPassword,
+                    suffixIcon: IconButton(
+                      icon: Icon(
+                        obscureConfirmPassword
+                            ? Icons.visibility_off_outlined
+                            : Icons.visibility_outlined,
+                        color: AppColors.primaryCyan,
+                      ),
+                      onPressed: () => setSheetState(
+                        () => obscureConfirmPassword = !obscureConfirmPassword,
+                      ),
+                    ),
+                    isDark: isDark,
+                  ),
+                ],
+
+                const SizedBox(height: 24),
+
+                // Submit Button
+                SizedBox(
+                  width: double.infinity,
+                  child: ElevatedButton(
+                    onPressed: isLoading
+                        ? null
+                        : () async {
+                            if (!codeSent) {
+                              // STEP 1: Send reset code
+                              final email = emailController.text.trim();
+                              if (email.isEmpty || !email.contains('@')) {
+                                Helpers.showSnackBar(
+                                  ctx,
+                                  'Enter a valid email',
+                                  isError: true,
+                                );
+                                return;
+                              }
+
+                              setSheetState(() => isLoading = true);
+                              final authProvider = context.read<AuthProvider>();
+                              final success = await authProvider.forgotPassword(
+                                email,
+                              );
+                              setSheetState(() => isLoading = false);
+
+                              if (success) {
+                                setSheetState(() => codeSent = true);
+                                Helpers.showSnackBar(
+                                  ctx,
+                                  'Reset code sent! Check your email.',
+                                );
+                              } else {
+                                Helpers.showSnackBar(
+                                  ctx,
+                                  authProvider.error ?? 'Failed to send code',
+                                  isError: true,
+                                );
+                              }
+                            } else {
+                              // STEP 2: Reset password with code
+                              final email = emailController.text.trim();
+                              final code = codeController.text.trim();
+                              final newPassword = newPasswordController.text;
+                              final confirmPassword =
+                                  confirmPasswordController.text;
+
+                              // Validations
+                              if (code.isEmpty || code.length < 6) {
+                                Helpers.showSnackBar(
+                                  ctx,
+                                  'Enter the 6-digit code',
+                                  isError: true,
+                                );
+                                return;
+                              }
+                              if (newPassword.isEmpty) {
+                                Helpers.showSnackBar(
+                                  ctx,
+                                  'Please enter a new password',
+                                  isError: true,
+                                );
+                                return;
+                              }
+                              if (newPassword.length < 6) {
+                                Helpers.showSnackBar(
+                                  ctx,
+                                  'Password must be at least 6 characters',
+                                  isError: true,
+                                );
+                                return;
+                              }
+                              if (newPassword != confirmPassword) {
+                                Helpers.showSnackBar(
+                                  ctx,
+                                  'Passwords do not match',
+                                  isError: true,
+                                );
+                                return;
+                              }
+
+                              setSheetState(() => isLoading = true);
+                              final authProvider = context.read<AuthProvider>();
+                              final success = await authProvider.resetPassword(
+                                email,
+                                code,
+                                newPassword,
+                              );
+                              setSheetState(() => isLoading = false);
+
+                              if (success) {
+                                // Close bottom sheet
+                                Navigator.pop(ctx);
+
+                                // Show success dialog
+                                showDialog(
+                                  context: context,
+                                  barrierDismissible: false,
+                                  builder: (dialogCtx) => AlertDialog(
+                                    backgroundColor: isDark
+                                        ? AppColors.darkSurface
+                                        : Colors.white,
+                                    shape: RoundedRectangleBorder(
+                                      borderRadius: BorderRadius.circular(16),
+                                    ),
+                                    title: Row(
+                                      children: const [
+                                        Icon(
+                                          Icons.check_circle,
+                                          color: Colors.green,
+                                          size: 28,
+                                        ),
+                                        SizedBox(width: 12),
+                                        Text('Success!'),
+                                      ],
+                                    ),
+                                    content: const Text(
+                                      'Your password has been changed successfully. Please log in with your new password.',
+                                    ),
+                                    actions: [
+                                      TextButton(
+                                        onPressed: () {
+                                          Navigator.pop(dialogCtx);
+                                        },
+                                        child: const Text('OK'),
+                                      ),
+                                    ],
+                                  ),
+                                );
+                              } else {
+                                Helpers.showSnackBar(
+                                  ctx,
+                                  authProvider.error ??
+                                      'Failed to reset password',
+                                  isError: true,
+                                );
+                              }
+                            }
+                          },
+                    style: ElevatedButton.styleFrom(
+                      backgroundColor: AppColors.primaryCyan,
+                      foregroundColor: Colors.black,
+                      padding: const EdgeInsets.symmetric(vertical: 14),
+                      shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(15),
+                      ),
+                    ),
+                    child: isLoading
+                        ? const SizedBox(
+                            width: 22,
+                            height: 22,
+                            child: CircularProgressIndicator(
+                              strokeWidth: 2.5,
+                              color: Colors.black,
+                            ),
+                          )
+                        : Text(
+                            codeSent ? 'RESET PASSWORD' : 'SEND RESET CODE',
+                            style: const TextStyle(
+                              fontWeight: FontWeight.bold,
+                              fontSize: 15,
+                            ),
+                          ),
+                  ),
                 ),
+
+                // Back to email button (when code sent)
+                if (codeSent) ...[
+                  const SizedBox(height: 14),
+                  Center(
+                    child: TextButton(
+                      onPressed: () {
+                        setSheetState(() {
+                          codeSent = false;
+                          codeController.clear();
+                          newPasswordController.clear();
+                          confirmPasswordController.clear();
+                        });
+                      },
+                      child: Text(
+                        '← Use a different email',
+                        style: TextStyle(
+                          color: isDark
+                              ? Colors.white.withOpacity(0.5)
+                              : Colors.grey.shade600,
+                        ),
+                      ),
+                    ),
+                  ),
+                ],
               ],
             ),
           );
