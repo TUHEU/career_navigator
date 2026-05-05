@@ -5,6 +5,7 @@ import 'package:provider/provider.dart';
 import 'core/themes/app_theme.dart';
 import 'providers/auth_provider.dart';
 import 'providers/theme_provider.dart';
+import 'providers/video_provider.dart';
 import 'presentation/screens/auth/splash_screen.dart';
 
 void main() async {
@@ -16,6 +17,7 @@ void main() async {
       providers: [
         ChangeNotifierProvider(create: (_) => ThemeProvider()),
         ChangeNotifierProvider(create: (_) => AuthProvider()),
+        ChangeNotifierProvider(create: (_) => VideoProvider()),
       ],
       child: const MyApp(),
     ),
