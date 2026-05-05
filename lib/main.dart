@@ -6,6 +6,7 @@ import 'core/themes/app_theme.dart';
 import 'providers/auth_provider.dart';
 import 'providers/theme_provider.dart';
 import 'presentation/screens/auth/splash_screen.dart';
+import 'presentation/screens/questionnaire/questionnaire_screen.dart';
 
 void main() async {
   WidgetsBinding widgetsBinding = WidgetsFlutterBinding.ensureInitialized();
@@ -34,6 +35,7 @@ class MyApp extends StatelessWidget {
       title: 'Career Navigator',
       theme: _buildTheme(themeProvider.isDarkMode),
       home: const SplashScreen(),
+      routes: {'/questionnaire': (context) => const QuestionnaireScreen()},
     );
   }
 

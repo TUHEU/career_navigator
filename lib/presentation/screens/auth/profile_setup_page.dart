@@ -1,4 +1,5 @@
 import 'dart:io';
+import 'package:career_navigator/presentation/screens/questionnaire/questionnaire_screen.dart';
 import 'package:flutter/material.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:provider/provider.dart';
@@ -11,6 +12,7 @@ import '../../widgets/shared/buttons.dart';
 import '../../widgets/shared/inputs.dart';
 import '../dashboard/job_seeker_dashboard.dart';
 import '../dashboard/mentor_dashboard.dart';
+import '../questionnaire/questionnaire_screen.dart';
 
 class ProfileSetupPage extends StatefulWidget {
   const ProfileSetupPage({super.key});
@@ -73,7 +75,7 @@ class _ProfileSetupPageState extends State<ProfileSetupPage> {
       } else {
         Navigator.pushReplacement(
           context,
-          MaterialPageRoute(builder: (_) => const JobSeekerDashboard()),
+          MaterialPageRoute(builder: (_) => const QuestionnaireScreen()),
         );
       }
     } else {
