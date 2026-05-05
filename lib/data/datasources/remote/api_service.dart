@@ -132,6 +132,18 @@ class ApiService {
     return _handleResponse(response);
   }
 
+  Future<Map<String, dynamic>> updatePicture({
+    required String token,
+    required String pictureUrl,
+  }) async {
+    final response = await http.put(
+      Uri.parse('${AppConstants.baseUrl}${ApiEndpoints.updatePicture}'),
+      headers: _authHeaders(token),
+      body: jsonEncode({'picture_url': pictureUrl}),
+    );
+    return _handleResponse(response);
+  }
+
   Future<Map<String, dynamic>> updateJobSeekerProfile({
     required String token,
     required Map<String, dynamic> fields,
@@ -237,6 +249,37 @@ class ApiService {
   }
 
   // ============================================================
+  // MENTOR ENDPOINTS
+  // ============================================================
+
+  Future<Map<String, dynamic>> listMentors({
+    required String token,
+    String expertise = '',
+    int page = 1,
+  }) async {
+    final uri = Uri.parse('${AppConstants.baseUrl}${ApiEndpoints.mentors}')
+        .replace(
+          queryParameters: {
+            if (expertise.isNotEmpty) 'expertise': expertise,
+            'page': '$page',
+          },
+        );
+    final response = await http.get(uri, headers: _authHeaders(token));
+    return _handleResponse(response);
+  }
+
+  Future<Map<String, dynamic>> getMentorDetail({
+    required String token,
+    required int mentorId,
+  }) async {
+    final response = await http.get(
+      Uri.parse('${AppConstants.baseUrl}${ApiEndpoints.mentors}/$mentorId'),
+      headers: _authHeaders(token),
+    );
+    return _handleResponse(response);
+  }
+
+  // ============================================================
   // MENTOR REQUEST ENDPOINTS
   // ============================================================
 
@@ -257,6 +300,21 @@ class ApiService {
     final response = await http.get(
       Uri.parse('${AppConstants.baseUrl}${ApiEndpoints.requests}'),
       headers: _authHeaders(token),
+    );
+    return _handleResponse(response);
+  }
+
+  Future<Map<String, dynamic>> respondToRequest({
+    required String token,
+    required int requestId,
+    required String action,
+  }) async {
+    final response = await http.put(
+      Uri.parse(
+        '${AppConstants.baseUrl}${ApiEndpoints.requests}/$requestId/respond',
+      ),
+      headers: _authHeaders(token),
+      body: jsonEncode({'action': action}),
     );
     return _handleResponse(response);
   }
@@ -298,15 +356,52 @@ class ApiService {
     return _handleResponse(response);
   }
 
+  Future<Map<String, dynamic>> createJob({
+    required String token,
+    required Map<String, dynamic> data,
+  }) async {
+    final response = await http.post(
+      Uri.parse('${AppConstants.baseUrl}${ApiEndpoints.jobs}'),
+      headers: _authHeaders(token),
+      body: jsonEncode(data),
+    );
+    return _handleResponse(response);
+  }
+
+  Future<Map<String, dynamic>> updateJob({
+    required String token,
+    required int jobId,
+    required Map<String, dynamic> data,
+  }) async {
+    final response = await http.put(
+      Uri.parse('${AppConstants.baseUrl}${ApiEndpoints.jobs}/$jobId'),
+      headers: _authHeaders(token),
+      body: jsonEncode(data),
+    );
+    return _handleResponse(response);
+  }
+
+  Future<Map<String, dynamic>> deleteJob({
+    required String token,
+    required int jobId,
+  }) async {
+    final response = await http.delete(
+      Uri.parse('${AppConstants.baseUrl}${ApiEndpoints.jobs}/$jobId'),
+      headers: _authHeaders(token),
+    );
+    return _handleResponse(response);
+  }
+
   Future<Map<String, dynamic>> applyForJob({
     required String token,
     required int jobId,
     String? coverLetter,
+    String? resumeUrl,
   }) async {
     final response = await http.post(
       Uri.parse('${AppConstants.baseUrl}${ApiEndpoints.jobs}/$jobId/apply'),
       headers: _authHeaders(token),
-      body: jsonEncode({'cover_letter': coverLetter}),
+      body: jsonEncode({'cover_letter': coverLetter, 'resume_url': resumeUrl}),
     );
     return _handleResponse(response);
   }
@@ -323,21 +418,25 @@ class ApiService {
   // NOTIFICATION ENDPOINTS
   // ============================================================
 
-  Future<Map<String, dynamic>> getNotifications(String token) async {
-    final response = await http.get(
-      Uri.parse('${AppConstants.baseUrl}${ApiEndpoints.notifications}'),
-      headers: _authHeaders(token),
-    );
+  Future<Map<String, dynamic>> getNotifications(
+    String token, {
+    int page = 1,
+  }) async {
+    final uri = Uri.parse(
+      '${AppConstants.baseUrl}${ApiEndpoints.notifications}',
+    ).replace(queryParameters: {'page': '$page'});
+    final response = await http.get(uri, headers: _authHeaders(token));
     return _handleResponse(response);
   }
 
   Future<Map<String, dynamic>> markNotificationsRead({
     required String token,
+    List<int> ids = const [],
   }) async {
     final response = await http.put(
       Uri.parse('${AppConstants.baseUrl}${ApiEndpoints.markNotificationsRead}'),
       headers: _authHeaders(token),
-      body: jsonEncode({}),
+      body: jsonEncode({'ids': ids}),
     );
     return _handleResponse(response);
   }
@@ -357,13 +456,12 @@ class ApiService {
   Future<Map<String, dynamic>> getMessages({
     required String token,
     required int conversationId,
+    int page = 1,
   }) async {
-    final response = await http.get(
-      Uri.parse(
-        '${AppConstants.baseUrl}${ApiEndpoints.messages}/$conversationId',
-      ),
-      headers: _authHeaders(token),
-    );
+    final uri = Uri.parse(
+      '${AppConstants.baseUrl}${ApiEndpoints.messages}/$conversationId',
+    ).replace(queryParameters: {'page': '$page'});
+    final response = await http.get(uri, headers: _authHeaders(token));
     return _handleResponse(response);
   }
 
@@ -387,10 +485,12 @@ class ApiService {
   Future<Map<String, dynamic>> search({
     required String token,
     required String query,
+    String kind = 'all',
+    int page = 1,
   }) async {
     final uri = Uri.parse(
       '${AppConstants.baseUrl}${ApiEndpoints.search}',
-    ).replace(queryParameters: {'q': query});
+    ).replace(queryParameters: {'q': query, 'kind': kind, 'page': '$page'});
     final response = await http.get(uri, headers: _authHeaders(token));
     return _handleResponse(response);
   }
