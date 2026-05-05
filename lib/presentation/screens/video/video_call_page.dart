@@ -36,6 +36,10 @@ class _VideoCallPageState extends State<VideoCallPage> {
   Timer? _durationTimer;
   int _callDuration = 0;
 
+  // Video view controllers
+  VideoViewController? _localVideoController;
+  VideoViewController? _remoteVideoController;
+
   @override
   void initState() {
     super.initState();
@@ -69,9 +73,11 @@ class _VideoCallPageState extends State<VideoCallPage> {
       RtcEngineEventHandler(
         onJoinChannelSuccess: (RtcConnection connection, int elapsed) {
           setState(() => _isJoined = true);
+          _setupLocalVideo();
         },
         onUserJoined: (RtcConnection connection, int remoteUid, int elapsed) {
           setState(() => _remoteUid = remoteUid);
+          _setupRemoteVideo(remoteUid);
         },
         onUserOffline:
             (
@@ -80,6 +86,7 @@ class _VideoCallPageState extends State<VideoCallPage> {
               UserOfflineReasonType reason,
             ) {
               setState(() => _remoteUid = null);
+              _remoteVideoController = null;
             },
         onError: (err, msg) {
           debugPrint('Agora error: $err - $msg');
@@ -97,9 +104,6 @@ class _VideoCallPageState extends State<VideoCallPage> {
     // Enable video
     await _engine.enableVideo();
 
-    // Setup local video
-    await _engine.enableLocalVideo(true);
-
     // Join channel
     await _engine.joinChannel(
       token: widget.token,
@@ -109,7 +113,33 @@ class _VideoCallPageState extends State<VideoCallPage> {
     );
   }
 
+  void _setupLocalVideo() async {
+    // Create local video view controller
+    final localVideo = await createVideoViewController(
+      _engine,
+      VideoCanvasType.texture,
+      0,
+    );
+    setState(() {
+      _localVideoController = localVideo;
+    });
+    await _engine.startPreview();
+  }
+
+  void _setupRemoteVideo(int uid) async {
+    // Create remote video view controller
+    final remoteVideo = await createVideoViewController(
+      _engine,
+      VideoCanvasType.texture,
+      uid,
+    );
+    setState(() {
+      _remoteVideoController = remoteVideo;
+    });
+  }
+
   Future<void> _leaveCall() async {
+    _durationTimer?.cancel();
     await _engine.leaveChannel();
     await _engine.release();
 
@@ -157,14 +187,8 @@ class _VideoCallPageState extends State<VideoCallPage> {
       body: Stack(
         children: [
           // Remote video (full screen)
-          if (_remoteUid != null)
-            AgoraVideoView(
-              view: VideoView(
-                uid: _remoteUid!,
-                channelId: widget.channelName,
-                renderMode: RenderMode.hidden,
-              ),
-            )
+          if (_remoteVideoController != null)
+            AgoraVideoView(controller: _remoteVideoController!)
           else
             Container(
               color: Colors.black,
@@ -196,28 +220,23 @@ class _VideoCallPageState extends State<VideoCallPage> {
             ),
 
           // Local video (small overlay)
-          Positioned(
-            top: 60,
-            right: 16,
-            child: Container(
-              width: 100,
-              height: 150,
-              decoration: BoxDecoration(
-                borderRadius: BorderRadius.circular(12),
-                border: Border.all(color: Colors.white, width: 2),
-              ),
-              child: ClipRRect(
-                borderRadius: BorderRadius.circular(10),
-                child: AgoraVideoView(
-                  view: VideoView(
-                    uid: 0,
-                    channelId: widget.channelName,
-                    renderMode: RenderMode.fit,
-                  ),
+          if (_localVideoController != null)
+            Positioned(
+              top: 60,
+              right: 16,
+              child: Container(
+                width: 100,
+                height: 150,
+                decoration: BoxDecoration(
+                  borderRadius: BorderRadius.circular(12),
+                  border: Border.all(color: Colors.white, width: 2),
+                ),
+                child: ClipRRect(
+                  borderRadius: BorderRadius.circular(10),
+                  child: AgoraVideoView(controller: _localVideoController!),
                 ),
               ),
             ),
-          ),
 
           // Top bar
           Positioned(
