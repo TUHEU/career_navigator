@@ -61,7 +61,7 @@ class PrivacyPolicyPage extends StatelessWidget {
             '• Objection: Object to processing for certain purposes.',
             '• Withdraw consent: Withdraw your consent at any time.',
           ], isDark),
-          _buildSection('06', Icons.mail_outline, 'Contact Us', [
+          _buildSection('06', Icons.mail_outlined, 'Contact Us', [
             'If you have any questions or concerns regarding this Privacy Policy, please reach out:',
             '• GitHub: github.com/career-navigator',
             '• Country: Cameroon',

@@ -45,9 +45,7 @@ class _VideoCallPageState extends State<VideoCallPage> {
 
   void _startDurationTimer() {
     _durationTimer = Timer.periodic(const Duration(seconds: 1), (timer) {
-      if (mounted) {
-        setState(() => _callDuration++);
-      }
+      if (mounted) setState(() => _callDuration++);
     });
   }
 
@@ -64,23 +62,17 @@ class _VideoCallPageState extends State<VideoCallPage> {
 
     _engine.registerEventHandler(
       RtcEngineEventHandler(
-        onJoinChannelSuccess: (RtcConnection connection, int elapsed) {
-          setState(() => _isJoined = true);
-        },
-        onUserJoined: (RtcConnection connection, int remoteUid, int elapsed) {
-          setState(() => _remoteUid = remoteUid);
-        },
+        onJoinChannelSuccess: (RtcConnection connection, int elapsed) =>
+            setState(() => _isJoined = true),
+        onUserJoined: (RtcConnection connection, int remoteUid, int elapsed) =>
+            setState(() => _remoteUid = remoteUid),
         onUserOffline:
             (
               RtcConnection connection,
               int remoteUid,
               UserOfflineReasonType reason,
-            ) {
-              setState(() => _remoteUid = null);
-            },
-        onError: (err, msg) {
-          debugPrint('Agora error: $err - $msg');
-        },
+            ) => setState(() => _remoteUid = null),
+        onError: (err, msg) => debugPrint('Agora error: $err - $msg'),
       ),
     );
 
@@ -89,10 +81,8 @@ class _VideoCallPageState extends State<VideoCallPage> {
           ? ClientRoleType.clientRoleBroadcaster
           : ClientRoleType.clientRoleAudience,
     );
-
     await _engine.enableVideo();
     await _engine.enableLocalVideo(true);
-
     await _engine.joinChannel(
       token: widget.token,
       channelId: widget.channelName,
@@ -104,13 +94,9 @@ class _VideoCallPageState extends State<VideoCallPage> {
   Future<void> _leaveCall() async {
     await _engine.leaveChannel();
     await _engine.release();
-
     final videoProvider = context.read<VideoProvider>();
     await videoProvider.endCall();
-
-    if (mounted) {
-      Navigator.pop(context);
-    }
+    if (mounted) Navigator.pop(context);
   }
 
   void _toggleMute() {
@@ -127,11 +113,8 @@ class _VideoCallPageState extends State<VideoCallPage> {
     _engine.switchCamera();
   }
 
-  String _formatDuration(int seconds) {
-    final minutes = seconds ~/ 60;
-    final remainingSeconds = seconds % 60;
-    return '${minutes.toString().padLeft(2, '0')}:${remainingSeconds.toString().padLeft(2, '0')}';
-  }
+  String _formatDuration(int seconds) =>
+      '${(seconds ~/ 60).toString().padLeft(2, '0')}:${(seconds % 60).toString().padLeft(2, '0')}';
 
   @override
   void dispose() {
@@ -147,7 +130,6 @@ class _VideoCallPageState extends State<VideoCallPage> {
       backgroundColor: Colors.black,
       body: Stack(
         children: [
-          // Remote video (full screen)
           if (_remoteUid != null)
             AgoraVideoView(
               controller: VideoViewController.remote(
@@ -185,8 +167,6 @@ class _VideoCallPageState extends State<VideoCallPage> {
                 ),
               ),
             ),
-
-          // Local video (small overlay)
           Positioned(
             top: 60,
             right: 16,
@@ -208,8 +188,6 @@ class _VideoCallPageState extends State<VideoCallPage> {
               ),
             ),
           ),
-
-          // Top bar
           Positioned(
             top: 20,
             left: 0,
@@ -220,7 +198,7 @@ class _VideoCallPageState extends State<VideoCallPage> {
                 children: [
                   IconButton(
                     icon: const Icon(Icons.arrow_back, color: Colors.white),
-                    onPressed: () => _leaveCall(),
+                    onPressed: _leaveCall,
                   ),
                   Container(
                     padding: const EdgeInsets.symmetric(
@@ -241,8 +219,6 @@ class _VideoCallPageState extends State<VideoCallPage> {
               ),
             ),
           ),
-
-          // Bottom controls
           Positioned(
             bottom: 30,
             left: 0,
