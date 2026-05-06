@@ -80,3 +80,82 @@ class JobListing {
   String get employmentTypeDisplay =>
       employmentType.replaceAll('_', ' ').toUpperCase();
 }
+
+// JOB APPLICATION CLASS - FIXED
+class JobApplication {
+  final int id;
+  final int jobId;
+  final String status;
+  final DateTime appliedAt;
+  final String title;
+  final String company;
+  final String? location;
+  final String? employmentType;
+  final int? salaryMin;
+  final int? salaryMax;
+  final String? salaryCurrency;
+
+  JobApplication({
+    required this.id,
+    required this.jobId,
+    required this.status,
+    required this.appliedAt,
+    required this.title,
+    required this.company,
+    this.location,
+    this.employmentType,
+    this.salaryMin,
+    this.salaryMax,
+    this.salaryCurrency,
+  });
+
+  factory JobApplication.fromJson(Map<String, dynamic> json) {
+    return JobApplication(
+      id: json['id'] as int? ?? 0,
+      jobId: json['job_id'] as int? ?? 0,
+      status: json['status'] as String? ?? 'pending',
+      appliedAt: DateTime.tryParse(json['applied_at'] ?? '') ?? DateTime.now(),
+      title: json['title'] as String? ?? '',
+      company: json['company'] as String? ?? '',
+      location: json['location'] as String?,
+      employmentType: json['employment_type'] as String?,
+      salaryMin: json['salary_min'] as int?,
+      salaryMax: json['salary_max'] as int?,
+      salaryCurrency: json['salary_currency'] as String?,
+    );
+  }
+
+  String get statusDisplay {
+    switch (status) {
+      case 'pending':
+        return 'Pending Review';
+      case 'reviewed':
+        return 'Reviewed';
+      case 'shortlisted':
+        return 'Shortlisted';
+      case 'rejected':
+        return 'Not Selected';
+      case 'hired':
+        return 'Hired!';
+      default:
+        return status;
+    }
+  }
+
+  Color get statusColor {
+    switch (status) {
+      case 'pending':
+        return Colors.orange;
+      case 'reviewed':
+        return Colors.blue;
+      case 'shortlisted':
+        return Colors.green;
+      case 'rejected':
+        return Colors.red;
+      case 'hired':
+        return Colors.purple;
+      default:
+        return Colors.grey;
+    }
+  }
+}
