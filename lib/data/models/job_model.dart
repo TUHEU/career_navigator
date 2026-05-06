@@ -1,3 +1,5 @@
+import 'package:flutter/material.dart';
+
 class JobListing {
   final int id;
   final String title;
@@ -70,18 +72,45 @@ class JobListing {
   }
 
   String get salaryText {
-    if (salaryMin == null && salaryMax == null) return 'Salary not specified';
-    if (salaryMin != null && salaryMax != null)
+    if (salaryMin == null && salaryMax == null) {
+      return 'Salary not specified';
+    }
+    if (salaryMin != null && salaryMax != null) {
       return '$salaryCurrency ${salaryMin.toString()} - ${salaryMax.toString()}';
-    if (salaryMin != null) return '$salaryCurrency ${salaryMin.toString()}+';
+    }
+    if (salaryMin != null) {
+      return '$salaryCurrency ${salaryMin.toString()}+';
+    }
     return 'Up to $salaryCurrency ${salaryMax.toString()}';
   }
 
-  String get employmentTypeDisplay =>
-      employmentType.replaceAll('_', ' ').toUpperCase();
+  String get employmentTypeDisplay {
+    return employmentType.replaceAll('_', ' ').toUpperCase();
+  }
+
+  String get locationTypeDisplay {
+    return locationType.toUpperCase();
+  }
+
+  String get experienceLevelDisplay {
+    switch (experienceLevel) {
+      case 'entry':
+        return 'Entry Level';
+      case 'mid':
+        return 'Mid Level';
+      case 'senior':
+        return 'Senior Level';
+      case 'lead':
+        return 'Lead';
+      case 'executive':
+        return 'Executive';
+      default:
+        return experienceLevel;
+    }
+  }
 }
 
-// JOB APPLICATION CLASS - FIXED
+// JOB APPLICATION CLASS
 class JobApplication {
   final int id;
   final int jobId;
@@ -158,4 +187,10 @@ class JobApplication {
         return Colors.grey;
     }
   }
+
+  bool get isPending => status == 'pending';
+  bool get isReviewed => status == 'reviewed';
+  bool get isShortlisted => status == 'shortlisted';
+  bool get isRejected => status == 'rejected';
+  bool get isHired => status == 'hired';
 }
