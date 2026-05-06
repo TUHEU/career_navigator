@@ -10,6 +10,7 @@ import '../../../providers/theme_provider.dart';
 import '../../widgets/shared/buttons.dart';
 import '../../widgets/shared/inputs.dart';
 import 'email_verification_page.dart';
+import 'sign_in_page.dart'; // FIXED: Added missing import
 
 class RegistrationPage extends StatefulWidget {
   const RegistrationPage({super.key});
@@ -64,6 +65,9 @@ class _RegistrationPageState extends State<RegistrationPage> {
     final isDark = themeProvider.isDarkMode;
 
     return Scaffold(
+      backgroundColor: isDark
+          ? AppColors.darkBackground
+          : AppColors.lightBackground,
       body: Stack(
         children: [
           Container(
@@ -72,7 +76,11 @@ class _RegistrationPageState extends State<RegistrationPage> {
                   ? AppColors.darkBackground
                   : AppColors.lightBackground,
               image: DecorationImage(
-                image: AssetImage(themeProvider.backgroundPath),
+                image: AssetImage(
+                  isDark
+                      ? 'assets/background/bg8.png'
+                      : 'assets/background/bg6.png',
+                ),
                 fit: BoxFit.cover,
                 opacity: 0.35,
               ),
