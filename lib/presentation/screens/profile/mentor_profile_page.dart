@@ -75,7 +75,7 @@ class _MentorProfilePageState extends State<MentorProfilePage> {
     setState(() => _isLoading = true);
 
     final authProvider = context.read<AuthProvider>();
-    final userRepo = authProvider.userRepository; // FIXED: using public getter
+    final userRepo = authProvider.userRepository;
 
     try {
       final expertiseList = _expertiseController.text

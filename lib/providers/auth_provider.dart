@@ -18,7 +18,6 @@ class AuthProvider extends ChangeNotifier {
   String? get error => _error;
   bool get isAuthenticated => _currentUser != null;
 
-  // Public getter for userRepository - FIXES the error
   UserRepository get userRepository => _userRepository;
 
   Future<String?> getAccessToken() async {

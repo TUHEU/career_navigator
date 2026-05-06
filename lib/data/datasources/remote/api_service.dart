@@ -16,7 +16,10 @@ class ApiService {
     }
   }
 
-  // Auth
+  // ============================================================
+  // AUTH ENDPOINTS
+  // ============================================================
+
   Future<Map<String, dynamic>> register(String email, String password) async {
     final response = await http.post(
       Uri.parse('${AppConstants.baseUrl}${ApiEndpoints.register}'),
@@ -75,6 +78,22 @@ class ApiService {
     return _handleResponse(response);
   }
 
+  Future<Map<String, dynamic>> changePassword(
+    String token,
+    String currentPassword,
+    String newPassword,
+  ) async {
+    final response = await http.post(
+      Uri.parse('${AppConstants.baseUrl}${ApiEndpoints.changePassword}'),
+      headers: _authHeaders(token),
+      body: jsonEncode({
+        'current_password': currentPassword,
+        'new_password': newPassword,
+      }),
+    );
+    return _handleResponse(response);
+  }
+
   Future<Map<String, dynamic>> deleteAccount(String token) async {
     final response = await http.delete(
       Uri.parse('${AppConstants.baseUrl}${ApiEndpoints.deleteAccount}'),
@@ -83,7 +102,10 @@ class ApiService {
     return _handleResponse(response);
   }
 
-  // Profile
+  // ============================================================
+  // PROFILE ENDPOINTS
+  // ============================================================
+
   Future<Map<String, dynamic>> getProfile(String token) async {
     final response = await http.get(
       Uri.parse('${AppConstants.baseUrl}${ApiEndpoints.getProfile}'),
@@ -134,7 +156,10 @@ class ApiService {
     return _handleResponse(response);
   }
 
-  // Education
+  // ============================================================
+  // EDUCATION ENDPOINTS
+  // ============================================================
+
   Future<Map<String, dynamic>> addEducation({
     required String token,
     required Map<String, dynamic> data,
@@ -171,7 +196,10 @@ class ApiService {
     return _handleResponse(response);
   }
 
-  // Work Experience
+  // ============================================================
+  // WORK EXPERIENCE ENDPOINTS
+  // ============================================================
+
   Future<Map<String, dynamic>> addWorkExperience({
     required String token,
     required Map<String, dynamic> data,
@@ -208,7 +236,10 @@ class ApiService {
     return _handleResponse(response);
   }
 
-  // Mentor Requests
+  // ============================================================
+  // MENTOR REQUEST ENDPOINTS
+  // ============================================================
+
   Future<Map<String, dynamic>> sendMentorRequest({
     required String token,
     required int mentorId,
@@ -230,7 +261,10 @@ class ApiService {
     return _handleResponse(response);
   }
 
-  // Jobs
+  // ============================================================
+  // JOB ENDPOINTS
+  // ============================================================
+
   Future<Map<String, dynamic>> getJobs({
     String? location,
     String? employmentType,
@@ -285,7 +319,10 @@ class ApiService {
     return _handleResponse(response);
   }
 
-  // Notifications
+  // ============================================================
+  // NOTIFICATION ENDPOINTS
+  // ============================================================
+
   Future<Map<String, dynamic>> getNotifications(String token) async {
     final response = await http.get(
       Uri.parse('${AppConstants.baseUrl}${ApiEndpoints.notifications}'),
@@ -305,7 +342,10 @@ class ApiService {
     return _handleResponse(response);
   }
 
-  // Chat
+  // ============================================================
+  // CHAT ENDPOINTS
+  // ============================================================
+
   Future<Map<String, dynamic>> getConversations(String token) async {
     final response = await http.get(
       Uri.parse('${AppConstants.baseUrl}${ApiEndpoints.conversations}'),
@@ -340,7 +380,10 @@ class ApiService {
     return _handleResponse(response);
   }
 
-  // Search
+  // ============================================================
+  // SEARCH ENDPOINT
+  // ============================================================
+
   Future<Map<String, dynamic>> search({
     required String token,
     required String query,
@@ -352,7 +395,10 @@ class ApiService {
     return _handleResponse(response);
   }
 
-  // Feedback
+  // ============================================================
+  // FEEDBACK ENDPOINT
+  // ============================================================
+
   Future<Map<String, dynamic>> submitFeedback({
     required String token,
     required String subject,
@@ -369,6 +415,56 @@ class ApiService {
         'category': category,
         'rating': rating,
       }),
+    );
+    return _handleResponse(response);
+  }
+
+  // ============================================================
+  // VIDEO CALL ENDPOINTS
+  // ============================================================
+
+  Future<Map<String, dynamic>> startVideoSession({
+    required String token,
+    required int mentorId,
+    required int seekerId,
+  }) async {
+    final response = await http.post(
+      Uri.parse('${AppConstants.baseUrl}${ApiEndpoints.videoStartSession}'),
+      headers: _authHeaders(token),
+      body: jsonEncode({'mentor_id': mentorId, 'seeker_id': seekerId}),
+    );
+    return _handleResponse(response);
+  }
+
+  Future<Map<String, dynamic>> joinVideoSession({
+    required String token,
+    required String channelName,
+  }) async {
+    final response = await http.post(
+      Uri.parse('${AppConstants.baseUrl}${ApiEndpoints.videoJoinSession}'),
+      headers: _authHeaders(token),
+      body: jsonEncode({'channel_name': channelName}),
+    );
+    return _handleResponse(response);
+  }
+
+  Future<Map<String, dynamic>> endVideoSession({
+    required String token,
+    required String channelName,
+    required int duration,
+  }) async {
+    final response = await http.post(
+      Uri.parse('${AppConstants.baseUrl}${ApiEndpoints.videoEndSession}'),
+      headers: _authHeaders(token),
+      body: jsonEncode({'channel_name': channelName, 'duration': duration}),
+    );
+    return _handleResponse(response);
+  }
+
+  Future<Map<String, dynamic>> getVideoSessions(String token) async {
+    final response = await http.get(
+      Uri.parse('${AppConstants.baseUrl}${ApiEndpoints.videoSessions}'),
+      headers: _authHeaders(token),
     );
     return _handleResponse(response);
   }

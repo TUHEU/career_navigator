@@ -82,6 +82,20 @@ const List<Developer> kDevelopers = [
 class AboutUsPage extends StatelessWidget {
   const AboutUsPage({super.key});
 
+  Future<void> _launchUrl(String url) async {
+    final uri = Uri.tryParse(url);
+    if (uri != null && await canLaunchUrl(uri)) {
+      await launchUrl(uri, mode: LaunchMode.externalApplication);
+    }
+  }
+
+  Future<void> _sendEmail(String email) async {
+    final uri = Uri.parse('mailto:$email?subject=Career%20Navigator%20Inquiry');
+    if (await canLaunchUrl(uri)) {
+      await launchUrl(uri);
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
     final themeProvider = context.watch<ThemeProvider>();
@@ -91,7 +105,7 @@ class AboutUsPage extends StatelessWidget {
       backgroundColor: isDark
           ? AppColors.darkBackground
           : AppColors.lightBackground,
-      appBar: AppBar(title: const Text('About Us'), elevation: 0),
+      appBar: AppBar(title: const Text('About Us')),
       body: SingleChildScrollView(
         padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 16),
         child: Column(
@@ -113,29 +127,30 @@ class AboutUsPage extends StatelessWidget {
               style: TextStyle(
                 color: isDark
                     ? Colors.white.withOpacity(0.45)
-                    : AppColors.lightTextSecondary.withOpacity(0.7),
+                    : AppColors.lightTextSecondary,
                 fontSize: 13,
               ),
               textAlign: TextAlign.center,
             ),
             const SizedBox(height: 20),
             ...kDevelopers.map(
-              (dev) => _DeveloperCard(dev: dev, isDark: isDark),
+              (dev) => _DeveloperCard(
+                dev: dev,
+                isDark: isDark,
+                onLaunchUrl: _launchUrl,
+                onSendEmail: _sendEmail,
+              ),
             ),
             const SizedBox(height: 32),
             _buildTechStackCard(isDark),
             const SizedBox(height: 24),
-            Container(
-              padding: const EdgeInsets.symmetric(vertical: 12),
-              child: Text(
-                '© 2025 Career Navigator. All rights reserved.',
-                style: TextStyle(
-                  color: isDark
-                      ? Colors.white.withOpacity(0.25)
-                      : AppColors.lightTextSecondary.withOpacity(0.5),
-                  fontSize: 11,
-                ),
-                textAlign: TextAlign.center,
+            Text(
+              '© 2025 Career Navigator. All rights reserved.',
+              style: TextStyle(
+                color: isDark
+                    ? Colors.white.withOpacity(0.25)
+                    : AppColors.lightTextSecondary.withOpacity(0.5),
+                fontSize: 11,
               ),
             ),
           ],
@@ -153,8 +168,6 @@ class AboutUsPage extends StatelessWidget {
             AppColors.primaryCyan.withOpacity(0.15),
             isDark ? AppColors.darkCard.withOpacity(0.8) : Colors.grey.shade100,
           ],
-          begin: Alignment.topLeft,
-          end: Alignment.bottomRight,
         ),
         borderRadius: BorderRadius.circular(24),
         border: Border.all(color: AppColors.primaryCyan.withOpacity(0.25)),
@@ -177,8 +190,6 @@ class AboutUsPage extends StatelessWidget {
             child: ClipOval(
               child: Image.asset(
                 'assets/logo/logo.png',
-                width: 90,
-                height: 90,
                 fit: BoxFit.cover,
                 errorBuilder: (_, __, ___) => Container(
                   color: AppColors.primaryCyan.withOpacity(0.2),
@@ -195,9 +206,9 @@ class AboutUsPage extends StatelessWidget {
           Text(
             'Career Navigator',
             style: TextStyle(
-              color: isDark ? Colors.white : AppColors.lightText,
               fontSize: 24,
               fontWeight: FontWeight.bold,
+              color: isDark ? Colors.white : AppColors.lightText,
               letterSpacing: 1.5,
             ),
           ),
@@ -219,9 +230,7 @@ class AboutUsPage extends StatelessWidget {
           ),
           const SizedBox(height: 16),
           Text(
-            'Career Navigator connects ambitious job seekers with experienced mentors. '
-            'Our platform enables personalized career guidance, skill development, '
-            'and professional networking — all in one place.',
+            'Career Navigator connects ambitious job seekers with experienced mentors. Our platform enables personalized career guidance, skill development, and professional networking — all in one place.',
             textAlign: TextAlign.center,
             style: TextStyle(
               color: isDark
@@ -279,17 +288,42 @@ class AboutUsPage extends StatelessWidget {
           Wrap(
             spacing: 10,
             runSpacing: 10,
-            children: [
-              _buildTechChip('Flutter', Icons.mobile_friendly, isDark),
-              _buildTechChip('Dart', Icons.code, isDark),
-              _buildTechChip('Python', Icons.terminal, isDark),
-              _buildTechChip('Flask', Icons.science, isDark),
-              _buildTechChip('MySQL', Icons.storage, isDark),
-              _buildTechChip('JWT', Icons.security, isDark),
-              _buildTechChip('Brevo', Icons.email, isDark),
-              _buildTechChip('PM2', Icons.settings, isDark),
-              _buildTechChip('Contabo VPS', Icons.cloud, isDark),
-            ],
+            children:
+                [
+                      'Flutter',
+                      'Dart',
+                      'Python',
+                      'Flask',
+                      'MySQL',
+                      'JWT',
+                      'Brevo',
+                      'PM2',
+                      'Contabo VPS',
+                    ]
+                    .map(
+                      (tech) => Container(
+                        padding: const EdgeInsets.symmetric(
+                          horizontal: 14,
+                          vertical: 8,
+                        ),
+                        decoration: BoxDecoration(
+                          color: AppColors.primaryCyan.withOpacity(0.08),
+                          borderRadius: BorderRadius.circular(30),
+                          border: Border.all(
+                            color: AppColors.primaryCyan.withOpacity(0.25),
+                          ),
+                        ),
+                        child: Text(
+                          tech,
+                          style: const TextStyle(
+                            color: AppColors.primaryCyan,
+                            fontSize: 12,
+                            fontWeight: FontWeight.w500,
+                          ),
+                        ),
+                      ),
+                    )
+                    .toList(),
           ),
           const SizedBox(height: 16),
           Divider(
@@ -299,45 +333,14 @@ class AboutUsPage extends StatelessWidget {
           ),
           const SizedBox(height: 12),
           Row(
-            children: [
-              const Icon(Icons.star, color: Colors.amber, size: 16),
-              const SizedBox(width: 8),
+            children: const [
+              Icon(Icons.star, color: Colors.amber, size: 16),
+              SizedBox(width: 8),
               Text(
                 'Fully open source | Continuous updates',
-                style: TextStyle(
-                  color: isDark
-                      ? Colors.white.withOpacity(0.4)
-                      : AppColors.lightTextSecondary.withOpacity(0.6),
-                  fontSize: 11,
-                ),
+                style: TextStyle(color: Colors.white70, fontSize: 11),
               ),
             ],
-          ),
-        ],
-      ),
-    );
-  }
-
-  Widget _buildTechChip(String label, IconData icon, bool isDark) {
-    return Container(
-      padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 8),
-      decoration: BoxDecoration(
-        color: AppColors.primaryCyan.withOpacity(0.08),
-        borderRadius: BorderRadius.circular(30),
-        border: Border.all(color: AppColors.primaryCyan.withOpacity(0.25)),
-      ),
-      child: Row(
-        mainAxisSize: MainAxisSize.min,
-        children: [
-          Icon(icon, color: AppColors.primaryCyan, size: 14),
-          const SizedBox(width: 6),
-          Text(
-            label,
-            style: const TextStyle(
-              color: AppColors.primaryCyan,
-              fontSize: 12,
-              fontWeight: FontWeight.w500,
-            ),
           ),
         ],
       ),
@@ -348,22 +351,15 @@ class AboutUsPage extends StatelessWidget {
 class _DeveloperCard extends StatelessWidget {
   final Developer dev;
   final bool isDark;
+  final Function(String) onLaunchUrl;
+  final Function(String) onSendEmail;
 
-  const _DeveloperCard({required this.dev, required this.isDark});
-
-  Future<void> _launchUrl(String url) async {
-    final uri = Uri.tryParse(url);
-    if (uri != null && await canLaunchUrl(uri)) {
-      await launchUrl(uri, mode: LaunchMode.externalApplication);
-    }
-  }
-
-  Future<void> _sendEmail(String email) async {
-    final uri = Uri.parse('mailto:$email?subject=Career%20Navigator%20Inquiry');
-    if (await canLaunchUrl(uri)) {
-      await launchUrl(uri);
-    }
-  }
+  const _DeveloperCard({
+    required this.dev,
+    required this.isDark,
+    required this.onLaunchUrl,
+    required this.onSendEmail,
+  });
 
   @override
   Widget build(BuildContext context) {
@@ -380,25 +376,18 @@ class _DeveloperCard extends StatelessWidget {
       child: Row(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          Container(
-            width: 70,
-            height: 70,
-            decoration: const BoxDecoration(shape: BoxShape.circle),
-            child: CircleAvatar(
-              radius: 35,
-              backgroundColor: AppColors.primaryCyan.withOpacity(0.2),
-              backgroundImage: AssetImage(dev.imagePath),
-              onBackgroundImageError: (_, __) {},
-              child: dev.imagePath.isEmpty
-                  ? Text(
-                      dev.name.isNotEmpty ? dev.name[0] : '?',
-                      style: const TextStyle(
-                        color: AppColors.primaryCyan,
-                        fontWeight: FontWeight.bold,
-                        fontSize: 28,
-                      ),
-                    )
-                  : null,
+          CircleAvatar(
+            radius: 35,
+            backgroundColor: AppColors.primaryCyan.withOpacity(0.2),
+            backgroundImage: AssetImage(dev.imagePath),
+            onBackgroundImageError: (_, __) {},
+            child: Text(
+              Helpers.getInitials(dev.name),
+              style: const TextStyle(
+                color: AppColors.primaryCyan,
+                fontWeight: FontWeight.bold,
+                fontSize: 28,
+              ),
             ),
           ),
           const SizedBox(width: 16),
@@ -409,9 +398,9 @@ class _DeveloperCard extends StatelessWidget {
                 Text(
                   dev.name,
                   style: TextStyle(
-                    color: isDark ? Colors.white : AppColors.lightText,
                     fontWeight: FontWeight.bold,
                     fontSize: 16,
+                    color: isDark ? Colors.white : AppColors.lightText,
                   ),
                 ),
                 const SizedBox(height: 4),
@@ -454,23 +443,20 @@ class _DeveloperCard extends StatelessWidget {
                       label: 'GitHub',
                       color: isDark ? Colors.white : AppColors.lightText,
                       onTap: () =>
-                          _launchUrl('https://github.com/${dev.github}'),
-                      isDark: isDark,
+                          onLaunchUrl('https://github.com/${dev.github}'),
                     ),
                     if (dev.email != null)
                       _buildSocialButton(
                         icon: Icons.email_outlined,
                         label: 'Email',
                         color: Colors.redAccent,
-                        onTap: () => _sendEmail(dev.email!),
-                        isDark: isDark,
+                        onTap: () => onSendEmail(dev.email!),
                       ),
                     _buildSocialButton(
                       icon: Icons.link,
                       label: 'LinkedIn',
                       color: const Color(0xFF0077B5),
-                      onTap: () => _launchUrl(dev.linkedin),
-                      isDark: isDark,
+                      onTap: () => onLaunchUrl(dev.linkedin),
                     ),
                   ],
                 ),
@@ -487,7 +473,6 @@ class _DeveloperCard extends StatelessWidget {
     required String label,
     required Color color,
     required VoidCallback onTap,
-    required bool isDark,
   }) {
     return GestureDetector(
       onTap: onTap,

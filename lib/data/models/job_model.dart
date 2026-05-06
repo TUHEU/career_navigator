@@ -1,3 +1,5 @@
+import 'package:flutter/material.dart';
+
 class JobListing {
   final int id;
   final String title;
@@ -70,17 +72,45 @@ class JobListing {
   }
 
   String get salaryText {
-    if (salaryMin == null && salaryMax == null) return 'Salary not specified';
-    if (salaryMin != null && salaryMax != null)
+    if (salaryMin == null && salaryMax == null) {
+      return 'Salary not specified';
+    }
+    if (salaryMin != null && salaryMax != null) {
       return '$salaryCurrency ${salaryMin.toString()} - ${salaryMax.toString()}';
-    if (salaryMin != null) return '$salaryCurrency ${salaryMin.toString()}+';
+    }
+    if (salaryMin != null) {
+      return '$salaryCurrency ${salaryMin.toString()}+';
+    }
     return 'Up to $salaryCurrency ${salaryMax.toString()}';
   }
 
-  String get employmentTypeDisplay =>
-      employmentType.replaceAll('_', ' ').toUpperCase();
+  String get employmentTypeDisplay {
+    return employmentType.replaceAll('_', ' ').toUpperCase();
+  }
+
+  String get locationTypeDisplay {
+    return locationType.toUpperCase();
+  }
+
+  String get experienceLevelDisplay {
+    switch (experienceLevel) {
+      case 'entry':
+        return 'Entry Level';
+      case 'mid':
+        return 'Mid Level';
+      case 'senior':
+        return 'Senior Level';
+      case 'lead':
+        return 'Lead';
+      case 'executive':
+        return 'Executive';
+      default:
+        return experienceLevel;
+    }
+  }
 }
 
+// JOB APPLICATION CLASS
 class JobApplication {
   final int id;
   final int jobId;
@@ -88,6 +118,11 @@ class JobApplication {
   final DateTime appliedAt;
   final String title;
   final String company;
+  final String? location;
+  final String? employmentType;
+  final int? salaryMin;
+  final int? salaryMax;
+  final String? salaryCurrency;
 
   JobApplication({
     required this.id,
@@ -96,16 +131,66 @@ class JobApplication {
     required this.appliedAt,
     required this.title,
     required this.company,
+    this.location,
+    this.employmentType,
+    this.salaryMin,
+    this.salaryMax,
+    this.salaryCurrency,
   });
 
   factory JobApplication.fromJson(Map<String, dynamic> json) {
     return JobApplication(
-      id: json['id'] as int,
+      id: json['id'] as int? ?? 0,
       jobId: json['job_id'] as int? ?? 0,
       status: json['status'] as String? ?? 'pending',
       appliedAt: DateTime.tryParse(json['applied_at'] ?? '') ?? DateTime.now(),
       title: json['title'] as String? ?? '',
       company: json['company'] as String? ?? '',
+      location: json['location'] as String?,
+      employmentType: json['employment_type'] as String?,
+      salaryMin: json['salary_min'] as int?,
+      salaryMax: json['salary_max'] as int?,
+      salaryCurrency: json['salary_currency'] as String?,
     );
   }
+
+  String get statusDisplay {
+    switch (status) {
+      case 'pending':
+        return 'Pending Review';
+      case 'reviewed':
+        return 'Reviewed';
+      case 'shortlisted':
+        return 'Shortlisted';
+      case 'rejected':
+        return 'Not Selected';
+      case 'hired':
+        return 'Hired!';
+      default:
+        return status;
+    }
+  }
+
+  Color get statusColor {
+    switch (status) {
+      case 'pending':
+        return Colors.orange;
+      case 'reviewed':
+        return Colors.blue;
+      case 'shortlisted':
+        return Colors.green;
+      case 'rejected':
+        return Colors.red;
+      case 'hired':
+        return Colors.purple;
+      default:
+        return Colors.grey;
+    }
+  }
+
+  bool get isPending => status == 'pending';
+  bool get isReviewed => status == 'reviewed';
+  bool get isShortlisted => status == 'shortlisted';
+  bool get isRejected => status == 'rejected';
+  bool get isHired => status == 'hired';
 }

@@ -6,7 +6,9 @@ import '../../../core/utils/helpers.dart';
 import '../../../data/datasources/remote/api_service.dart';
 import '../../../providers/auth_provider.dart';
 import '../../../providers/theme_provider.dart';
+import '../../../providers/video_provider.dart';
 import '../../widgets/shared/loading_widgets.dart';
+import '../video/video_call_page.dart';
 
 class ConversationsPage extends StatefulWidget {
   const ConversationsPage({super.key});
@@ -226,6 +228,7 @@ class ChatPage extends StatefulWidget {
   final int conversationId;
   final int recipientId;
   final String recipientName;
+
   const ChatPage({
     super.key,
     required this.conversationId,
@@ -302,6 +305,46 @@ class _ChatPageState extends State<ChatPage> {
     }
   }
 
+  Future<void> _startVideoCall() async {
+    final videoProvider = context.read<VideoProvider>();
+    final authProvider = context.read<AuthProvider>();
+    final currentUser = authProvider.currentUser;
+
+    if (currentUser == null) return;
+
+    final isCurrentUserMentor = currentUser.role == 'mentor';
+    final mentorId = isCurrentUserMentor ? currentUser.id : widget.recipientId;
+    final seekerId = isCurrentUserMentor ? widget.recipientId : currentUser.id;
+
+    try {
+      final callData = await videoProvider.startCall(
+        mentorId: mentorId,
+        seekerId: seekerId,
+      );
+
+      if (mounted) {
+        Navigator.push(
+          context,
+          MaterialPageRoute(
+            builder: (_) => VideoCallPage(
+              channelName: callData['channel_name'],
+              token: callData['token'],
+              appId: callData['app_id'],
+              peerName: widget.recipientName,
+              isMentor: isCurrentUserMentor,
+            ),
+          ),
+        );
+      }
+    } catch (e) {
+      Helpers.showSnackBar(
+        context,
+        'Failed to start video call: $e',
+        isError: true,
+      );
+    }
+  }
+
   void _scrollToBottom() {
     WidgetsBinding.instance.addPostFrameCallback((_) {
       if (_scrollController.hasClients) {
@@ -323,7 +366,16 @@ class _ChatPageState extends State<ChatPage> {
       backgroundColor: isDark
           ? AppColors.darkBackground
           : AppColors.lightBackground,
-      appBar: AppBar(title: Text(widget.recipientName)),
+      appBar: AppBar(
+        title: Text(widget.recipientName),
+        actions: [
+          IconButton(
+            icon: const Icon(Icons.videocam, color: AppColors.primaryCyan),
+            onPressed: _startVideoCall,
+            tooltip: 'Start Video Call',
+          ),
+        ],
+      ),
       body: Column(
         children: [
           Expanded(

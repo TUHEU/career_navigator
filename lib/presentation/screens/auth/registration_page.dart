@@ -65,6 +65,9 @@ class _RegistrationPageState extends State<RegistrationPage> {
     final isDark = themeProvider.isDarkMode;
 
     return Scaffold(
+      backgroundColor: isDark
+          ? AppColors.darkBackground
+          : AppColors.lightBackground,
       body: Stack(
         children: [
           Container(
@@ -73,7 +76,11 @@ class _RegistrationPageState extends State<RegistrationPage> {
                   ? AppColors.darkBackground
                   : AppColors.lightBackground,
               image: DecorationImage(
-                image: AssetImage(themeProvider.backgroundPath),
+                image: AssetImage(
+                  isDark
+                      ? 'assets/background/bg8.png'
+                      : 'assets/background/bg6.png',
+                ),
                 fit: BoxFit.cover,
                 opacity: 0.35,
               ),
