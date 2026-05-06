@@ -26,7 +26,7 @@ class _JobSeekerDashboardState extends State<JobSeekerDashboard> {
 
   final List<Widget> _pages = [
     const _HomePage(),
-    const _JobsPage(),
+    const JobListingsPage(),
     const ConversationsPage(),
     const SearchPage(),
     const SettingsPage(),
@@ -267,11 +267,4 @@ class _HomePage extends StatelessWidget {
       ),
     );
   }
-}
-
-class _JobsPage extends StatelessWidget {
-  const _JobsPage();
-
-  @override
-  Widget build(BuildContext context) => const JobListingsPage();
 }

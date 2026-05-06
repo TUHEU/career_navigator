@@ -312,7 +312,6 @@ class _ChatPageState extends State<ChatPage> {
 
     if (currentUser == null) return;
 
-    // Determine mentor and seeker IDs
     final isCurrentUserMentor = currentUser.role == 'mentor';
     final mentorId = isCurrentUserMentor ? currentUser.id : widget.recipientId;
     final seekerId = isCurrentUserMentor ? widget.recipientId : currentUser.id;

@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
-import '../data/repositories/video_repository.dart';
 import '../data/models/video_session_model.dart';
+import '../data/repositories/video_repository.dart';
 
 class VideoProvider extends ChangeNotifier {
   final VideoRepository _videoRepository = VideoRepository();

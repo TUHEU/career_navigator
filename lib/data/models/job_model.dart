@@ -80,32 +80,3 @@ class JobListing {
   String get employmentTypeDisplay =>
       employmentType.replaceAll('_', ' ').toUpperCase();
 }
-
-class JobApplication {
-  final int id;
-  final int jobId;
-  final String status;
-  final DateTime appliedAt;
-  final String title;
-  final String company;
-
-  JobApplication({
-    required this.id,
-    required this.jobId,
-    required this.status,
-    required this.appliedAt,
-    required this.title,
-    required this.company,
-  });
-
-  factory JobApplication.fromJson(Map<String, dynamic> json) {
-    return JobApplication(
-      id: json['id'] as int,
-      jobId: json['job_id'] as int? ?? 0,
-      status: json['status'] as String? ?? 'pending',
-      appliedAt: DateTime.tryParse(json['applied_at'] ?? '') ?? DateTime.now(),
-      title: json['title'] as String? ?? '',
-      company: json['company'] as String? ?? '',
-    );
-  }
-}
