@@ -32,7 +32,7 @@ const List<Developer> kDevelopers = [
     role: 'Lead Backend Developer & Database Architect',
     github: 'TUHEU',
     email: 'tuheu.moussa@ictuniversity.edu.cm',
-    linkedin: 'https://www.linkedin.com/in/fahdil-tuheu/',
+    linkedin: 'https://www.linkedin.com/in/nadal-junior-63b5933a3/',
     imagePath: 'assets/team/dev1.png',
     description:
         'Designed and implemented the Flask API, database schema, authentication system, and job listing module.',
