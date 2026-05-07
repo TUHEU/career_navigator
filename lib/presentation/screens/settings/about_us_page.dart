@@ -38,21 +38,23 @@ const List<Developer> kDevelopers = [
         'Designed and implemented the Flask API, database schema, authentication system, and job listing module.',
   ),
   Developer(
-    name: 'Sarah Johnson',
+    name: 'Yuyar Lea-Babara',
     role: 'Lead Flutter Developer',
-    github: 'sarah_dev',
-    email: 'sarah.johnson@careernavigator.com',
-    linkedin: 'https://linkedin.com/in/sarah-johnson',
+    github: 'techgirl911',
+    email: 'yuyarbongkem@gmail.com',
+    linkedin:
+        'https://www.linkedin.com/in/yuyar-bongkem-71bb10345/?utm_source=share&utm_campaign=share_via&utm_content=profile&utm_medium=android_app',
     imagePath: 'assets/team/dev2.png',
     description:
         'Built the mobile UI, dashboard screens, navigation system, and chat integration.',
   ),
   Developer(
-    name: 'Michael Chen',
+    name: 'NDZEKA GETRUDE BERINYUY',
     role: 'UI/UX Designer & Frontend Developer',
-    github: 'mike_chen',
-    email: 'michael.chen@careernavigator.com',
-    linkedin: 'https://linkedin.com/in/michael-chen',
+    github: 'getrudepink9-design',
+    email: 'getrudepink@gmail.com',
+    linkedin:
+        'https://www.linkedin.com/in/getrude-pink-b51747339?utm_source=share_via&utm_content=profile&utm_medium=member_android',
     imagePath: 'assets/team/dev3.png',
     description:
         'Created the design system, theming engine, and all screen layouts with responsive design.',
@@ -82,17 +84,32 @@ const List<Developer> kDevelopers = [
 class AboutUsPage extends StatelessWidget {
   const AboutUsPage({super.key});
 
-  Future<void> _launchUrl(String url) async {
-    final uri = Uri.tryParse(url);
-    if (uri != null && await canLaunchUrl(uri)) {
-      await launchUrl(uri, mode: LaunchMode.externalApplication);
+  /// Opens any https/http URL in the external browser / LinkedIn app
+  Future<void> _launchUrl(BuildContext context, String url) async {
+    // Ensure the URL is absolute
+    final String fullUrl = url.startsWith('http') ? url : 'https://$url';
+    final uri = Uri.tryParse(fullUrl);
+    if (uri == null) return;
+
+    final bool launched = await launchUrl(
+      uri,
+      mode: LaunchMode.externalApplication,
+    );
+
+    if (!launched && context.mounted) {
+      ScaffoldMessenger.of(
+        context,
+      ).showSnackBar(SnackBar(content: Text('Could not open: $fullUrl')));
     }
   }
 
-  Future<void> _sendEmail(String email) async {
+  Future<void> _sendEmail(BuildContext context, String email) async {
     final uri = Uri.parse('mailto:$email?subject=Career%20Navigator%20Inquiry');
-    if (await canLaunchUrl(uri)) {
-      await launchUrl(uri);
+    final bool launched = await launchUrl(uri);
+    if (!launched && context.mounted) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text('Could not open email app for: $email')),
+      );
     }
   }
 
@@ -137,8 +154,8 @@ class AboutUsPage extends StatelessWidget {
               (dev) => _DeveloperCard(
                 dev: dev,
                 isDark: isDark,
-                onLaunchUrl: _launchUrl,
-                onSendEmail: _sendEmail,
+                onLaunchUrl: (url) => _launchUrl(context, url),
+                onSendEmail: (email) => _sendEmail(context, email),
               ),
             ),
             const SizedBox(height: 32),
@@ -332,8 +349,8 @@ class AboutUsPage extends StatelessWidget {
                 : Colors.grey.shade300,
           ),
           const SizedBox(height: 12),
-          Row(
-            children: const [
+          const Row(
+            children: [
               Icon(Icons.star, color: Colors.amber, size: 16),
               SizedBox(width: 8),
               Text(
@@ -347,6 +364,10 @@ class AboutUsPage extends StatelessWidget {
     );
   }
 }
+
+// ─────────────────────────────────────────────────────────────────────────────
+// Developer Card
+// ─────────────────────────────────────────────────────────────────────────────
 
 class _DeveloperCard extends StatelessWidget {
   final Developer dev;
@@ -376,20 +397,8 @@ class _DeveloperCard extends StatelessWidget {
       child: Row(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          CircleAvatar(
-            radius: 35,
-            backgroundColor: AppColors.primaryCyan.withOpacity(0.2),
-            backgroundImage: AssetImage(dev.imagePath),
-            onBackgroundImageError: (_, __) {},
-            child: Text(
-              Helpers.getInitials(dev.name),
-              style: const TextStyle(
-                color: AppColors.primaryCyan,
-                fontWeight: FontWeight.bold,
-                fontSize: 28,
-              ),
-            ),
-          ),
+          // ── Avatar: shows image, falls back to initials circle ──
+          _buildAvatar(),
           const SizedBox(width: 16),
           Expanded(
             child: Column(
@@ -456,6 +465,7 @@ class _DeveloperCard extends StatelessWidget {
                       icon: Icons.link,
                       label: 'LinkedIn',
                       color: const Color(0xFF0077B5),
+                      // ← tapping this now opens the full LinkedIn profile URL
                       onTap: () => onLaunchUrl(dev.linkedin),
                     ),
                   ],
@@ -464,6 +474,39 @@ class _DeveloperCard extends StatelessWidget {
             ),
           ),
         ],
+      ),
+    );
+  }
+
+  /// Displays the asset image; falls back to a cyan circle with initials.
+  Widget _buildAvatar() {
+    return SizedBox(
+      width: 70,
+      height: 70,
+      child: ClipOval(
+        child: Image.asset(
+          dev.imagePath,
+          width: 70,
+          height: 70,
+          fit: BoxFit.cover,
+          // If the asset is missing, show a coloured circle with initials
+          errorBuilder: (_, __, ___) {
+            return Container(
+              width: 70,
+              height: 70,
+              color: AppColors.primaryCyan.withOpacity(0.2),
+              alignment: Alignment.center,
+              child: Text(
+                Helpers.getInitials(dev.name),
+                style: const TextStyle(
+                  color: AppColors.primaryCyan,
+                  fontWeight: FontWeight.bold,
+                  fontSize: 24,
+                ),
+              ),
+            );
+          },
+        ),
       ),
     );
   }
@@ -484,6 +527,7 @@ class _DeveloperCard extends StatelessWidget {
           border: Border.all(color: color.withOpacity(0.3)),
         ),
         child: Row(
+          mainAxisSize: MainAxisSize.min,
           children: [
             Icon(icon, color: color, size: 14),
             const SizedBox(width: 6),
