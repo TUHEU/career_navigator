@@ -52,7 +52,7 @@ const List<Developer> kDevelopers = [
     name: 'NDZEKA GETRUDE BERINYUY',
     role: 'UI/UX Designer & Frontend Developer',
     github: 'getrudepink9-design',
-    email: 'michael.chen@careernavigator.com',
+    email: 'getrudepink@gmail.com',
     linkedin:
         'https://www.linkedin.com/in/getrude-pink-b51747339?utm_source=share_via&utm_content=profile&utm_medium=member_android',
     imagePath: 'assets/team/dev3.png',
