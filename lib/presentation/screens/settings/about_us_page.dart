@@ -38,21 +38,23 @@ const List<Developer> kDevelopers = [
         'Designed and implemented the Flask API, database schema, authentication system, and job listing module.',
   ),
   Developer(
-    name: 'Sarah Johnson',
+    name: 'Yuyar Lea- Babara',
     role: 'Lead Flutter Developer',
-    github: 'sarah_dev',
-    email: 'sarah.johnson@careernavigator.com',
-    linkedin: 'https://linkedin.com/in/sarah-johnson',
+    github: 'techgirl911',
+    email: 'yuyarbongkem@gmail.com',
+    linkedin:
+        'https://www.linkedin.com/in/yuyar-bongkem-71bb10345/?utm_source=share&utm_campaign=share_via&utm_content=profile&utm_medium=android_app',
     imagePath: 'assets/team/dev2.png',
     description:
         'Built the mobile UI, dashboard screens, navigation system, and chat integration.',
   ),
   Developer(
-    name: 'Michael Chen',
+    name: 'NDZEKA GETRUDE BERINYUY',
     role: 'UI/UX Designer & Frontend Developer',
-    github: 'mike_chen',
+    github: 'getrudepink9-design',
     email: 'michael.chen@careernavigator.com',
-    linkedin: 'https://linkedin.com/in/michael-chen',
+    linkedin:
+        'https://www.linkedin.com/in/getrude-pink-b51747339?utm_source=share_via&utm_content=profile&utm_medium=member_android',
     imagePath: 'assets/team/dev3.png',
     description:
         'Created the design system, theming engine, and all screen layouts with responsive design.',

@@ -263,62 +263,76 @@ class _EmailVerificationPageState extends State<EmailVerificationPage> {
     );
   }
 
-  /// Responsive OTP input — boxes scale to screen width
+  /// Responsive OTP input — boxes always fit and stay centered
   Widget _buildCodeInput() {
-    final screenWidth = MediaQuery.of(context).size.width;
-    // Total horizontal padding = 24 * 2 = 48
-    // Total gap between boxes = 8px * 2 sides * 6 boxes = 96
-    // But we use margin: symmetric(horizontal: 4) so 8px per box total
-    // Available width for boxes = screenWidth - 48 - (8 * 6) = screenWidth - 96
-    final boxSize = ((screenWidth - 96) / 6).clamp(40.0, 54.0);
+    return LayoutBuilder(
+      builder: (context, constraints) {
+        // Available width = column width (screen - 24*2 outer padding)
+        // Each box has 4px margin on each side = 8px total per box
+        // Total margin for 6 boxes = 48px
+        // We also add 16px inner padding on each side = 32px
+        // So usable width for boxes = constraints.maxWidth - 48 - 32
+        const int boxCount = 6;
+        const double marginPerBox = 8.0; // 4 left + 4 right
+        const double innerPadding = 16.0; // padding on each side of the row
+        final double totalMargins = marginPerBox * boxCount;
+        final double available =
+            constraints.maxWidth - totalMargins - (innerPadding * 2);
+        // Clamp so boxes are never too big or too small
+        final double boxSize = (available / boxCount).clamp(36.0, 50.0);
+        final double boxHeight = boxSize + 6;
 
-    return Padding(
-      padding: const EdgeInsets.symmetric(horizontal: 24),
-      child: Row(
-        mainAxisAlignment: MainAxisAlignment.center,
-        children: List.generate(6, (i) {
-          return Container(
-            width: boxSize,
-            height: boxSize + 8,
-            margin: const EdgeInsets.symmetric(horizontal: 4),
-            child: TextFormField(
-              controller: _controllers[i],
-              focusNode: _focusNodes[i],
-              textAlign: TextAlign.center,
-              keyboardType: TextInputType.number,
-              maxLength: 1,
-              style: TextStyle(
-                fontSize: boxSize * 0.44,
-                fontWeight: FontWeight.bold,
-                color: AppColors.primaryCyan,
-              ),
-              inputFormatters: [FilteringTextInputFormatter.digitsOnly],
-              decoration: InputDecoration(
-                counterText: '',
-                filled: true,
-                fillColor: Colors.white.withOpacity(0.07),
-                contentPadding: EdgeInsets.zero,
-                border: OutlineInputBorder(
-                  borderRadius: BorderRadius.circular(12),
-                  borderSide: BorderSide.none,
-                ),
-                enabledBorder: OutlineInputBorder(
-                  borderRadius: BorderRadius.circular(12),
-                  borderSide: BorderSide(color: Colors.white.withOpacity(0.2)),
-                ),
-                focusedBorder: OutlineInputBorder(
-                  borderRadius: BorderRadius.circular(12),
-                  borderSide: const BorderSide(
+        return Padding(
+          padding: const EdgeInsets.symmetric(horizontal: 16),
+          child: Row(
+            mainAxisAlignment: MainAxisAlignment.center,
+            children: List.generate(boxCount, (i) {
+              return Container(
+                width: boxSize,
+                height: boxHeight,
+                margin: const EdgeInsets.symmetric(horizontal: 4),
+                child: TextFormField(
+                  controller: _controllers[i],
+                  focusNode: _focusNodes[i],
+                  textAlign: TextAlign.center,
+                  keyboardType: TextInputType.number,
+                  maxLength: 1,
+                  style: TextStyle(
+                    fontSize: boxSize * 0.44,
+                    fontWeight: FontWeight.bold,
                     color: AppColors.primaryCyan,
-                    width: 2,
                   ),
+                  inputFormatters: [FilteringTextInputFormatter.digitsOnly],
+                  decoration: InputDecoration(
+                    counterText: '',
+                    filled: true,
+                    fillColor: Colors.white.withOpacity(0.07),
+                    contentPadding: EdgeInsets.zero,
+                    border: OutlineInputBorder(
+                      borderRadius: BorderRadius.circular(12),
+                      borderSide: BorderSide.none,
+                    ),
+                    enabledBorder: OutlineInputBorder(
+                      borderRadius: BorderRadius.circular(12),
+                      borderSide: BorderSide(
+                        color: Colors.white.withOpacity(0.2),
+                      ),
+                    ),
+                    focusedBorder: OutlineInputBorder(
+                      borderRadius: BorderRadius.circular(12),
+                      borderSide: const BorderSide(
+                        color: AppColors.primaryCyan,
+                        width: 2,
+                      ),
+                    ),
+                  ),
+                  onChanged: (value) => _onCodeChanged(i, value),
                 ),
-              ),
-              onChanged: (value) => _onCodeChanged(i, value),
-            ),
-          );
-        }),
-      ),
+              );
+            }),
+          ),
+        );
+      },
     );
   }
 
