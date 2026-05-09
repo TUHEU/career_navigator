@@ -2,9 +2,9 @@ import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 
 import '../../../core/themes/app_theme.dart';
-import '../../../providers/auth_provider.dart';
 import '../../../providers/user_provider.dart';
 import '../dashboard/job_seeker_dashboard.dart';
+import 'questionnaire_service.dart';
 
 class QuestionnaireScreen extends StatefulWidget {
   const QuestionnaireScreen({super.key});
@@ -77,6 +77,9 @@ class _QuestionnaireScreenState extends State<QuestionnaireScreen> {
       }
 
       await userProvider.updateJobSeekerProfile(fields);
+
+      // Mark questionnaire as completed so it won't show again for 1 year
+      await QuestionnaireService.markCompleted();
 
       if (mounted) {
         Navigator.pushAndRemoveUntil(

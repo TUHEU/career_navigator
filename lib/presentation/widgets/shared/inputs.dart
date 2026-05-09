@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import '../../../core/themes/app_theme.dart';
 
+// ─── CustomTextField ─────────────────────────────────────────
 class CustomTextField extends StatelessWidget {
   final TextEditingController controller;
   final IconData icon;
@@ -9,9 +10,9 @@ class CustomTextField extends StatelessWidget {
   final TextInputType? keyboardType;
   final String? Function(String?)? validator;
   final Widget? suffixIcon;
-  final int maxLines;
-  final bool enabled;
+  final int? maxLines;
   final bool isDark;
+  final bool enabled;
 
   const CustomTextField({
     super.key,
@@ -23,8 +24,8 @@ class CustomTextField extends StatelessWidget {
     this.validator,
     this.suffixIcon,
     this.maxLines = 1,
+    required this.isDark,
     this.enabled = true,
-    this.isDark = true,
   });
 
   @override
@@ -36,13 +37,18 @@ class CustomTextField extends StatelessWidget {
       validator: validator,
       maxLines: maxLines,
       enabled: enabled,
-      style: TextStyle(color: isDark ? Colors.white : Colors.grey.shade800),
+      style: TextStyle(
+        color: isDark ? Colors.white : AppColors.lightText,
+        fontSize: 14,
+      ),
       decoration: InputDecoration(
-        prefixIcon: Icon(icon, color: AppColors.primaryCyan),
+        prefixIcon: Icon(icon, color: AppColors.primaryCyan, size: 20),
         labelText: label,
         labelStyle: TextStyle(
           color: isDark ? Colors.white.withOpacity(0.6) : Colors.grey.shade600,
+          fontSize: 14,
         ),
+        suffixIcon: suffixIcon,
         filled: true,
         fillColor: isDark
             ? Colors.white.withOpacity(0.05)
@@ -61,23 +67,35 @@ class CustomTextField extends StatelessWidget {
         ),
         focusedBorder: OutlineInputBorder(
           borderRadius: BorderRadius.circular(15),
-          borderSide: const BorderSide(color: AppColors.primaryCyan),
+          borderSide: const BorderSide(
+            color: AppColors.primaryCyan,
+            width: 1.5,
+          ),
         ),
         errorBorder: OutlineInputBorder(
           borderRadius: BorderRadius.circular(15),
-          borderSide: const BorderSide(color: Colors.redAccent),
+          borderSide: const BorderSide(color: Colors.redAccent, width: 1.5),
         ),
-        suffixIcon: suffixIcon,
+        focusedErrorBorder: OutlineInputBorder(
+          borderRadius: BorderRadius.circular(15),
+          borderSide: const BorderSide(color: Colors.redAccent, width: 1.5),
+        ),
+        contentPadding: const EdgeInsets.symmetric(
+          horizontal: 16,
+          vertical: 16,
+        ),
       ),
     );
   }
 }
 
+// ─── SearchField ─────────────────────────────────────────────
 class SearchField extends StatelessWidget {
   final TextEditingController controller;
   final Function(String) onSubmitted;
   final VoidCallback? onClear;
   final bool isDark;
+  final String hintText;
 
   const SearchField({
     super.key,
@@ -85,6 +103,7 @@ class SearchField extends StatelessWidget {
     required this.onSubmitted,
     this.onClear,
     this.isDark = true,
+    this.hintText = 'Search...',
   });
 
   @override
@@ -94,7 +113,7 @@ class SearchField extends StatelessWidget {
       style: TextStyle(color: isDark ? Colors.white : Colors.grey.shade800),
       onSubmitted: onSubmitted,
       decoration: InputDecoration(
-        hintText: 'Search...',
+        hintText: hintText,
         hintStyle: TextStyle(
           color: isDark ? Colors.white.withOpacity(0.35) : Colors.grey.shade500,
         ),

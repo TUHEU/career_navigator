@@ -10,7 +10,7 @@ import '../../../providers/theme_provider.dart';
 import '../../widgets/shared/buttons.dart';
 import '../../widgets/shared/inputs.dart';
 import 'email_verification_page.dart';
-import 'sign_in_page.dart'; // FIXED: Added missing import
+import 'sign_in_page.dart';
 
 class RegistrationPage extends StatefulWidget {
   const RegistrationPage({super.key});
@@ -26,6 +26,25 @@ class _RegistrationPageState extends State<RegistrationPage> {
   final _confirmPassCtrl = TextEditingController();
   bool _obscurePassword = true;
   bool _obscureConfirm = true;
+  int _passwordStrength = 0;
+
+  @override
+  void initState() {
+    super.initState();
+    _passCtrl.addListener(() {
+      setState(() {
+        _passwordStrength = Validators.passwordStrength(_passCtrl.text);
+      });
+    });
+  }
+
+  @override
+  void dispose() {
+    _emailCtrl.dispose();
+    _passCtrl.dispose();
+    _confirmPassCtrl.dispose();
+    super.dispose();
+  }
 
   Future<void> _register() async {
     if (!_formKey.currentState!.validate()) return;
@@ -55,6 +74,21 @@ class _RegistrationPageState extends State<RegistrationPage> {
         authProvider.error ?? 'Registration failed',
         isError: true,
       );
+    }
+  }
+
+  Color _strengthColor() {
+    switch (_passwordStrength) {
+      case 1:
+        return Colors.redAccent;
+      case 2:
+        return Colors.orangeAccent;
+      case 3:
+        return Colors.amber;
+      case 4:
+        return Colors.greenAccent;
+      default:
+        return Colors.transparent;
     }
   }
 
@@ -185,6 +219,7 @@ class _RegistrationPageState extends State<RegistrationPage> {
         child: Form(
           key: _formKey,
           child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
             children: [
               CustomTextField(
                 controller: _emailCtrl,
@@ -195,6 +230,7 @@ class _RegistrationPageState extends State<RegistrationPage> {
                 isDark: isDark,
               ),
               const SizedBox(height: 15),
+              // ── Password field ──────────────────────────
               _buildPasswordField(
                 controller: _passCtrl,
                 label: 'Password',
@@ -202,7 +238,13 @@ class _RegistrationPageState extends State<RegistrationPage> {
                 onToggle: () =>
                     setState(() => _obscurePassword = !_obscurePassword),
                 isDark: isDark,
+                validator: Validators.validatePassword,
               ),
+              // ── Password strength bar ───────────────────
+              if (_passCtrl.text.isNotEmpty) ...[
+                const SizedBox(height: 8),
+                _buildStrengthBar(isDark),
+              ],
               const SizedBox(height: 15),
               _buildPasswordField(
                 controller: _confirmPassCtrl,
@@ -211,7 +253,19 @@ class _RegistrationPageState extends State<RegistrationPage> {
                 onToggle: () =>
                     setState(() => _obscureConfirm = !_obscureConfirm),
                 isDark: isDark,
+                validator: (v) {
+                  if (v == null || v.isEmpty) {
+                    return 'Please confirm your password';
+                  }
+                  if (v != _passCtrl.text) {
+                    return 'Passwords do not match';
+                  }
+                  return null;
+                },
               ),
+              const SizedBox(height: 10),
+              // ── Password requirements hint ──────────────
+              _buildPasswordHints(isDark),
               const SizedBox(height: 25),
               PrimaryButton(
                 text: 'CREATE ACCOUNT',
@@ -225,18 +279,113 @@ class _RegistrationPageState extends State<RegistrationPage> {
     ),
   );
 
+  Widget _buildStrengthBar(bool isDark) {
+    final color = _strengthColor();
+    final label = Validators.strengthLabel(_passwordStrength);
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        ClipRRect(
+          borderRadius: BorderRadius.circular(4),
+          child: LinearProgressIndicator(
+            value: _passwordStrength / 4,
+            backgroundColor: isDark
+                ? Colors.white.withOpacity(0.1)
+                : Colors.grey.shade200,
+            valueColor: AlwaysStoppedAnimation<Color>(color),
+            minHeight: 6,
+          ),
+        ),
+        const SizedBox(height: 4),
+        Text(
+          'Password strength: $label',
+          style: TextStyle(
+            color: color,
+            fontSize: 11,
+            fontWeight: FontWeight.w500,
+          ),
+        ),
+      ],
+    );
+  }
+
+  Widget _buildPasswordHints(bool isDark) {
+    final hints = [
+      {'text': 'At least 8 characters', 'ok': _passCtrl.text.length >= 8},
+      {
+        'text': 'One uppercase letter (A-Z)',
+        'ok': _passCtrl.text.contains(RegExp(r'[A-Z]')),
+      },
+      {
+        'text': 'One lowercase letter (a-z)',
+        'ok': _passCtrl.text.contains(RegExp(r'[a-z]')),
+      },
+      {
+        'text': 'One number (0-9)',
+        'ok': _passCtrl.text.contains(RegExp(r'[0-9]')),
+      },
+      {
+        'text': r'One special character (!@#$...)',
+        'ok': _passCtrl.text.contains(
+          RegExp(r'[!@#\$%^&*(),.?":{}|<>_\-+=\[\]\\;/]'),
+        ),
+      },
+    ];
+
+    return Container(
+      padding: const EdgeInsets.all(12),
+      decoration: BoxDecoration(
+        color: isDark ? Colors.white.withOpacity(0.04) : Colors.grey.shade100,
+        borderRadius: BorderRadius.circular(12),
+        border: Border.all(
+          color: isDark ? Colors.white.withOpacity(0.08) : Colors.grey.shade300,
+        ),
+      ),
+      child: Column(
+        children: hints.map((hint) {
+          final ok = hint['ok'] as bool;
+          return Padding(
+            padding: const EdgeInsets.symmetric(vertical: 2),
+            child: Row(
+              children: [
+                Icon(
+                  ok ? Icons.check_circle : Icons.radio_button_unchecked,
+                  color: ok ? Colors.greenAccent : Colors.grey,
+                  size: 14,
+                ),
+                const SizedBox(width: 8),
+                Text(
+                  hint['text'] as String,
+                  style: TextStyle(
+                    fontSize: 11,
+                    color: ok
+                        ? Colors.greenAccent
+                        : (isDark
+                              ? Colors.white.withOpacity(0.45)
+                              : Colors.grey.shade500),
+                  ),
+                ),
+              ],
+            ),
+          );
+        }).toList(),
+      ),
+    );
+  }
+
   Widget _buildPasswordField({
     required TextEditingController controller,
     required String label,
     required bool obscure,
     required VoidCallback onToggle,
     required bool isDark,
+    String? Function(String?)? validator,
   }) {
     return TextFormField(
       controller: controller,
       obscureText: obscure,
+      validator: validator,
       style: TextStyle(color: isDark ? Colors.white : Colors.grey.shade800),
-      validator: Validators.validatePassword,
       decoration: InputDecoration(
         prefixIcon: const Icon(
           Icons.lock_outline,
@@ -265,6 +414,14 @@ class _RegistrationPageState extends State<RegistrationPage> {
         focusedBorder: OutlineInputBorder(
           borderRadius: BorderRadius.circular(15),
           borderSide: const BorderSide(color: AppColors.primaryCyan),
+        ),
+        errorBorder: OutlineInputBorder(
+          borderRadius: BorderRadius.circular(15),
+          borderSide: const BorderSide(color: Colors.redAccent),
+        ),
+        focusedErrorBorder: OutlineInputBorder(
+          borderRadius: BorderRadius.circular(15),
+          borderSide: const BorderSide(color: Colors.redAccent),
         ),
         suffixIcon: IconButton(
           icon: Icon(

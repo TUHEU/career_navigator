@@ -10,6 +10,7 @@ import '../../../providers/theme_provider.dart';
 import '../../widgets/shared/buttons.dart';
 import '../../widgets/shared/inputs.dart';
 import 'registration_page.dart';
+import 'reset_password_page.dart';
 import '../dashboard/job_seeker_dashboard.dart';
 import '../dashboard/mentor_dashboard.dart';
 import '../dashboard/admin_dashboard.dart';
@@ -331,9 +332,13 @@ class _SignInPageState extends State<SignInPage> {
                           setSheetState(() => sending = false);
                           Navigator.pop(ctx);
                           if (success) {
-                            Helpers.showSnackBar(
-                              ctx,
-                              'Reset code sent! Check your email.',
+                            Navigator.push(
+                              context,
+                              MaterialPageRoute(
+                                builder: (_) => ResetPasswordPage(
+                                  email: emailCtrl.text.trim(),
+                                ),
+                              ),
                             );
                           } else {
                             Helpers.showSnackBar(
