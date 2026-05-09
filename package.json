@@ -1,0 +1,13 @@
+{
+  "name": "career-navigator",
+  "private": true,
+  "workspaces": [
+    "apps/*"
+  ],
+  "scripts": {
+    "dev": "npm -ws run dev",
+    "build": "npm -ws run build",
+    "lint": "npm -ws run lint",
+    "test": "npm -ws run test"
+  }
+}
