@@ -21,7 +21,7 @@ class AuthProvider extends ChangeNotifier {
   UserRepository get userRepository => _userRepository;
 
   Future<String?> getAccessToken() async {
-    return await _tokenStore.getAccess();
+    return _tokenStore.getAccess();
   }
 
   Future<bool> login(String email, String password) async {
@@ -114,6 +114,7 @@ class AuthProvider extends ChangeNotifier {
     return response['success'] == true;
   }
 
+  // FIX: was missing from provider — used by ChangePasswordPage
   Future<bool> resetPassword(String email, String code, String password) async {
     _setLoading(true);
     _clearError();
@@ -172,6 +173,6 @@ class AuthProvider extends ChangeNotifier {
 
   void _clearError() {
     _error = null;
-    notifyListeners();
+    // No notifyListeners here to avoid extra rebuilds
   }
 }
