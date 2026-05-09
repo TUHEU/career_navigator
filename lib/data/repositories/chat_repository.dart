@@ -12,7 +12,9 @@ class ChatRepository {
     final response = await _apiService.getConversations(token);
     if (response['success'] == true) {
       final List<dynamic> data = response['data'] ?? [];
-      return data.map((json) => Conversation.fromJson(json)).toList();
+      return data
+          .map((j) => Conversation.fromJson(j as Map<String, dynamic>))
+          .toList();
     }
     throw Exception(response['message'] ?? 'Failed to load conversations');
   }
@@ -26,7 +28,9 @@ class ChatRepository {
     );
     if (response['success'] == true) {
       final List<dynamic> data = response['data'] ?? [];
-      return data.map((json) => ChatMessage.fromJson(json)).toList();
+      return data
+          .map((j) => ChatMessage.fromJson(j as Map<String, dynamic>))
+          .toList();
     }
     throw Exception(response['message'] ?? 'Failed to load messages');
   }

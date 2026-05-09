@@ -9,7 +9,7 @@ class AuthRepository {
     try {
       return await _apiService.register(email, password);
     } catch (e) {
-      return {'success': false, 'message': 'Network error: ${e.toString()}'};
+      return {'success': false, 'message': 'Network error: $e'};
     }
   }
 
@@ -22,7 +22,7 @@ class AuthRepository {
       }
       return response;
     } catch (e) {
-      return {'success': false, 'message': 'Network error: ${e.toString()}'};
+      return {'success': false, 'message': 'Network error: $e'};
     }
   }
 
@@ -30,7 +30,7 @@ class AuthRepository {
     try {
       return await _apiService.resendCode(email);
     } catch (e) {
-      return {'success': false, 'message': 'Network error: ${e.toString()}'};
+      return {'success': false, 'message': 'Network error: $e'};
     }
   }
 
@@ -43,7 +43,7 @@ class AuthRepository {
       }
       return response;
     } catch (e) {
-      return {'success': false, 'message': 'Network error: ${e.toString()}'};
+      return {'success': false, 'message': 'Network error: $e'};
     }
   }
 
@@ -51,7 +51,7 @@ class AuthRepository {
     try {
       return await _apiService.forgotPassword(email);
     } catch (e) {
-      return {'success': false, 'message': 'Network error: ${e.toString()}'};
+      return {'success': false, 'message': 'Network error: $e'};
     }
   }
 
@@ -63,30 +63,25 @@ class AuthRepository {
     try {
       return await _apiService.resetPassword(email, code, password);
     } catch (e) {
-      return {'success': false, 'message': 'Network error: ${e.toString()}'};
+      return {'success': false, 'message': 'Network error: $e'};
     }
   }
 
   Future<Map<String, dynamic>> deleteAccount() async {
     final token = await _tokenStore.getAccess();
-    if (token == null)
+    if (token == null) {
       return {'success': false, 'message': 'Not authenticated'};
+    }
     try {
       return await _apiService.deleteAccount(token);
     } catch (e) {
-      return {'success': false, 'message': 'Network error: ${e.toString()}'};
+      return {'success': false, 'message': 'Network error: $e'};
     }
   }
 
-  Future<void> logout() async {
-    await _tokenStore.clear();
-  }
+  Future<void> logout() async => _tokenStore.clear();
 
-  Future<bool> isAuthenticated() async {
-    return await _tokenStore.hasToken();
-  }
+  Future<bool> isAuthenticated() async => _tokenStore.hasToken();
 
-  Future<String?> getAccessToken() async {
-    return await _tokenStore.getAccess();
-  }
+  Future<String?> getAccessToken() async => _tokenStore.getAccess();
 }

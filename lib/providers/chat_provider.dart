@@ -21,9 +21,9 @@ class ChatProvider extends ChangeNotifier {
     _setLoading(true);
     try {
       _conversations = await _chatRepository.getConversations();
-      _setLoading(false);
     } catch (e) {
       _error = e.toString();
+    } finally {
       _setLoading(false);
     }
   }
@@ -32,28 +32,31 @@ class ChatProvider extends ChangeNotifier {
     _setLoading(true);
     try {
       _messages = await _chatRepository.getMessages(conversationId);
-      _setLoading(false);
     } catch (e) {
       _error = e.toString();
+    } finally {
       _setLoading(false);
     }
   }
 
   Future<bool> sendMessage(int recipientId, String content) async {
-    _setLoading(true);
     try {
       await _chatRepository.sendMessage(recipientId, content);
-      _setLoading(false);
       return true;
     } catch (e) {
       _error = e.toString();
-      _setLoading(false);
+      notifyListeners();
       return false;
     }
   }
 
-  void _setLoading(bool loading) {
-    _isLoading = loading;
+  void clearMessages() {
+    _messages = [];
+    notifyListeners();
+  }
+
+  void _setLoading(bool v) {
+    _isLoading = v;
     notifyListeners();
   }
 }

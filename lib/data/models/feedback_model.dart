@@ -32,7 +32,9 @@ class FeedbackModel {
       category: json['category'] as String? ?? 'General',
       rating: json['rating'] as int?,
       status: json['status'] as String? ?? 'pending',
-      createdAt: DateTime.tryParse(json['created_at'] ?? '') ?? DateTime.now(),
+      createdAt:
+          DateTime.tryParse(json['created_at']?.toString() ?? '') ??
+          DateTime.now(),
       userName: json['full_name'] as String?,
       userEmail: json['email'] as String?,
     );

@@ -15,8 +15,8 @@ class Helpers {
         return '${parts[0]} ${parts[1].substring(0, 5)}';
       }
       return dateTimeStr;
-    } catch (e) {
-      return dateTimeStr;
+    } catch (_) {
+      return dateTimeStr ?? '';
     }
   }
 
@@ -25,20 +25,13 @@ class Helpers {
     try {
       final dateTime = DateTime.parse(dateTimeStr);
       final now = DateTime.now();
-      final difference = now.difference(dateTime);
-
-      if (difference.inDays > 7) {
-        return '${difference.inDays ~/ 7}w ago';
-      } else if (difference.inDays > 0) {
-        return '${difference.inDays}d ago';
-      } else if (difference.inHours > 0) {
-        return '${difference.inHours}h ago';
-      } else if (difference.inMinutes > 0) {
-        return '${difference.inMinutes}m ago';
-      } else {
-        return 'Just now';
-      }
-    } catch (e) {
+      final diff = now.difference(dateTime);
+      if (diff.inDays > 7) return '${diff.inDays ~/ 7}w ago';
+      if (diff.inDays > 0) return '${diff.inDays}d ago';
+      if (diff.inHours > 0) return '${diff.inHours}h ago';
+      if (diff.inMinutes > 0) return '${diff.inMinutes}m ago';
+      return 'Just now';
+    } catch (_) {
       return '';
     }
   }
@@ -77,7 +70,6 @@ class Helpers {
     Color confirmColor = Colors.redAccent,
   }) async {
     final isDark = Theme.of(context).brightness == Brightness.dark;
-
     return await showDialog<bool>(
           context: context,
           builder: (context) => AlertDialog(

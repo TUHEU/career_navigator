@@ -17,6 +17,8 @@ class JobProvider extends ChangeNotifier {
   List<JobApplication> get applications => _applications;
   bool get isLoading => _isLoading;
   String? get error => _error;
+  String get selectedLocation => _selectedLocation;
+  String get selectedType => _selectedType;
 
   Future<void> loadJobs() async {
     _setLoading(true);
@@ -26,9 +28,9 @@ class JobProvider extends ChangeNotifier {
         employmentType: _selectedType != 'All' ? _selectedType : null,
         search: _searchQuery.isNotEmpty ? _searchQuery : null,
       );
-      _setLoading(false);
     } catch (e) {
       _error = e.toString();
+    } finally {
       _setLoading(false);
     }
   }
@@ -37,9 +39,9 @@ class JobProvider extends ChangeNotifier {
     _setLoading(true);
     try {
       _applications = await _jobRepository.getMyApplications();
-      _setLoading(false);
     } catch (e) {
       _error = e.toString();
+    } finally {
       _setLoading(false);
     }
   }
@@ -49,19 +51,19 @@ class JobProvider extends ChangeNotifier {
     try {
       await _jobRepository.applyForJob(jobId, coverLetter: coverLetter);
       await loadApplications();
-      _setLoading(false);
       return true;
     } catch (e) {
       _error = e.toString();
-      _setLoading(false);
       return false;
+    } finally {
+      _setLoading(false);
     }
   }
 
   Future<bool> hasApplied(int jobId) async {
     try {
       return await _jobRepository.hasApplied(jobId);
-    } catch (e) {
+    } catch (_) {
       return false;
     }
   }
@@ -88,8 +90,8 @@ class JobProvider extends ChangeNotifier {
     loadJobs();
   }
 
-  void _setLoading(bool loading) {
-    _isLoading = loading;
+  void _setLoading(bool v) {
+    _isLoading = v;
     notifyListeners();
   }
 }
