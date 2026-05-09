@@ -14,7 +14,7 @@ class NotificationRepository {
       final data = response['data'] as Map<String, dynamic>;
       final List<dynamic> notifications = data['notifications'] ?? [];
       return notifications
-          .map((json) => NotificationModel.fromJson(json))
+          .map((j) => NotificationModel.fromJson(j as Map<String, dynamic>))
           .toList();
     }
     throw Exception(response['message'] ?? 'Failed to load notifications');
@@ -36,7 +36,9 @@ class NotificationRepository {
     if (token == null) throw Exception('Not authenticated');
     final response = await _apiService.markNotificationsRead(token: token);
     if (response['success'] != true) {
-      throw Exception(response['message'] ?? 'Failed to mark as read');
+      throw Exception(
+        response['message'] ?? 'Failed to mark notifications as read',
+      );
     }
   }
 }

@@ -37,27 +37,28 @@ class VideoSession {
       seekerId: json['seeker_id'] as int,
       status: json['status'] as String,
       startedAt: json['started_at'] != null
-          ? DateTime.tryParse(json['started_at'])
+          ? DateTime.tryParse(json['started_at'].toString())
           : null,
       endedAt: json['ended_at'] != null
-          ? DateTime.tryParse(json['ended_at'])
+          ? DateTime.tryParse(json['ended_at'].toString())
           : null,
       durationSeconds: json['duration_seconds'] as int? ?? 0,
       recordingUrl: json['recording_url'] as String?,
-      createdAt: DateTime.parse(json['created_at']),
+      createdAt:
+          DateTime.tryParse(json['created_at']?.toString() ?? '') ??
+          DateTime.now(),
       mentorName: json['mentor_name'] as String?,
       seekerName: json['seeker_name'] as String?,
     );
   }
 
   String get durationFormatted {
-    final minutes = durationSeconds ~/ 60;
-    final seconds = durationSeconds % 60;
-    return '${minutes.toString().padLeft(2, '0')}:${seconds.toString().padLeft(2, '0')}';
+    final m = durationSeconds ~/ 60;
+    final s = durationSeconds % 60;
+    return '${m.toString().padLeft(2, '0')}:${s.toString().padLeft(2, '0')}';
   }
 
   bool get isActive => status == 'active';
-  bool get isScheduled => status == 'scheduled';
   bool get isEnded => status == 'ended';
   bool get isMissed => status == 'missed';
 

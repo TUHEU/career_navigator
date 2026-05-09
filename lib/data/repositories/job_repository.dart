@@ -20,7 +20,9 @@ class JobRepository {
     );
     if (response['success'] == true) {
       final List<dynamic> data = response['data'] ?? [];
-      return data.map((json) => JobListing.fromJson(json)).toList();
+      return data
+          .map((j) => JobListing.fromJson(j as Map<String, dynamic>))
+          .toList();
     }
     throw Exception(response['message'] ?? 'Failed to load jobs');
   }
@@ -30,7 +32,7 @@ class JobRepository {
     if (response['success'] == true) {
       return JobListing.fromJson(response['data'] as Map<String, dynamic>);
     }
-    throw Exception(response['message'] ?? 'Failed to load job details');
+    throw Exception(response['message'] ?? 'Failed to load job');
   }
 
   Future<void> applyForJob(int jobId, {String? coverLetter}) async {
@@ -42,7 +44,7 @@ class JobRepository {
       coverLetter: coverLetter,
     );
     if (response['success'] != true) {
-      throw Exception(response['message'] ?? 'Failed to apply for job');
+      throw Exception(response['message'] ?? 'Failed to apply');
     }
   }
 
@@ -52,16 +54,18 @@ class JobRepository {
     final response = await _apiService.getMyApplications(token);
     if (response['success'] == true) {
       final List<dynamic> data = response['data'] ?? [];
-      return data.map((json) => JobApplication.fromJson(json)).toList();
+      return data
+          .map((j) => JobApplication.fromJson(j as Map<String, dynamic>))
+          .toList();
     }
     throw Exception(response['message'] ?? 'Failed to load applications');
   }
 
   Future<bool> hasApplied(int jobId) async {
     try {
-      final applications = await getMyApplications();
-      return applications.any((app) => app.jobId == jobId);
-    } catch (e) {
+      final apps = await getMyApplications();
+      return apps.any((a) => a.jobId == jobId);
+    } catch (_) {
       return false;
     }
   }

@@ -1,3 +1,5 @@
+// ─── user_model.dart ────────────────────────────────────────────────────────
+
 class User {
   final int id;
   final String email;
@@ -51,21 +53,22 @@ class User {
 
   factory User.fromJson(Map<String, dynamic> json) {
     final mentorProfile = json['mentor_profile'] as Map<String, dynamic>? ?? {};
-
     return User(
       id: json['id'] as int,
       email: json['email'] as String,
       fullName: json['full_name'] as String?,
       profilePictureUrl: json['profile_picture_url'] as String?,
       role: json['role'] as String? ?? 'job_seeker',
-      isVerified: json['is_verified'] == 1,
-      phone: json['phone'] as String? ?? mentorProfile['phone'],
-      location: json['location'] as String? ?? mentorProfile['location'],
-      headline: json['headline'] as String? ?? mentorProfile['headline'],
-      bio: json['bio'] as String? ?? mentorProfile['bio'],
+      isVerified: json['is_verified'] == 1 || json['is_verified'] == true,
+      phone: json['phone'] as String? ?? mentorProfile['phone'] as String?,
+      location:
+          json['location'] as String? ?? mentorProfile['location'] as String?,
+      headline:
+          json['headline'] as String? ?? mentorProfile['headline'] as String?,
+      bio: json['bio'] as String? ?? mentorProfile['bio'] as String?,
       currentJobTitle:
           json['current_job_title'] as String? ??
-          mentorProfile['current_job_title'],
+          mentorProfile['current_job_title'] as String?,
       desiredJobTitle: json['desired_job_title'] as String?,
       yearsOfExperience:
           (json['years_of_experience'] ?? mentorProfile['years_of_experience'])
@@ -73,22 +76,24 @@ class User {
       availability: json['availability'] as String?,
       education:
           (json['education'] as List?)
-              ?.map((e) => Education.fromJson(e))
+              ?.map((e) => Education.fromJson(e as Map<String, dynamic>))
               .toList() ??
           [],
       workExperience:
           (json['work_experience'] as List?)
-              ?.map((w) => WorkExperience.fromJson(w))
+              ?.map((w) => WorkExperience.fromJson(w as Map<String, dynamic>))
               .toList() ??
           [],
-      currentCompany: mentorProfile['current_company'],
+      currentCompany: mentorProfile['current_company'] as String?,
       expertiseAreas: mentorProfile['expertise_areas'] != null
-          ? List<String>.from(mentorProfile['expertise_areas'])
+          ? List<String>.from(mentorProfile['expertise_areas'] as List)
           : null,
       sessionPrice: mentorProfile['session_price'] != null
           ? double.tryParse(mentorProfile['session_price'].toString())
           : null,
-      isAcceptingMentees: mentorProfile['is_accepting_mentees'] == 1,
+      isAcceptingMentees:
+          mentorProfile['is_accepting_mentees'] == 1 ||
+          mentorProfile['is_accepting_mentees'] == true,
       rating: mentorProfile['rating'] != null
           ? double.tryParse(mentorProfile['rating'].toString())
           : null,
@@ -97,10 +102,13 @@ class User {
   }
 
   String get displayName => fullName ?? email.split('@').first;
+
   String get initials {
     if (displayName.isEmpty) return '?';
     final parts = displayName.trim().split(' ');
-    if (parts.length >= 2) return '${parts[0][0]}${parts[1][0]}'.toUpperCase();
+    if (parts.length >= 2) {
+      return '${parts[0][0]}${parts[1][0]}'.toUpperCase();
+    }
     return displayName[0].toUpperCase();
   }
 }
@@ -133,7 +141,7 @@ class Education {
     fieldOfStudy: json['field_of_study'] as String? ?? '',
     startYear: json['start_year'] as int? ?? 0,
     endYear: json['end_year'] as int?,
-    isCurrent: json['is_current'] == 1,
+    isCurrent: json['is_current'] == 1 || json['is_current'] == true,
     description: json['description'] as String?,
   );
 
@@ -186,7 +194,7 @@ class WorkExperience {
     location: json['location'] as String?,
     startDate: json['start_date']?.toString() ?? '',
     endDate: json['end_date']?.toString(),
-    isCurrent: json['is_current'] == 1,
+    isCurrent: json['is_current'] == 1 || json['is_current'] == true,
     description: json['description'] as String?,
   );
 

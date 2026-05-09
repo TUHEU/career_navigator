@@ -92,8 +92,8 @@ class UserProvider extends ChangeNotifier {
     }
   }
 
-  void _setLoading(bool loading) {
-    _isLoading = loading;
+  void _setLoading(bool v) {
+    _isLoading = v;
     notifyListeners();
   }
 }

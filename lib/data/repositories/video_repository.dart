@@ -12,46 +12,38 @@ class VideoRepository {
   }) async {
     final token = await _tokenStore.getAccess();
     if (token == null) throw Exception('Not authenticated');
-
     final response = await _apiService.startVideoSession(
       token: token,
       mentorId: mentorId,
       seekerId: seekerId,
     );
-
     if (response['success'] != true) {
       throw Exception(response['message'] ?? 'Failed to start video session');
     }
-
     return response['data'] as Map<String, dynamic>;
   }
 
   Future<Map<String, dynamic>> joinSession(String channelName) async {
     final token = await _tokenStore.getAccess();
     if (token == null) throw Exception('Not authenticated');
-
     final response = await _apiService.joinVideoSession(
       token: token,
       channelName: channelName,
     );
-
     if (response['success'] != true) {
       throw Exception(response['message'] ?? 'Failed to join video session');
     }
-
     return response['data'] as Map<String, dynamic>;
   }
 
   Future<void> endSession(String channelName, int duration) async {
     final token = await _tokenStore.getAccess();
     if (token == null) throw Exception('Not authenticated');
-
     final response = await _apiService.endVideoSession(
       token: token,
       channelName: channelName,
       duration: duration,
     );
-
     if (response['success'] != true) {
       throw Exception(response['message'] ?? 'Failed to end video session');
     }
@@ -60,14 +52,13 @@ class VideoRepository {
   Future<List<VideoSession>> getSessions() async {
     final token = await _tokenStore.getAccess();
     if (token == null) throw Exception('Not authenticated');
-
     final response = await _apiService.getVideoSessions(token);
-
     if (response['success'] == true) {
       final List<dynamic> data = response['data'] ?? [];
-      return data.map((json) => VideoSession.fromJson(json)).toList();
+      return data
+          .map((j) => VideoSession.fromJson(j as Map<String, dynamic>))
+          .toList();
     }
-
     throw Exception(response['message'] ?? 'Failed to load video sessions');
   }
 }

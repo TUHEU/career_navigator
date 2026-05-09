@@ -3,8 +3,7 @@ import '../data/models/notification_model.dart';
 import '../data/repositories/notification_repository.dart';
 
 class NotificationProvider extends ChangeNotifier {
-  final NotificationRepository _notificationRepository =
-      NotificationRepository();
+  final NotificationRepository _repo = NotificationRepository();
 
   List<NotificationModel> _notifications = [];
   int _unreadCount = 0;
@@ -17,27 +16,28 @@ class NotificationProvider extends ChangeNotifier {
   Future<void> loadNotifications() async {
     _setLoading(true);
     try {
-      _notifications = await _notificationRepository.getNotifications();
-      _unreadCount = await _notificationRepository.getUnreadCount();
-      _setLoading(false);
-    } catch (e) {
+      _notifications = await _repo.getNotifications();
+      _unreadCount = await _repo.getUnreadCount();
+    } catch (_) {
+      // silently fail — badge just won't update
+    } finally {
       _setLoading(false);
     }
   }
 
   Future<void> markAllAsRead() async {
     try {
-      await _notificationRepository.markAllAsRead();
+      await _repo.markAllAsRead();
       _unreadCount = 0;
-      for (var notification in _notifications) {
-        notification.isRead = true;
+      for (final n in _notifications) {
+        n.isRead = true;
       }
       notifyListeners();
-    } catch (e) {}
+    } catch (_) {}
   }
 
-  void _setLoading(bool loading) {
-    _isLoading = loading;
+  void _setLoading(bool v) {
+    _isLoading = v;
     notifyListeners();
   }
 }

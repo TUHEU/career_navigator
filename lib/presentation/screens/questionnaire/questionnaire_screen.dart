@@ -1,8 +1,9 @@
-import 'package:career_navigator/presentation/screens/dashboard/job_seeker_dashboard.dart';
 import 'package:flutter/material.dart';
-import 'package:shared_preferences/shared_preferences.dart';
-import '../models/questionnaire_model.dart';
-import '../services/questionnaire_service.dart';
+import 'package:provider/provider.dart';
+
+import '../../../core/themes/app_theme.dart';
+import '../../../providers/auth_provider.dart';
+import '../../../providers/user_provider.dart';
 import '../dashboard/job_seeker_dashboard.dart';
 
 class QuestionnaireScreen extends StatefulWidget {
@@ -17,10 +18,11 @@ class _QuestionnaireScreenState extends State<QuestionnaireScreen> {
   int _currentStep = 0;
   bool _isLoading = false;
 
+  // Step 1 – Education
   String _educationLevel = "Bachelor's";
   final _fieldController = TextEditingController();
-  final _graduationYearController = TextEditingController();
 
+  // Step 2 – Interests
   final List<String> _allInterests = [
     'Software Engineering',
     'Data Science',
@@ -30,14 +32,18 @@ class _QuestionnaireScreenState extends State<QuestionnaireScreen> {
     'Education',
     'Design',
     'Business',
+    'DevOps',
+    'Mobile Development',
   ];
   final List<String> _selectedInterests = [];
 
+  // Step 3 – Skills
   final _skillController = TextEditingController();
   final List<String> _skills = [];
 
-  String _jobType = 'Full-time';
-  String _workMode = 'Onsite';
+  // Step 4 – Preferences
+  String _jobType = 'full_time';
+  String _workMode = 'onsite';
   final _locationController = TextEditingController();
 
   void _addSkill() {
@@ -52,37 +58,44 @@ class _QuestionnaireScreenState extends State<QuestionnaireScreen> {
 
   Future<void> _submit() async {
     setState(() => _isLoading = true);
-    final prefs = await SharedPreferences.getInstance();
-    final userId = prefs.getString('user_id') ?? '';
 
-    final data = QuestionnaireModel(
-      userId: userId,
-      educationLevel: _educationLevel,
-      fieldOfStudy: _fieldController.text.trim(),
-      graduationYear: _graduationYearController.text.trim(),
-      careerInterests: _selectedInterests,
-      skills: _skills,
-      jobType: _jobType,
-      workMode: _workMode,
-      preferredLocation: _locationController.text.trim(),
-      submittedAt: DateTime.now(),
-    );
+    try {
+      final userProvider = context.read<UserProvider>();
 
-    final success = await QuestionnaireService.submitQuestionnaire(data);
-    setState(() => _isLoading = false);
+      // Save interests and skills as part of the job seeker profile
+      final fields = <String, dynamic>{
+        'desired_job_title': _selectedInterests.isNotEmpty
+            ? _selectedInterests.first
+            : '',
+        'availability': _workMode,
+      };
+      if (_skills.isNotEmpty) {
+        fields['skills'] = _skills;
+      }
+      if (_locationController.text.trim().isNotEmpty) {
+        fields['location'] = _locationController.text.trim();
+      }
 
-    if (success && mounted) {
-      Navigator.pushReplacement(
-        context,
-        MaterialPageRoute(builder: (_) => const JobSeekerDashboard()),
-      );
-    } else if (mounted) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(
-          content: Text('Something went wrong. Try again.'),
-          backgroundColor: Colors.red,
-        ),
-      );
+      await userProvider.updateJobSeekerProfile(fields);
+
+      if (mounted) {
+        Navigator.pushAndRemoveUntil(
+          context,
+          MaterialPageRoute(builder: (_) => const JobSeekerDashboard()),
+          (_) => false,
+        );
+      }
+    } catch (e) {
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text('Something went wrong: $e'),
+            backgroundColor: Colors.redAccent,
+          ),
+        );
+      }
+    } finally {
+      if (mounted) setState(() => _isLoading = false);
     }
   }
 
@@ -103,7 +116,7 @@ class _QuestionnaireScreenState extends State<QuestionnaireScreen> {
           "Master's",
           "PhD",
         ].map((e) => DropdownMenuItem(value: e, child: Text(e))).toList(),
-        onChanged: (val) => setState(() => _educationLevel = val!),
+        onChanged: (v) => setState(() => _educationLevel = v!),
         decoration: const InputDecoration(border: OutlineInputBorder()),
       ),
       const SizedBox(height: 16),
@@ -118,22 +131,8 @@ class _QuestionnaireScreenState extends State<QuestionnaireScreen> {
           hintText: 'e.g. Computer Science',
           border: OutlineInputBorder(),
         ),
-        validator: (v) => v!.isEmpty ? 'Required' : null,
-      ),
-      const SizedBox(height: 16),
-      const Text(
-        'Graduation Year',
-        style: TextStyle(fontWeight: FontWeight.bold),
-      ),
-      const SizedBox(height: 8),
-      TextFormField(
-        controller: _graduationYearController,
-        keyboardType: TextInputType.number,
-        decoration: const InputDecoration(
-          hintText: 'e.g. 2024',
-          border: OutlineInputBorder(),
-        ),
-        validator: (v) => v!.isEmpty ? 'Required' : null,
+        validator: (v) =>
+            (v == null || v.isEmpty) ? 'Field of study required' : null,
       ),
     ],
   );
@@ -154,8 +153,10 @@ class _QuestionnaireScreenState extends State<QuestionnaireScreen> {
               (interest) => FilterChip(
                 label: Text(interest),
                 selected: _selectedInterests.contains(interest),
-                onSelected: (val) => setState(
-                  () => val
+                selectedColor: AppColors.primaryCyan.withOpacity(0.25),
+                checkmarkColor: AppColors.primaryCyan,
+                onSelected: (selected) => setState(
+                  () => selected
                       ? _selectedInterests.add(interest)
                       : _selectedInterests.remove(interest),
                 ),
@@ -198,6 +199,7 @@ class _QuestionnaireScreenState extends State<QuestionnaireScreen> {
             .map(
               (s) => Chip(
                 label: Text(s),
+                deleteIconColor: AppColors.primaryCyan,
                 onDeleted: () => setState(() => _skills.remove(s)),
               ),
             )
@@ -213,13 +215,14 @@ class _QuestionnaireScreenState extends State<QuestionnaireScreen> {
       const SizedBox(height: 8),
       DropdownButtonFormField<String>(
         value: _jobType,
-        items: [
-          'Full-time',
-          'Part-time',
-          'Internship',
-          'Contract',
-        ].map((e) => DropdownMenuItem(value: e, child: Text(e))).toList(),
-        onChanged: (val) => setState(() => _jobType = val!),
+        items: const [
+          DropdownMenuItem(value: 'full_time', child: Text('Full-time')),
+          DropdownMenuItem(value: 'part_time', child: Text('Part-time')),
+          DropdownMenuItem(value: 'internship', child: Text('Internship')),
+          DropdownMenuItem(value: 'contract', child: Text('Contract')),
+          DropdownMenuItem(value: 'freelance', child: Text('Freelance')),
+        ],
+        onChanged: (v) => setState(() => _jobType = v!),
         decoration: const InputDecoration(border: OutlineInputBorder()),
       ),
       const SizedBox(height: 16),
@@ -227,12 +230,12 @@ class _QuestionnaireScreenState extends State<QuestionnaireScreen> {
       const SizedBox(height: 8),
       DropdownButtonFormField<String>(
         value: _workMode,
-        items: [
-          'Onsite',
-          'Remote',
-          'Hybrid',
-        ].map((e) => DropdownMenuItem(value: e, child: Text(e))).toList(),
-        onChanged: (val) => setState(() => _workMode = val!),
+        items: const [
+          DropdownMenuItem(value: 'onsite', child: Text('Onsite')),
+          DropdownMenuItem(value: 'remote', child: Text('Remote')),
+          DropdownMenuItem(value: 'hybrid', child: Text('Hybrid')),
+        ],
+        onChanged: (v) => setState(() => _workMode = v!),
         decoration: const InputDecoration(border: OutlineInputBorder()),
       ),
       const SizedBox(height: 16),
@@ -270,6 +273,7 @@ class _QuestionnaireScreenState extends State<QuestionnaireScreen> {
         key: _formKey,
         child: Column(
           children: [
+            // Progress bar
             Padding(
               padding: const EdgeInsets.all(16),
               child: Row(
@@ -281,8 +285,8 @@ class _QuestionnaireScreenState extends State<QuestionnaireScreen> {
                       height: 6,
                       decoration: BoxDecoration(
                         color: i <= _currentStep
-                            ? Theme.of(context).primaryColor
-                            : Colors.grey[300],
+                            ? AppColors.primaryCyan
+                            : Colors.grey.shade300,
                         borderRadius: BorderRadius.circular(3),
                       ),
                     ),
@@ -328,8 +332,9 @@ class _QuestionnaireScreenState extends State<QuestionnaireScreen> {
                           ? null
                           : () {
                               if (_currentStep < steps.length - 1) {
-                                if (_formKey.currentState!.validate())
+                                if (_formKey.currentState!.validate()) {
                                   setState(() => _currentStep++);
+                                }
                               } else {
                                 _submit();
                               }
@@ -343,7 +348,7 @@ class _QuestionnaireScreenState extends State<QuestionnaireScreen> {
                           : Text(
                               _currentStep < steps.length - 1
                                   ? 'Next'
-                                  : 'Submit',
+                                  : 'Get Started',
                             ),
                     ),
                   ),
@@ -359,7 +364,6 @@ class _QuestionnaireScreenState extends State<QuestionnaireScreen> {
   @override
   void dispose() {
     _fieldController.dispose();
-    _graduationYearController.dispose();
     _skillController.dispose();
     _locationController.dispose();
     super.dispose();

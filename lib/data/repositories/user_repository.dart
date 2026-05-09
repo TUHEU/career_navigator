@@ -9,7 +9,6 @@ class UserRepository {
   Future<User> getProfile() async {
     final token = await _tokenStore.getAccess();
     if (token == null) throw Exception('Not authenticated');
-
     final response = await _apiService.getProfile(token);
     if (response['success'] == true) {
       return User.fromJson(response['data'] as Map<String, dynamic>);
@@ -24,7 +23,6 @@ class UserRepository {
   }) async {
     final token = await _tokenStore.getAccess();
     if (token == null) throw Exception('Not authenticated');
-
     final response = await _apiService.setupProfile(
       token: token,
       fullName: fullName,
@@ -39,7 +37,6 @@ class UserRepository {
   Future<void> updateJobSeekerProfile(Map<String, dynamic> fields) async {
     final token = await _tokenStore.getAccess();
     if (token == null) throw Exception('Not authenticated');
-
     final response = await _apiService.updateJobSeekerProfile(
       token: token,
       fields: fields,
@@ -52,7 +49,6 @@ class UserRepository {
   Future<void> updateMentorProfile(Map<String, dynamic> fields) async {
     final token = await _tokenStore.getAccess();
     if (token == null) throw Exception('Not authenticated');
-
     final response = await _apiService.updateMentorProfile(
       token: token,
       fields: fields,
@@ -65,7 +61,6 @@ class UserRepository {
   Future<void> addEducation(Education education) async {
     final token = await _tokenStore.getAccess();
     if (token == null) throw Exception('Not authenticated');
-
     final response = await _apiService.addEducation(
       token: token,
       data: education.toJson(),
@@ -78,7 +73,6 @@ class UserRepository {
   Future<void> updateEducation(int id, Education education) async {
     final token = await _tokenStore.getAccess();
     if (token == null) throw Exception('Not authenticated');
-
     final response = await _apiService.updateEducation(
       token: token,
       id: id,
@@ -92,7 +86,6 @@ class UserRepository {
   Future<void> deleteEducation(int id) async {
     final token = await _tokenStore.getAccess();
     if (token == null) throw Exception('Not authenticated');
-
     final response = await _apiService.deleteEducation(token: token, id: id);
     if (response['success'] != true) {
       throw Exception(response['message'] ?? 'Failed to delete education');
@@ -102,7 +95,6 @@ class UserRepository {
   Future<void> addWorkExperience(WorkExperience work) async {
     final token = await _tokenStore.getAccess();
     if (token == null) throw Exception('Not authenticated');
-
     final response = await _apiService.addWorkExperience(
       token: token,
       data: work.toJson(),
@@ -115,7 +107,6 @@ class UserRepository {
   Future<void> updateWorkExperience(int id, WorkExperience work) async {
     final token = await _tokenStore.getAccess();
     if (token == null) throw Exception('Not authenticated');
-
     final response = await _apiService.updateWorkExperience(
       token: token,
       id: id,
@@ -131,7 +122,6 @@ class UserRepository {
   Future<void> deleteWorkExperience(int id) async {
     final token = await _tokenStore.getAccess();
     if (token == null) throw Exception('Not authenticated');
-
     final response = await _apiService.deleteWorkExperience(
       token: token,
       id: id,

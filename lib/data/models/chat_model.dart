@@ -25,7 +25,7 @@ class Conversation {
       otherPicture: json['other_picture'] as String?,
       lastMessage: json['last_message'] as String?,
       lastMessageAt: json['last_message_at'] != null
-          ? DateTime.tryParse(json['last_message_at'])
+          ? DateTime.tryParse(json['last_message_at'].toString())
           : null,
       unreadCount: json['unread_count'] as int? ?? 0,
     );
@@ -72,8 +72,10 @@ class ChatMessage {
       senderName: json['sender_name'] as String? ?? 'User',
       senderPicture: json['sender_picture'] as String?,
       content: json['content'] as String? ?? '',
-      isRead: json['is_read'] == 1,
-      createdAt: DateTime.tryParse(json['created_at'] ?? '') ?? DateTime.now(),
+      isRead: json['is_read'] == 1 || json['is_read'] == true,
+      createdAt:
+          DateTime.tryParse(json['created_at']?.toString() ?? '') ??
+          DateTime.now(),
     );
   }
 
@@ -82,8 +84,9 @@ class ChatMessage {
   String get formattedTime {
     final now = DateTime.now();
     final diff = now.difference(createdAt);
-    if (diff.inDays > 0)
+    if (diff.inDays > 0) {
       return '${createdAt.hour}:${createdAt.minute.toString().padLeft(2, '0')}';
+    }
     if (diff.inHours > 0) return '${diff.inHours}h ago';
     if (diff.inMinutes > 0) return '${diff.inMinutes}m ago';
     return 'now';

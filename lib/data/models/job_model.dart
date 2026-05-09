@@ -61,36 +61,31 @@ class JobListing {
       responsibilities: json['responsibilities'] as String? ?? '',
       benefits: json['benefits'] as String?,
       skillsRequired: json['skills_required'] != null
-          ? List<String>.from(json['skills_required'])
+          ? List<String>.from(json['skills_required'] as List)
           : null,
-      isActive: json['is_active'] == 1,
+      isActive: json['is_active'] == 1 || json['is_active'] == true,
       expiresAt: json['expires_at'] != null
-          ? DateTime.tryParse(json['expires_at'])
+          ? DateTime.tryParse(json['expires_at'].toString())
           : null,
-      createdAt: DateTime.tryParse(json['created_at'] ?? '') ?? DateTime.now(),
+      createdAt:
+          DateTime.tryParse(json['created_at']?.toString() ?? '') ??
+          DateTime.now(),
     );
   }
 
   String get salaryText {
-    if (salaryMin == null && salaryMax == null) {
-      return 'Salary not specified';
-    }
+    if (salaryMin == null && salaryMax == null) return 'Salary not specified';
     if (salaryMin != null && salaryMax != null) {
-      return '$salaryCurrency ${salaryMin.toString()} - ${salaryMax.toString()}';
+      return '$salaryCurrency $salaryMin - $salaryMax';
     }
-    if (salaryMin != null) {
-      return '$salaryCurrency ${salaryMin.toString()}+';
-    }
-    return 'Up to $salaryCurrency ${salaryMax.toString()}';
+    if (salaryMin != null) return '$salaryCurrency $salaryMin+';
+    return 'Up to $salaryCurrency $salaryMax';
   }
 
-  String get employmentTypeDisplay {
-    return employmentType.replaceAll('_', ' ').toUpperCase();
-  }
+  String get employmentTypeDisplay =>
+      employmentType.replaceAll('_', ' ').toUpperCase();
 
-  String get locationTypeDisplay {
-    return locationType.toUpperCase();
-  }
+  String get locationTypeDisplay => locationType.toUpperCase();
 
   String get experienceLevelDisplay {
     switch (experienceLevel) {
@@ -110,7 +105,6 @@ class JobListing {
   }
 }
 
-// JOB APPLICATION CLASS
 class JobApplication {
   final int id;
   final int jobId;
@@ -143,7 +137,9 @@ class JobApplication {
       id: json['id'] as int? ?? 0,
       jobId: json['job_id'] as int? ?? 0,
       status: json['status'] as String? ?? 'pending',
-      appliedAt: DateTime.tryParse(json['applied_at'] ?? '') ?? DateTime.now(),
+      appliedAt:
+          DateTime.tryParse(json['applied_at']?.toString() ?? '') ??
+          DateTime.now(),
       title: json['title'] as String? ?? '',
       company: json['company'] as String? ?? '',
       location: json['location'] as String?,
@@ -189,7 +185,6 @@ class JobApplication {
   }
 
   bool get isPending => status == 'pending';
-  bool get isReviewed => status == 'reviewed';
   bool get isShortlisted => status == 'shortlisted';
   bool get isRejected => status == 'rejected';
   bool get isHired => status == 'hired';

@@ -30,11 +30,13 @@ class NotificationModel {
       type: json['type'] as String? ?? 'system',
       title: json['title'] as String? ?? '',
       body: json['body'] as String?,
-      isRead: json['is_read'] == 1,
+      isRead: json['is_read'] == 1 || json['is_read'] == true,
       referenceId: json['reference_id'] as int?,
       senderName: json['sender_name'] as String?,
       senderPicture: json['sender_picture'] as String?,
-      createdAt: DateTime.tryParse(json['created_at'] ?? '') ?? DateTime.now(),
+      createdAt:
+          DateTime.tryParse(json['created_at']?.toString() ?? '') ??
+          DateTime.now(),
     );
   }
 
