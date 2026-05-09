@@ -12,7 +12,10 @@ class Developer {
   final String github;
   final String? email;
   final String linkedin;
-  final String imagePath;
+  // FIX: added networkImageUrl so photos can be loaded from the internet
+  // when the local asset is missing. Set to '' to use initials only.
+  final String networkImageUrl;
+  final String imagePath; // kept for backwards compat (local asset)
   final String description;
 
   const Developer({
@@ -22,6 +25,7 @@ class Developer {
     this.email,
     required this.linkedin,
     required this.imagePath,
+    this.networkImageUrl = '',
     required this.description,
   });
 }
@@ -34,17 +38,19 @@ const List<Developer> kDevelopers = [
     email: 'tuheu.moussa@ictuniversity.edu.cm',
     linkedin: 'https://www.linkedin.com/in/nadal-junior-63b5933a3/',
     imagePath: 'assets/team/dev1.png',
+    // Replace with your actual LinkedIn/GitHub avatar URL:
+    networkImageUrl: 'https://avatars.githubusercontent.com/TUHEU',
     description:
         'Designed and implemented the Flask API, database schema, authentication system, and job listing module.',
   ),
   Developer(
-    name: 'Yuyar Lea-Babara',
+    name: 'Yuyar Lea-Barbara',
     role: 'Lead Flutter Developer',
     github: 'techgirl911',
     email: 'yuyarbongkem@gmail.com',
-    linkedin:
-        'https://www.linkedin.com/in/yuyar-bongkem-71bb10345/?utm_source=share&utm_campaign=share_via&utm_content=profile&utm_medium=android_app',
+    linkedin: 'https://www.linkedin.com/in/yuyar-bongkem-71bb10345/',
     imagePath: 'assets/team/dev2.png',
+    networkImageUrl: 'https://avatars.githubusercontent.com/techgirl911',
     description:
         'Built the mobile UI, dashboard screens, navigation system, and chat integration.',
   ),
@@ -53,9 +59,10 @@ const List<Developer> kDevelopers = [
     role: 'UI/UX Designer & Frontend Developer',
     github: 'getrudepink9-design',
     email: 'getrudepink@gmail.com',
-    linkedin:
-        'https://www.linkedin.com/in/getrude-pink-b51747339?utm_source=share_via&utm_content=profile&utm_medium=member_android',
+    linkedin: 'https://www.linkedin.com/in/getrude-pink-b51747339',
     imagePath: 'assets/team/dev3.png',
+    networkImageUrl:
+        'https://avatars.githubusercontent.com/getrudepink9-design',
     description:
         'Created the design system, theming engine, and all screen layouts with responsive design.',
   ),
@@ -66,6 +73,7 @@ const List<Developer> kDevelopers = [
     email: 'david.okonkwo@careernavigator.com',
     linkedin: 'https://linkedin.com/in/david-okonkwo',
     imagePath: 'assets/team/dev4.png',
+    networkImageUrl: '',
     description:
         'Deployed the backend on Contabo VPS, configured PM2, managed server security, and CI/CD pipelines.',
   ),
@@ -76,6 +84,7 @@ const List<Developer> kDevelopers = [
     email: 'emma.rodriguez@careernavigator.com',
     linkedin: 'https://linkedin.com/in/emma-rodriguez',
     imagePath: 'assets/team/dev5.png',
+    networkImageUrl: '',
     description:
         'Manages testing, user acceptance, and coordinates feature releases across the team.',
   ),
@@ -84,18 +93,11 @@ const List<Developer> kDevelopers = [
 class AboutUsPage extends StatelessWidget {
   const AboutUsPage({super.key});
 
-  /// Opens any https/http URL in the external browser / LinkedIn app
   Future<void> _launchUrl(BuildContext context, String url) async {
-    // Ensure the URL is absolute
-    final String fullUrl = url.startsWith('http') ? url : 'https://$url';
+    final fullUrl = url.startsWith('http') ? url : 'https://$url';
     final uri = Uri.tryParse(fullUrl);
     if (uri == null) return;
-
-    final bool launched = await launchUrl(
-      uri,
-      mode: LaunchMode.externalApplication,
-    );
-
+    final launched = await launchUrl(uri, mode: LaunchMode.externalApplication);
     if (!launched && context.mounted) {
       ScaffoldMessenger.of(
         context,
@@ -105,7 +107,7 @@ class AboutUsPage extends StatelessWidget {
 
   Future<void> _sendEmail(BuildContext context, String email) async {
     final uri = Uri.parse('mailto:$email?subject=Career%20Navigator%20Inquiry');
-    final bool launched = await launchUrl(uri);
+    final launched = await launchUrl(uri);
     if (!launched && context.mounted) {
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(content: Text('Could not open email app for: $email')),
@@ -170,6 +172,7 @@ class AboutUsPage extends StatelessWidget {
                 fontSize: 11,
               ),
             ),
+            const SizedBox(height: 16),
           ],
         ),
       ),
@@ -313,6 +316,8 @@ class AboutUsPage extends StatelessWidget {
                       'Flask',
                       'MySQL',
                       'JWT',
+                      'Agora',
+                      'Cloudinary',
                       'Brevo',
                       'PM2',
                       'Contabo VPS',
@@ -349,13 +354,16 @@ class AboutUsPage extends StatelessWidget {
                 : Colors.grey.shade300,
           ),
           const SizedBox(height: 12),
-          const Row(
+          Row(
             children: [
-              Icon(Icons.star, color: Colors.amber, size: 16),
-              SizedBox(width: 8),
+              const Icon(Icons.star, color: Colors.amber, size: 16),
+              const SizedBox(width: 8),
               Text(
                 'Fully open source | Continuous updates',
-                style: TextStyle(color: Colors.white70, fontSize: 11),
+                style: TextStyle(
+                  color: isDark ? Colors.white70 : AppColors.lightTextSecondary,
+                  fontSize: 11,
+                ),
               ),
             ],
           ),
@@ -397,7 +405,6 @@ class _DeveloperCard extends StatelessWidget {
       child: Row(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          // ── Avatar: shows image, falls back to initials circle ──
           _buildAvatar(),
           const SizedBox(width: 16),
           Expanded(
@@ -408,7 +415,7 @@ class _DeveloperCard extends StatelessWidget {
                   dev.name,
                   style: TextStyle(
                     fontWeight: FontWeight.bold,
-                    fontSize: 16,
+                    fontSize: 15,
                     color: isDark ? Colors.white : AppColors.lightText,
                   ),
                 ),
@@ -445,7 +452,7 @@ class _DeveloperCard extends StatelessWidget {
                 const SizedBox(height: 12),
                 Wrap(
                   spacing: 10,
-                  runSpacing: 10,
+                  runSpacing: 8,
                   children: [
                     _buildSocialButton(
                       icon: Icons.code,
@@ -465,7 +472,6 @@ class _DeveloperCard extends StatelessWidget {
                       icon: Icons.link,
                       label: 'LinkedIn',
                       color: const Color(0xFF0077B5),
-                      // ← tapping this now opens the full LinkedIn profile URL
                       onTap: () => onLaunchUrl(dev.linkedin),
                     ),
                   ],
@@ -478,34 +484,55 @@ class _DeveloperCard extends StatelessWidget {
     );
   }
 
-  /// Displays the asset image; falls back to a cyan circle with initials.
+  /// FIX: tries network URL first, then local asset, then initials fallback
   Widget _buildAvatar() {
-    return SizedBox(
-      width: 70,
-      height: 70,
-      child: ClipOval(
-        child: Image.asset(
-          dev.imagePath,
+    // Priority 1: network image URL (GitHub avatar or custom URL)
+    if (dev.networkImageUrl.isNotEmpty) {
+      return ClipOval(
+        child: Image.network(
+          dev.networkImageUrl,
           width: 70,
           height: 70,
           fit: BoxFit.cover,
-          // If the asset is missing, show a coloured circle with initials
-          errorBuilder: (_, __, ___) {
-            return Container(
-              width: 70,
-              height: 70,
-              color: AppColors.primaryCyan.withOpacity(0.2),
-              alignment: Alignment.center,
-              child: Text(
-                Helpers.getInitials(dev.name),
-                style: const TextStyle(
-                  color: AppColors.primaryCyan,
-                  fontWeight: FontWeight.bold,
-                  fontSize: 24,
-                ),
-              ),
-            );
+          loadingBuilder: (context, child, loadingProgress) {
+            if (loadingProgress == null) return child;
+            return _initialsCircle();
           },
+          errorBuilder: (_, __, ___) => _localAssetOrInitials(),
+        ),
+      );
+    }
+    // Priority 2: local asset image
+    return _localAssetOrInitials();
+  }
+
+  Widget _localAssetOrInitials() {
+    return ClipOval(
+      child: Image.asset(
+        dev.imagePath,
+        width: 70,
+        height: 70,
+        fit: BoxFit.cover,
+        errorBuilder: (_, __, ___) => _initialsCircle(),
+      ),
+    );
+  }
+
+  Widget _initialsCircle() {
+    return Container(
+      width: 70,
+      height: 70,
+      decoration: BoxDecoration(
+        shape: BoxShape.circle,
+        color: AppColors.primaryCyan.withOpacity(0.2),
+      ),
+      alignment: Alignment.center,
+      child: Text(
+        Helpers.getInitials(dev.name),
+        style: const TextStyle(
+          color: AppColors.primaryCyan,
+          fontWeight: FontWeight.bold,
+          fontSize: 22,
         ),
       ),
     );
