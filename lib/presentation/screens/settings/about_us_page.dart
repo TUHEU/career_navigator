@@ -164,7 +164,7 @@ class AboutUsPage extends StatelessWidget {
             _buildTechStackCard(isDark),
             const SizedBox(height: 24),
             Text(
-              '© 2025 Career Navigator. All rights reserved.',
+              '© 2026 Career Navigator. All rights reserved.',
               style: TextStyle(
                 color: isDark
                     ? Colors.white.withOpacity(0.25)
