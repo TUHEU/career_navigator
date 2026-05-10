@@ -19,33 +19,56 @@ class EmailVerificationPage extends StatefulWidget {
   State<EmailVerificationPage> createState() => _EmailVerificationPageState();
 }
 
-class _EmailVerificationPageState extends State<EmailVerificationPage> {
-  final List<TextEditingController> _controllers = List.generate(
+class _EmailVerificationPageState extends State<EmailVerificationPage>
+    with WidgetsBindingObserver {
+  // ── Controllers ────────────────────────────────────────────
+  final List<TextEditingController> _ctrl = List.generate(
     6,
     (_) => TextEditingController(),
   );
-  final List<FocusNode> _focusNodes = List.generate(6, (_) => FocusNode());
+  final List<FocusNode> _focus = List.generate(6, (_) => FocusNode());
+  final _singleCtrl = TextEditingController(); // hidden single field
 
+  // ── State ──────────────────────────────────────────────────
   bool _isVerifying = false;
   bool _isResending = false;
   bool _autoTriggered = false;
+  bool _clipChecked = false; // only check clipboard once on open
   int _countdown = 60;
   Timer? _timer;
 
+  // ── Lifecycle ──────────────────────────────────────────────
   @override
   void initState() {
     super.initState();
+    WidgetsBinding.instance.addObserver(this);
     _startCountdown();
+    // Auto-read clipboard after first frame renders
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      _tryReadClipboard();
+    });
   }
 
   @override
   void dispose() {
     _timer?.cancel();
-    for (final c in _controllers) c.dispose();
-    for (final f in _focusNodes) f.dispose();
+    WidgetsBinding.instance.removeObserver(this);
+    for (final c in _ctrl) c.dispose();
+    for (final f in _focus) f.dispose();
+    _singleCtrl.dispose();
     super.dispose();
   }
 
+  /// Re-check clipboard when app comes back to foreground
+  /// (user opens email app → copies code → returns)
+  @override
+  void didChangeAppLifecycleState(AppLifecycleState state) {
+    if (state == AppLifecycleState.resumed && !_isVerifying) {
+      _tryReadClipboard();
+    }
+  }
+
+  // ── Countdown ──────────────────────────────────────────────
   void _startCountdown() {
     _timer?.cancel();
     setState(() => _countdown = 60);
@@ -63,17 +86,49 @@ class _EmailVerificationPageState extends State<EmailVerificationPage> {
     });
   }
 
-  String get _fullCode => _controllers.map((c) => c.text).join();
-
-  void _clearAll() {
-    for (final c in _controllers) c.clear();
-    _autoTriggered = false;
-    if (mounted) {
-      setState(() {});
-      _focusNodes[0].requestFocus();
+  // ── Auto-read clipboard ────────────────────────────────────
+  /// Reads the clipboard. If it contains exactly 6 digits it
+  /// fills all boxes automatically and triggers verification.
+  Future<void> _tryReadClipboard() async {
+    if (_isVerifying) return;
+    try {
+      final data = await Clipboard.getData(Clipboard.kTextPlain);
+      final text = (data?.text ?? '').trim();
+      final digits = text.replaceAll(RegExp(r'\D'), '');
+      if (digits.length == 6) {
+        _fillCode(digits);
+        // Small delay so user sees the filled boxes before submission
+        await Future.delayed(const Duration(milliseconds: 400));
+        if (mounted && !_isVerifying) _verify();
+      }
+    } catch (_) {
+      // Clipboard access denied — fail silently
     }
   }
 
+  // ── Fill all 6 boxes ───────────────────────────────────────
+  void _fillCode(String digits) {
+    if (digits.length != 6) return;
+    for (int i = 0; i < 6; i++) {
+      _ctrl[i].text = digits[i];
+    }
+    setState(() {});
+    _focus[5].requestFocus();
+  }
+
+  // ── Clear all boxes ────────────────────────────────────────
+  void _clearAll() {
+    for (final c in _ctrl) c.clear();
+    _autoTriggered = false;
+    _clipChecked = false;
+    setState(() {});
+    if (mounted) _focus[0].requestFocus();
+  }
+
+  // ── Full 6-digit string ────────────────────────────────────
+  String get _fullCode => _ctrl.map((c) => c.text).join();
+
+  // ── Verify ─────────────────────────────────────────────────
   Future<void> _verify() async {
     if (_isVerifying) return;
     final code = _fullCode;
@@ -85,6 +140,7 @@ class _EmailVerificationPageState extends State<EmailVerificationPage> {
       );
       return;
     }
+
     setState(() => _isVerifying = true);
     final auth = context.read<AuthProvider>();
     final success = await auth.verifyEmail(widget.email, code);
@@ -99,13 +155,14 @@ class _EmailVerificationPageState extends State<EmailVerificationPage> {
     } else {
       Helpers.showSnackBar(
         context,
-        auth.error ?? 'Invalid code. Please try again.',
+        auth.error ?? 'Invalid or expired code. Try again.',
         isError: true,
       );
       _clearAll();
     }
   }
 
+  // ── Resend ─────────────────────────────────────────────────
   Future<void> _resend() async {
     if (_isResending || _countdown > 0) return;
     setState(() => _isResending = true);
@@ -113,8 +170,9 @@ class _EmailVerificationPageState extends State<EmailVerificationPage> {
     final success = await auth.resendCode(widget.email);
     if (!mounted) return;
     setState(() => _isResending = false);
+
     if (success) {
-      Helpers.showSnackBar(context, 'New code sent to ${widget.email}!');
+      Helpers.showSnackBar(context, 'New code sent! Check your email.');
       _clearAll();
       _startCountdown();
     } else {
@@ -126,38 +184,53 @@ class _EmailVerificationPageState extends State<EmailVerificationPage> {
     }
   }
 
+  // ── Handle digit change ────────────────────────────────────
   void _onChanged(int index, String value) {
-    // Handle paste — distribute digits across all boxes
+    // ── Handle paste of full code ──
     if (value.length > 1) {
       final digits = value.replaceAll(RegExp(r'\D'), '');
-      for (int i = 0; i < 6 && i < digits.length; i++) {
-        _controllers[i].text = digits[i];
+      if (digits.length >= 6) {
+        _fillCode(digits.substring(0, 6));
+        // trigger auto-verify
+        if (!_autoTriggered && !_isVerifying) {
+          _autoTriggered = true;
+          Future.delayed(const Duration(milliseconds: 300), _verify);
+        }
+        return;
       }
-      final next = (digits.length - 1).clamp(0, 5);
-      _focusNodes[next].requestFocus();
+      // partial paste — fill what we can
+      for (int i = index; i < 6 && (i - index) < digits.length; i++) {
+        _ctrl[i].text = digits[i - index];
+      }
+      final next = (index + digits.length).clamp(0, 5);
+      _focus[next].requestFocus();
+      setState(() {});
     } else if (value.isNotEmpty && index < 5) {
-      _focusNodes[index + 1].requestFocus();
+      _focus[index + 1].requestFocus();
     }
 
     setState(() {});
 
+    // Auto-submit when all 6 filled
     if (_fullCode.length == 6 && !_autoTriggered && !_isVerifying) {
       _autoTriggered = true;
-      Future.delayed(const Duration(milliseconds: 250), _verify);
+      Future.delayed(const Duration(milliseconds: 300), _verify);
     } else if (_fullCode.length < 6) {
       _autoTriggered = false;
     }
   }
 
+  // ── Handle backspace ───────────────────────────────────────
   void _onKeyEvent(int index, KeyEvent event) {
     if (event is KeyDownEvent &&
         event.logicalKey == LogicalKeyboardKey.backspace &&
-        _controllers[index].text.isEmpty &&
+        _ctrl[index].text.isEmpty &&
         index > 0) {
-      _focusNodes[index - 1].requestFocus();
+      _focus[index - 1].requestFocus();
     }
   }
 
+  // ── Build ──────────────────────────────────────────────────
   @override
   Widget build(BuildContext context) {
     final isDark = context.watch<ThemeProvider>().isDarkMode;
@@ -174,7 +247,7 @@ class _EmailVerificationPageState extends State<EmailVerificationPage> {
             child: Column(
               mainAxisSize: MainAxisSize.min,
               children: [
-                // Logo
+                // ── Logo ────────────────────────────────
                 Container(
                   width: 80,
                   height: 80,
@@ -204,7 +277,7 @@ class _EmailVerificationPageState extends State<EmailVerificationPage> {
                 ),
                 const SizedBox(height: 28),
 
-                // Email icon
+                // ── Email icon ───────────────────────────
                 Container(
                   padding: const EdgeInsets.all(18),
                   decoration: BoxDecoration(
@@ -223,9 +296,9 @@ class _EmailVerificationPageState extends State<EmailVerificationPage> {
                 ),
                 const SizedBox(height: 24),
 
-                // Title
+                // ── Title ────────────────────────────────
                 Text(
-                  'Verify Your Email',
+                  'Check Your Email',
                   style: TextStyle(
                     fontSize: 26,
                     fontWeight: FontWeight.bold,
@@ -252,25 +325,71 @@ class _EmailVerificationPageState extends State<EmailVerificationPage> {
                   ),
                   textAlign: TextAlign.center,
                 ),
-                const SizedBox(height: 36),
-
-                // OTP boxes
-                _buildOtpRow(isDark),
                 const SizedBox(height: 10),
 
-                // Helper text
-                Text(
-                  'Tip: you can paste the full code directly',
-                  style: TextStyle(
-                    fontSize: 11,
-                    color: isDark
-                        ? Colors.white.withOpacity(0.3)
-                        : AppColors.lightTextMuted,
+                // ── Auto-fill banner ─────────────────────
+                Container(
+                  padding: const EdgeInsets.symmetric(
+                    horizontal: 14,
+                    vertical: 10,
+                  ),
+                  decoration: BoxDecoration(
+                    color: AppColors.primaryCyan.withOpacity(0.08),
+                    borderRadius: BorderRadius.circular(12),
+                    border: Border.all(
+                      color: AppColors.primaryCyan.withOpacity(0.25),
+                    ),
+                  ),
+                  child: Row(
+                    mainAxisSize: MainAxisSize.min,
+                    children: [
+                      const Icon(
+                        Icons.auto_awesome,
+                        color: AppColors.primaryCyan,
+                        size: 16,
+                      ),
+                      const SizedBox(width: 8),
+                      Flexible(
+                        child: Text(
+                          'Open your email, copy the 6-digit code — '
+                          'the app will fill it in automatically.',
+                          style: TextStyle(
+                            fontSize: 12,
+                            color: isDark
+                                ? Colors.white.withOpacity(0.7)
+                                : AppColors.lightTextSecondary,
+                          ),
+                        ),
+                      ),
+                    ],
                   ),
                 ),
                 const SizedBox(height: 28),
 
-                // Verify button
+                // ── OTP boxes ────────────────────────────
+                _buildOtpRow(isDark),
+                const SizedBox(height: 12),
+
+                // ── Paste button ─────────────────────────
+                TextButton.icon(
+                  onPressed: _tryReadClipboard,
+                  icon: const Icon(
+                    Icons.content_paste_rounded,
+                    size: 16,
+                    color: AppColors.primaryCyan,
+                  ),
+                  label: const Text(
+                    'Paste code from clipboard',
+                    style: TextStyle(
+                      fontSize: 13,
+                      color: AppColors.primaryCyan,
+                      fontWeight: FontWeight.w500,
+                    ),
+                  ),
+                ),
+                const SizedBox(height: 20),
+
+                // ── Verify button ────────────────────────
                 PrimaryButton(
                   text: 'VERIFY EMAIL',
                   onPressed: isLoading ? null : _verify,
@@ -278,11 +397,11 @@ class _EmailVerificationPageState extends State<EmailVerificationPage> {
                 ),
                 const SizedBox(height: 24),
 
-                // Resend
+                // ── Resend row ───────────────────────────
                 _buildResendRow(isDark),
                 const SizedBox(height: 16),
 
-                // Back
+                // ── Back ─────────────────────────────────
                 TextButton(
                   onPressed: () => Navigator.pushReplacement(
                     context,
@@ -306,6 +425,7 @@ class _EmailVerificationPageState extends State<EmailVerificationPage> {
     );
   }
 
+  // ── OTP box row ────────────────────────────────────────────
   Widget _buildOtpRow(bool isDark) {
     return LayoutBuilder(
       builder: (context, constraints) {
@@ -319,20 +439,20 @@ class _EmailVerificationPageState extends State<EmailVerificationPage> {
         return Row(
           mainAxisAlignment: MainAxisAlignment.center,
           children: List.generate(count, (i) {
-            final filled = _controllers[i].text.isNotEmpty;
+            final filled = _ctrl[i].text.isNotEmpty;
             return Container(
               width: box,
-              height: box + 8,
+              height: box + 10,
               margin: EdgeInsets.only(right: i < count - 1 ? gap : 0),
               child: KeyboardListener(
                 focusNode: FocusNode(),
                 onKeyEvent: (e) => _onKeyEvent(i, e),
                 child: TextFormField(
-                  controller: _controllers[i],
-                  focusNode: _focusNodes[i],
+                  controller: _ctrl[i],
+                  focusNode: _focus[i],
                   textAlign: TextAlign.center,
                   keyboardType: TextInputType.number,
-                  maxLength: 6, // allow paste of full code
+                  maxLength: 6, // allow paste of full code in one box
                   inputFormatters: [FilteringTextInputFormatter.digitsOnly],
                   style: TextStyle(
                     fontSize: box * 0.46,
@@ -345,9 +465,7 @@ class _EmailVerificationPageState extends State<EmailVerificationPage> {
                     counterText: '',
                     filled: true,
                     fillColor: filled
-                        ? AppColors.primaryCyan.withOpacity(
-                            isDark ? 0.12 : 0.08,
-                          )
+                        ? AppColors.primaryCyan.withOpacity(isDark ? 0.15 : 0.1)
                         : (isDark
                               ? Colors.white.withOpacity(0.06)
                               : AppColors.lightInputFill),
@@ -360,7 +478,7 @@ class _EmailVerificationPageState extends State<EmailVerificationPage> {
                       borderRadius: BorderRadius.circular(14),
                       borderSide: BorderSide(
                         color: filled
-                            ? AppColors.primaryCyan.withOpacity(0.6)
+                            ? AppColors.primaryCyan.withOpacity(0.7)
                             : (isDark
                                   ? Colors.white.withOpacity(0.18)
                                   : AppColors.lightBorder),
@@ -385,6 +503,7 @@ class _EmailVerificationPageState extends State<EmailVerificationPage> {
     );
   }
 
+  // ── Resend row ─────────────────────────────────────────────
   Widget _buildResendRow(bool isDark) {
     return Row(
       mainAxisAlignment: MainAxisAlignment.center,

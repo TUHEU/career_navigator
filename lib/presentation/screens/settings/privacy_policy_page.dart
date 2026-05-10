@@ -63,7 +63,7 @@ class PrivacyPolicyPage extends StatelessWidget {
           ], isDark),
           _buildSection('06', Icons.mail_outlined, 'Contact Us', [
             'If you have any questions or concerns regarding this Privacy Policy, please reach out:',
-            '• GitHub: github.com/career-navigator',
+            '• GitHub: https://github.com/TUHEU/career_navigator',
             '• Country: Cameroon',
           ], isDark),
           const SizedBox(height: 28),
@@ -129,7 +129,7 @@ class PrivacyPolicyPage extends StatelessWidget {
           ),
           const SizedBox(height: 8),
           Text(
-            'Last updated: June 1, 2025\nEffective date: June 1, 2025',
+            'Last updated: June 1, 2026\nEffective date: June 1, 2026',
             style: TextStyle(
               color: isDark
                   ? Colors.white.withOpacity(0.45)
