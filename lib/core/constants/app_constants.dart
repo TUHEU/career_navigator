@@ -2,10 +2,11 @@ class AppConstants {
   static const String appName = 'Career Navigator';
   static const String appVersion = '2.0.0';
 
-  // ── Update with your server IP ──────────────────────────────
-  static const String baseUrl = 'http://38.242.246.126:5000';
-  // static const String baseUrl = 'http://10.0.2.2:5000'; // Android emulator
-  // static const String baseUrl = 'http://localhost:5000';  // iOS simulator
+  // API - Update with your server IP
+  static const String baseUrl =
+      'http://38.242.246.126:5000'; // For Android emulator
+  // static const String baseUrl = 'http://localhost:5000'; // For iOS simulator
+  // static const String baseUrl = 'http://YOUR_SERVER_IP:5000'; // For production
 
   static const int defaultPageSize = 20;
   static const int maxPageSize = 50;
@@ -18,7 +19,7 @@ class AppConstants {
   static const Duration receiveTimeout = Duration(seconds: 30);
 
   static const int otpLength = 6;
-  static const int minPasswordLength = 6;
+  static const int minPasswordLength = 8; // FIX: backend requires min 8 chars
   static const int minSearchLength = 2;
 }
 
@@ -37,7 +38,8 @@ class ApiEndpoints {
   // Profile
   static const String getProfile = '/profile/me';
   static const String setupProfile = '/profile/setup';
-  static const String updatePicture = '/upload/picture';
+  static const String updatePicture =
+      '/upload/picture'; // FIX: was /profile/picture
   static const String updateJobSeeker = '/profile/job-seeker';
   static const String updateMentor = '/profile/mentor';
 
@@ -46,7 +48,7 @@ class ApiEndpoints {
   static const String workExperience = '/profile/work-experience';
 
   // Mentors & Requests
-  static const String mentors = '/mentors'; // FIX: was missing
+  static const String mentors = '/mentors';
   static const String requests = '/requests';
 
   // Jobs
@@ -70,12 +72,11 @@ class ApiEndpoints {
   // Admin
   static const String adminUsers = '/admin/users';
   static const String adminFeedback = '/admin/feedback';
-  static const String adminJobs = '/admin/jobs';
+  static const String adminJobs = '/admin/jobs'; // FIX: was missing
 
   // Video Call
   static const String videoStartSession = '/video/start-session';
   static const String videoJoinSession = '/video/join-session';
   static const String videoEndSession = '/video/end-session';
-  static const String videoSessions =
-      '/video/sessions'; // FIX: was missing on backend
+  static const String videoSessions = '/video/sessions';
 }
