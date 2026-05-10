@@ -4,7 +4,7 @@ class AppConstants {
 
   // API - Update with your server IP
   static const String baseUrl =
-      'http://38.242.246.126:5000'; // For Android emulator
+      'http://192.168.1.191:5000'; // For Android emulator
   // static const String baseUrl = 'http://localhost:5000'; // For iOS simulator
   // static const String baseUrl = 'http://YOUR_SERVER_IP:5000'; // For production
 
