@@ -56,7 +56,7 @@ class _MentorDashboardState extends State<MentorDashboard> {
           Container(
             color: isDark
                 ? AppColors.darkBackground.withOpacity(0.80)
-                : Colors.white.withOpacity(0.92),
+                : Colors.white.withOpacity(0.97),
           ),
           SafeArea(child: _pages[_currentIndex]),
         ],
@@ -112,8 +112,8 @@ class _HomePage extends StatelessWidget {
                     'Mentor Dashboard',
                     style: TextStyle(
                       color: isDark
-                          ? Colors.white.withOpacity(0.5)
-                          : AppColors.lightTextSecondary,
+                          ? Colors.white.withOpacity(0.75)
+                          : const Color(0xFF1C2333),
                       fontSize: 12,
                     ),
                   ),
@@ -122,7 +122,7 @@ class _HomePage extends StatelessWidget {
               IconButton(
                 icon: Icon(
                   Icons.search,
-                  color: isDark ? Colors.white70 : Colors.grey.shade600,
+                  color: isDark ? Colors.white70 : const Color(0xFF1C2333),
                 ),
                 onPressed: () => Navigator.push(
                   context,
@@ -137,7 +137,7 @@ class _HomePage extends StatelessWidget {
             decoration: BoxDecoration(
               color: isDark
                   ? Colors.white.withOpacity(0.06)
-                  : Colors.grey.shade100,
+                  : const Color(0xFFE2EAF4),
               borderRadius: BorderRadius.circular(22),
               border: Border.all(
                 color: AppColors.primaryCyan.withOpacity(0.25),

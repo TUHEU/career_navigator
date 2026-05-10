@@ -55,7 +55,7 @@ class _JobSeekerDashboardState extends State<JobSeekerDashboard> {
           Container(
             color: isDark
                 ? AppColors.darkBackground.withOpacity(0.80)
-                : Colors.white.withOpacity(0.92),
+                : Colors.white.withOpacity(0.97),
           ),
           SafeArea(child: _pages[_currentIndex]),
         ],
@@ -111,8 +111,8 @@ class _HomePage extends StatelessWidget {
                     'Job Seeker Dashboard',
                     style: TextStyle(
                       color: isDark
-                          ? Colors.white.withOpacity(0.5)
-                          : AppColors.lightTextSecondary,
+                          ? Colors.white.withOpacity(0.75)
+                          : const Color(0xFF1C2333),
                       fontSize: 12,
                     ),
                   ),
@@ -121,7 +121,7 @@ class _HomePage extends StatelessWidget {
               IconButton(
                 icon: Icon(
                   Icons.search,
-                  color: isDark ? Colors.white70 : Colors.grey.shade600,
+                  color: isDark ? Colors.white70 : const Color(0xFF1C2333),
                 ),
                 onPressed: () => Navigator.push(
                   context,
@@ -136,7 +136,7 @@ class _HomePage extends StatelessWidget {
             decoration: BoxDecoration(
               color: isDark
                   ? Colors.white.withOpacity(0.06)
-                  : Colors.grey.shade100,
+                  : const Color(0xFFE2EAF4),
               borderRadius: BorderRadius.circular(22),
               border: Border.all(
                 color: AppColors.primaryCyan.withOpacity(0.25),
@@ -233,13 +233,13 @@ class _HomePage extends StatelessWidget {
               ),
             ),
             child: Row(
-              children: const [
-                Icon(
+              children: [
+                const Icon(
                   Icons.rocket_launch_outlined,
                   color: AppColors.primaryCyan,
                   size: 20,
                 ),
-                SizedBox(width: 12),
+                const SizedBox(width: 12),
                 Expanded(
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
@@ -247,15 +247,22 @@ class _HomePage extends StatelessWidget {
                       Text(
                         'More features coming soon',
                         style: TextStyle(
-                          color: Colors.white,
+                          color: isDark
+                              ? Colors.white
+                              : const Color(0xFF0A0E1A),
                           fontWeight: FontWeight.w600,
                           fontSize: 13,
                         ),
                       ),
-                      SizedBox(height: 3),
+                      const SizedBox(height: 3),
                       Text(
                         'AI recommendations & skill assessments.',
-                        style: TextStyle(color: Colors.white70, fontSize: 12),
+                        style: TextStyle(
+                          color: isDark
+                              ? Colors.white70
+                              : const Color(0xFF2D3748),
+                          fontSize: 12,
+                        ),
                       ),
                     ],
                   ),

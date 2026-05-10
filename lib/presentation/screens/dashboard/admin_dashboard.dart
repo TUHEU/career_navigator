@@ -48,7 +48,7 @@ class _AdminDashboardState extends State<AdminDashboard> {
           Container(
             color: isDark
                 ? AppColors.darkBackground.withOpacity(0.80)
-                : Colors.white.withOpacity(0.92),
+                : Colors.white.withOpacity(0.97),
           ),
           SafeArea(child: _pages[_currentIndex]),
         ],
@@ -102,8 +102,8 @@ class _HomePage extends StatelessWidget {
                     'Admin Dashboard',
                     style: TextStyle(
                       color: isDark
-                          ? Colors.white.withOpacity(0.5)
-                          : AppColors.lightTextSecondary,
+                          ? Colors.white.withOpacity(0.75)
+                          : const Color(0xFF1C2333),
                       fontSize: 12,
                     ),
                   ),
@@ -117,7 +117,7 @@ class _HomePage extends StatelessWidget {
             decoration: BoxDecoration(
               color: isDark
                   ? Colors.white.withOpacity(0.06)
-                  : Colors.grey.shade100,
+                  : const Color(0xFFE2EAF4),
               borderRadius: BorderRadius.circular(22),
               border: Border.all(
                 color: AppColors.primaryCyan.withOpacity(0.25),
@@ -163,8 +163,8 @@ class _HomePage extends StatelessWidget {
                         user?.email ?? '',
                         style: TextStyle(
                           color: isDark
-                              ? Colors.white.withOpacity(0.4)
-                              : AppColors.lightTextSecondary,
+                              ? Colors.white.withOpacity(0.65)
+                              : const Color(0xFF1C2333),
                           fontSize: 12,
                         ),
                       ),
