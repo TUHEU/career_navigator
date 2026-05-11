@@ -507,7 +507,6 @@ class ApiService {
     }
   }
 
-  // FIX: was using wrong HTTP method (now PUT as backend expects)
   Future<Map<String, dynamic>> markNotificationsRead({
     required String token,
   }) async {
@@ -626,88 +625,6 @@ class ApiService {
               'category': category,
               'rating': rating,
             }),
-          )
-          .timeout(AppConstants.connectionTimeout);
-      return _handleResponse(res);
-    } catch (e) {
-      return {'success': false, 'message': 'Network error: $e'};
-    }
-  }
-
-  // ──────────────────────────────────────────────
-  // VIDEO CALL
-  // ──────────────────────────────────────────────
-
-  Future<Map<String, dynamic>> startVideoSession({
-    required String token,
-    required int mentorId,
-    required int seekerId,
-  }) async {
-    try {
-      final res = await http
-          .post(
-            Uri.parse(
-              '${AppConstants.baseUrl}${ApiEndpoints.videoStartSession}',
-            ),
-            headers: _authHeaders(token),
-            body: jsonEncode({'mentor_id': mentorId, 'seeker_id': seekerId}),
-          )
-          .timeout(AppConstants.connectionTimeout);
-      return _handleResponse(res);
-    } catch (e) {
-      return {'success': false, 'message': 'Network error: $e'};
-    }
-  }
-
-  Future<Map<String, dynamic>> joinVideoSession({
-    required String token,
-    required String channelName,
-  }) async {
-    try {
-      final res = await http
-          .post(
-            Uri.parse(
-              '${AppConstants.baseUrl}${ApiEndpoints.videoJoinSession}',
-            ),
-            headers: _authHeaders(token),
-            body: jsonEncode({'channel_name': channelName}),
-          )
-          .timeout(AppConstants.connectionTimeout);
-      return _handleResponse(res);
-    } catch (e) {
-      return {'success': false, 'message': 'Network error: $e'};
-    }
-  }
-
-  Future<Map<String, dynamic>> endVideoSession({
-    required String token,
-    required String channelName,
-    required int duration,
-  }) async {
-    try {
-      final res = await http
-          .post(
-            Uri.parse('${AppConstants.baseUrl}${ApiEndpoints.videoEndSession}'),
-            headers: _authHeaders(token),
-            body: jsonEncode({
-              'channel_name': channelName,
-              'duration': duration,
-            }),
-          )
-          .timeout(AppConstants.connectionTimeout);
-      return _handleResponse(res);
-    } catch (e) {
-      return {'success': false, 'message': 'Network error: $e'};
-    }
-  }
-
-  // FIX: was missing — pointed to correct endpoint
-  Future<Map<String, dynamic>> getVideoSessions(String token) async {
-    try {
-      final res = await http
-          .get(
-            Uri.parse('${AppConstants.baseUrl}${ApiEndpoints.videoSessions}'),
-            headers: _authHeaders(token),
           )
           .timeout(AppConstants.connectionTimeout);
       return _handleResponse(res);

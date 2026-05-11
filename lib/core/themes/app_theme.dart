@@ -1,48 +1,48 @@
 import 'package:flutter/material.dart';
 
 class AppColors {
-  // ── Brand ────────────────────────────────────────────────
+  // ── Brand ──────────────────────────────────────────────────
   static const Color primaryCyan = Color(
-    0xFF007A99,
-  ); // darker cyan — readable on white
+    0xFF006B82,
+  ); // dark teal — readable on white
   static const Color primaryCyanLight = Color(
     0xFF00B8D4,
-  ); // lighter variant for dark mode
+  ); // bright — for dark mode only
 
-  // ── Dark theme ───────────────────────────────────────────
+  // ── Dark theme ─────────────────────────────────────────────
   static const Color darkBackground = Color(0xFF0A192F);
   static const Color darkSurface = Color(0xFF0D2137);
   static const Color darkCard = Color(0xFF112240);
 
-  // ── Light theme — maximum contrast ───────────────────────
-  static const Color lightBackground = Color(0xFFF0F4F8); // soft off-white
-  static const Color lightSurface = Color(0xFFFFFFFF); // pure white cards
-  static const Color lightCard = Color(0xFFE8EEF6); // light blue-grey card
+  // ── Light theme ────────────────────────────────────────────
+  static const Color lightBackground = Color(0xFFF2F5F9);
+  static const Color lightSurface = Color(0xFFFFFFFF);
+  static const Color lightCard = Color(0xFFE9EFF8);
 
-  // Text — all very dark for maximum readability
-  static const Color lightText = Color(0xFF0D1117); // near black
-  static const Color lightTextSecondary = Color(0xFF24292F); // dark grey
-  static const Color lightTextMuted = Color(0xFF57606A); // medium grey
+  // Text — all very dark
+  static const Color lightText = Color(0xFF0A0E1A); // near black
+  static const Color lightTextSecondary = Color(0xFF1C2333); // very dark grey
+  static const Color lightTextMuted = Color(
+    0xFF4A5568,
+  ); // medium dark grey — still readable
 
   // Inputs
-  static const Color lightInputFill = Color(
-    0xFFDDE4EE,
-  ); // visible input background
-  static const Color lightBorder = Color(0xFF8C959F); // clear border
+  static const Color lightInputFill = Color(0xFFD8E0ED);
+  static const Color lightBorder = Color(0xFF8896B0);
 
   // Status
   static const Color success = Color(0xFF16A34A);
   static const Color warning = Color(0xFFD97706);
   static const Color danger = Color(0xFFDC2626);
 
-  // ── Convenience getters ──────────────────────────────────
+  // ── Static helpers ─────────────────────────────────────────
   static Color text(bool isDark) => isDark ? Colors.white : lightText;
 
   static Color textSecondary(bool isDark) =>
-      isDark ? Colors.white70 : lightTextSecondary;
+      isDark ? const Color(0xFFCDD5E0) : lightTextSecondary;
 
   static Color textMuted(bool isDark) =>
-      isDark ? Colors.white54 : lightTextMuted;
+      isDark ? const Color(0xFF8899BB) : lightTextMuted;
 
   static Color background(bool isDark) =>
       isDark ? darkBackground : lightBackground;
@@ -52,7 +52,7 @@ class AppColors {
   static Color card(bool isDark) => isDark ? darkCard : lightCard;
 
   static Color inputFill(bool isDark) =>
-      isDark ? Colors.white.withOpacity(0.06) : lightInputFill;
+      isDark ? Colors.white.withOpacity(0.07) : lightInputFill;
 
   static Color border(bool isDark) =>
       isDark ? Colors.white.withOpacity(0.15) : lightBorder;
