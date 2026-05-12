@@ -316,7 +316,6 @@ class AboutUsPage extends StatelessWidget {
                       'Flask',
                       'MySQL',
                       'JWT',
-                      'Agora',
                       'Cloudinary',
                       'Brevo',
                       'PM2',

@@ -2,12 +2,13 @@ import 'package:flutter/material.dart';
 
 class AppColors {
   // ── Brand ──────────────────────────────────────────────────
+  // ── Brand ──────────────────────────────────────────────────
   static const Color primaryCyan = Color(
-    0xFF006B82,
-  ); // dark teal — readable on white
+    0xFF00B8D4,
+  ); // original cyan (restored)
   static const Color primaryCyanLight = Color(
     0xFF00B8D4,
-  ); // bright — for dark mode only
+  ); // same for both modes
 
   // ── Dark theme ─────────────────────────────────────────────
   static const Color darkBackground = Color(0xFF0A192F);
@@ -20,7 +21,7 @@ class AppColors {
   static const Color lightCard = Color(0xFFE9EFF8);
 
   // Text — all very dark
-  static const Color lightText = Color(0xFF0A0E1A); // near black
+  static const Color lightText = Color(0xFF0F172A); // main text (original)
   static const Color lightTextSecondary = Color(0xFF1C2333); // very dark grey
   static const Color lightTextMuted = Color(
     0xFF4A5568,
