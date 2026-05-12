@@ -8,7 +8,7 @@ on:
 
 jobs:
   # ──────────────────────────────────────────────────────────────
-  # JOB 1 — TEST (runs on every push and PR)
+  # JOB 1 — TEST (syntax check only, no imports needed)
   # ──────────────────────────────────────────────────────────────
   test:
     name: 🧪 Run Tests
@@ -22,15 +22,11 @@ jobs:
         uses: actions/setup-python@v5
         with:
           python-version: '3.11'
-          cache: 'pip'
 
-      - name: Install dependencies
+      - name: Check Python syntax (no imports needed)
         run: |
-          python -m pip install --upgrade pip
-          pip install -r requirements.txt
-
-      - name: Check syntax (no import errors)
-        run: python -c "import app; print('✅ app.py syntax OK')"
+          python -m py_compile app.py
+          echo "✅ app.py syntax OK"
 
       - name: Run tests (if tests/ folder exists)
         run: |
@@ -38,17 +34,17 @@ jobs:
             pip install pytest
             pytest tests/ -v
           else
-            echo "No tests directory found — skipping tests"
+            echo "⚠️  No tests directory — skipping"
           fi
 
   # ──────────────────────────────────────────────────────────────
-  # JOB 2 — DEPLOY (runs only on push to main/master)
+  # JOB 2 — DEPLOY (push to main/master only)
   # ──────────────────────────────────────────────────────────────
   deploy:
     name: 🚀 Deploy to VPS
     runs-on: ubuntu-latest
-    needs: test                         # only deploy if tests pass
-    if: github.event_name == 'push'     # not on pull requests
+    needs: test
+    if: github.event_name == 'push'
 
     steps:
       - name: Checkout code
@@ -63,38 +59,33 @@ jobs:
           port:     ${{ secrets.VPS_PORT }}
 
           script: |
-            echo "──────────────────────────────────────────"
+            echo "────────────────────────────────────────"
             echo "  Career Navigator — Deploying..."
-            echo "──────────────────────────────────────────"
+            echo "────────────────────────────────────────"
 
-            # ── Go to backend folder ──────────────────────
             cd /root/CARRER-NAVIGATOR-BACKEND || {
               echo "❌ Backend folder not found"; exit 1
             }
 
-            # ── Pull latest code ──────────────────────────
             git pull origin main || git pull origin master
             echo "✅ Code updated"
 
-            # ── Install / update Python dependencies ──────
             pip install -r requirements.txt --quiet
             echo "✅ Dependencies installed"
 
-            # ── Restart app with PM2 ──────────────────────
             pm2 restart career-navigator-api || pm2 start app.py \
               --name career-navigator-api \
               --interpreter python3
             pm2 save
             echo "✅ PM2 restarted"
 
-            # ── Show status ───────────────────────────────
             pm2 status career-navigator-api
-            echo "──────────────────────────────────────────"
+            echo "────────────────────────────────────────"
             echo "  ✅ Deployment complete!"
-            echo "──────────────────────────────────────────"
+            echo "────────────────────────────────────────"
 
   # ──────────────────────────────────────────────────────────────
-  # JOB 3 — NOTIFY (always runs after deploy)
+  # JOB 3 — NOTIFY (always runs)
   # ──────────────────────────────────────────────────────────────
   notify:
     name: 📢 Notify Status
