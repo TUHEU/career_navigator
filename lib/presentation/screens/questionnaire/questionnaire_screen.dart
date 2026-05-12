@@ -14,18 +14,17 @@ class QuestionnaireScreen extends StatefulWidget {
 }
 
 class _QuestionnaireScreenState extends State<QuestionnaireScreen> {
-  // Each step has its OWN form key so validate() only touches that step
-  final _step1Key = GlobalKey<FormState>(); // Education — has validators
-  // Steps 2, 3, 4 have NO required validators — no form key needed
+  // Step 1 only has a form — other steps have no validators
+  final _step1Key = GlobalKey<FormState>();
 
   int _currentStep = 0;
   bool _isLoading = false;
 
-  // ── Step 1 — Education ────────────────────────────────────
+  // ── Step 1 — Education ─────────────────────────────────────
   String _educationLevel = "Bachelor's";
   final _fieldController = TextEditingController();
 
-  // ── Step 2 — Interests ────────────────────────────────────
+  // ── Step 2 — Interests ─────────────────────────────────────
   final List<String> _allInterests = [
     'Software Engineering',
     'Data Science',
@@ -40,16 +39,22 @@ class _QuestionnaireScreenState extends State<QuestionnaireScreen> {
   ];
   final List<String> _selectedInterests = [];
 
-  // ── Step 3 — Skills ───────────────────────────────────────
+  // ── Step 3 — Skills ────────────────────────────────────────
   final _skillController = TextEditingController();
   final List<String> _skills = [];
 
-  // ── Step 4 — Preferences ──────────────────────────────────
+  // ── Step 4 — Preferences ───────────────────────────────────
   String _jobType = 'full_time';
   String _workMode = 'onsite';
   final _locationController = TextEditingController();
 
-  // ── Dispose ───────────────────────────────────────────────
+  static const List<String> _titles = [
+    'Education',
+    'Interests',
+    'Skills',
+    'Preferences',
+  ];
+
   @override
   void dispose() {
     _fieldController.dispose();
@@ -58,7 +63,7 @@ class _QuestionnaireScreenState extends State<QuestionnaireScreen> {
     super.dispose();
   }
 
-  // ── Add skill chip ────────────────────────────────────────
+  // ── Add skill ──────────────────────────────────────────────
   void _addSkill() {
     final skill = _skillController.text.trim();
     if (skill.isNotEmpty && !_skills.contains(skill)) {
@@ -69,38 +74,36 @@ class _QuestionnaireScreenState extends State<QuestionnaireScreen> {
     }
   }
 
-  // ── Next button logic ─────────────────────────────────────
-  // FIX: only validate on step 1 which actually has validators.
-  // Steps 2, 3, 4 just increment the step directly — no validate() call.
+  // ── Next ───────────────────────────────────────────────────
   void _onNext() {
     if (_currentStep == 0) {
-      // Step 1 — Education: validate the form
+      // Only step 1 has validators
       if (_step1Key.currentState?.validate() ?? false) {
         setState(() => _currentStep++);
       }
     } else if (_currentStep < 3) {
-      // Steps 2 & 3 — no validation needed, just advance
+      // Steps 2 & 3 — advance directly, no validation
       setState(() => _currentStep++);
     } else {
-      // Step 4 — final step, submit
+      // Step 4 — submit
       _submit();
     }
   }
 
-  // ── Submit ────────────────────────────────────────────────
+  // ── Submit ─────────────────────────────────────────────────
   Future<void> _submit() async {
+    if (_isLoading) return;
     setState(() => _isLoading = true);
+
     try {
       final userProvider = context.read<UserProvider>();
-      final fields = <String, dynamic>{
-        'desired_job_title': _selectedInterests.isNotEmpty
-            ? _selectedInterests.first
-            : '',
-        'availability': _workMode,
-      };
-      if (_skills.isNotEmpty) fields['skills'] = _skills;
+      final fields = <String, dynamic>{'availability': _workMode};
       if (_selectedInterests.isNotEmpty) {
+        fields['desired_job_title'] = _selectedInterests.first;
         fields['interests'] = _selectedInterests;
+      }
+      if (_skills.isNotEmpty) {
+        fields['skills'] = _skills;
       }
       if (_locationController.text.trim().isNotEmpty) {
         fields['location'] = _locationController.text.trim();
@@ -120,7 +123,7 @@ class _QuestionnaireScreenState extends State<QuestionnaireScreen> {
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
-            content: Text('Something went wrong: $e'),
+            content: Text('Error: $e'),
             backgroundColor: Colors.redAccent,
           ),
         );
@@ -130,10 +133,8 @@ class _QuestionnaireScreenState extends State<QuestionnaireScreen> {
     }
   }
 
-  // ── Step widgets ──────────────────────────────────────────
-
-  // Step 1 — wrapped in its own Form so validate() is scoped to it only
-  Widget _educationStep() => Form(
+  // ── Step 1: Education ──────────────────────────────────────
+  Widget _buildStep1() => Form(
     key: _step1Key,
     child: Column(
       crossAxisAlignment: CrossAxisAlignment.start,
@@ -175,8 +176,8 @@ class _QuestionnaireScreenState extends State<QuestionnaireScreen> {
     ),
   );
 
-  // Step 2 — plain widget, NO Form, NO validators
-  Widget _interestsStep() => Column(
+  // ── Step 2: Interests ──────────────────────────────────────
+  Widget _buildStep2() => Column(
     crossAxisAlignment: CrossAxisAlignment.start,
     children: [
       const Text(
@@ -200,22 +201,26 @@ class _QuestionnaireScreenState extends State<QuestionnaireScreen> {
             selectedColor: AppColors.primaryCyan.withOpacity(0.2),
             checkmarkColor: AppColors.primaryCyan,
             side: BorderSide(
-              color: selected ? AppColors.primaryCyan : Colors.grey.shade300,
+              color: selected ? AppColors.primaryCyan : Colors.grey.shade400,
               width: selected ? 1.5 : 1,
             ),
-            onSelected: (val) => setState(
-              () => val
-                  ? _selectedInterests.add(interest)
-                  : _selectedInterests.remove(interest),
-            ),
+            onSelected: (val) {
+              setState(() {
+                if (val) {
+                  _selectedInterests.add(interest);
+                } else {
+                  _selectedInterests.remove(interest);
+                }
+              });
+            },
           );
         }).toList(),
       ),
     ],
   );
 
-  // Step 3 — plain widget, NO Form, NO validators
-  Widget _skillsStep() => Column(
+  // ── Step 3: Skills ─────────────────────────────────────────
+  Widget _buildStep3() => Column(
     crossAxisAlignment: CrossAxisAlignment.start,
     children: [
       const Text(
@@ -261,8 +266,8 @@ class _QuestionnaireScreenState extends State<QuestionnaireScreen> {
     ],
   );
 
-  // Step 4 — plain widget, NO Form, NO validators
-  Widget _preferencesStep() => Column(
+  // ── Step 4: Preferences ────────────────────────────────────
+  Widget _buildStep4() => Column(
     crossAxisAlignment: CrossAxisAlignment.start,
     children: [
       const Text('Job Type', style: TextStyle(fontWeight: FontWeight.bold)),
@@ -308,17 +313,22 @@ class _QuestionnaireScreenState extends State<QuestionnaireScreen> {
     ],
   );
 
-  // ── Build ─────────────────────────────────────────────────
+  // ── Build ──────────────────────────────────────────────────
+  Widget _buildCurrentStep() {
+    switch (_currentStep) {
+      case 0:
+        return _buildStep1();
+      case 1:
+        return _buildStep2();
+      case 2:
+        return _buildStep3();
+      default:
+        return _buildStep4();
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
-    final steps = [
-      _educationStep(),
-      _interestsStep(),
-      _skillsStep(),
-      _preferencesStep(),
-    ];
-    final titles = ['Education', 'Interests', 'Skills', 'Preferences'];
-
     return Scaffold(
       appBar: AppBar(
         title: const Text('Tell Us About You'),
@@ -326,12 +336,12 @@ class _QuestionnaireScreenState extends State<QuestionnaireScreen> {
       ),
       body: Column(
         children: [
-          // ── Progress bar ──────────────────────────────
+          // Progress bar
           Padding(
             padding: const EdgeInsets.fromLTRB(16, 16, 16, 0),
             child: Row(
               children: List.generate(
-                steps.length,
+                4,
                 (i) => Expanded(
                   child: Container(
                     margin: const EdgeInsets.symmetric(horizontal: 4),
@@ -348,13 +358,14 @@ class _QuestionnaireScreenState extends State<QuestionnaireScreen> {
             ),
           ),
           const SizedBox(height: 12),
+
+          // Step label
           Padding(
             padding: const EdgeInsets.symmetric(horizontal: 16),
             child: Align(
               alignment: Alignment.centerLeft,
               child: Text(
-                'Step ${_currentStep + 1} of ${steps.length}: '
-                '${titles[_currentStep]}',
+                'Step ${_currentStep + 1} of 4: ${_titles[_currentStep]}',
                 style: const TextStyle(
                   fontSize: 16,
                   fontWeight: FontWeight.bold,
@@ -363,15 +374,17 @@ class _QuestionnaireScreenState extends State<QuestionnaireScreen> {
             ),
           ),
 
-          // ── Step content ──────────────────────────────
+          // Step content
           Expanded(
             child: SingleChildScrollView(
               padding: const EdgeInsets.all(16),
-              child: steps[_currentStep],
+              // KEY: forces Flutter to rebuild the widget tree when step changes
+              key: ValueKey(_currentStep),
+              child: _buildCurrentStep(),
             ),
           ),
 
-          // ── Navigation buttons ────────────────────────
+          // Navigation buttons
           Padding(
             padding: const EdgeInsets.fromLTRB(16, 8, 16, 24),
             child: Row(
@@ -379,7 +392,9 @@ class _QuestionnaireScreenState extends State<QuestionnaireScreen> {
                 if (_currentStep > 0) ...[
                   Expanded(
                     child: OutlinedButton(
-                      onPressed: () => setState(() => _currentStep--),
+                      onPressed: _isLoading
+                          ? null
+                          : () => setState(() => _currentStep--),
                       child: const Text('Back'),
                     ),
                   ),
@@ -406,9 +421,7 @@ class _QuestionnaireScreenState extends State<QuestionnaireScreen> {
                             ),
                           )
                         : Text(
-                            _currentStep < steps.length - 1
-                                ? 'Next'
-                                : 'Get Started',
+                            _currentStep < 3 ? 'Next' : 'Get Started',
                             style: const TextStyle(
                               fontWeight: FontWeight.bold,
                               fontSize: 15,
