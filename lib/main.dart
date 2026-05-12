@@ -81,7 +81,7 @@ class MyApp extends StatelessWidget {
       colorScheme: ColorScheme(
         brightness: isDark ? Brightness.dark : Brightness.light,
         primary: cyan,
-        onPrimary: isDark ? Colors.black : Colors.white,
+        onPrimary: Colors.black, // black on cyan for both modes
         secondary: cyan,
         onSecondary: isDark ? Colors.black : Colors.white,
         error: AppColors.danger,
@@ -159,7 +159,7 @@ class MyApp extends StatelessWidget {
       elevatedButtonTheme: ElevatedButtonThemeData(
         style: ElevatedButton.styleFrom(
           backgroundColor: cyan,
-          foregroundColor: isDark ? Colors.black : Colors.white,
+          foregroundColor: Colors.black, // black on #00B8D4 cyan
           shape: RoundedRectangleBorder(borderRadius: r15),
           minimumSize: const Size(double.infinity, 52),
           textStyle: const TextStyle(fontWeight: FontWeight.bold, fontSize: 15),
@@ -350,7 +350,7 @@ class MyApp extends StatelessWidget {
       // FAB
       floatingActionButtonTheme: FloatingActionButtonThemeData(
         backgroundColor: cyan,
-        foregroundColor: isDark ? Colors.black : Colors.white,
+        foregroundColor: Colors.black, // black on #00B8D4 cyan
       ),
 
       // Checkbox
