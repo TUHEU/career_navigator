@@ -67,24 +67,26 @@ const List<Developer> kDevelopers = [
         'Created the design system, theming engine, and all screen layouts with responsive design.',
   ),
   Developer(
-    name: 'David Okonkwo',
+    name: 'Ayukeyong Dohbila Nyamndi Benjunior',
     role: 'DevOps & Security Engineer',
-    github: 'david_okonkwo',
+    github: 'AyuknyamndiICTU',
     email: 'david.okonkwo@careernavigator.com',
-    linkedin: 'https://linkedin.com/in/david-okonkwo',
+    linkedin:
+        'https://www.linkedin.com/in/ayukeyong-nyamndi-a74176227/?utm_source=share_via&utm_content=profile&utm_medium=member_android',
     imagePath: 'assets/team/dev4.png',
-    networkImageUrl: '',
+    networkImageUrl: 'https://avatars.githubusercontent.com/AyuknyamndiICTU',
     description:
         'Deployed the backend on Contabo VPS, configured PM2, managed server security, and CI/CD pipelines.',
   ),
   Developer(
-    name: 'Emma Rodriguez',
+    name: 'MBOCK LOWE Gloria Laetitia',
     role: 'Quality Assurance & Product Manager',
-    github: 'emma_qa',
-    email: 'emma.rodriguez@careernavigator.com',
-    linkedin: 'https://linkedin.com/in/emma-rodriguez',
+    github: 'Laetitia-ml',
+    email: 'bnyamndi@gmail.com',
+    linkedin:
+        'https://www.linkedin.com/in/gloria-laetitia-b3b3b0378/?skipRedirect=true',
     imagePath: 'assets/team/dev5.png',
-    networkImageUrl: '',
+    networkImageUrl: 'https://avatars.githubusercontent.com/Laetitia-ml',
     description:
         'Manages testing, user acceptance, and coordinates feature releases across the team.',
   ),
