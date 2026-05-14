@@ -1,0 +1,77 @@
+@import url('https://fonts.googleapis.com/css2?family=Syne:wght@400;500;600;700&family=DM+Sans:wght@300;400;500&display=swap');
+
+*, *::before, *::after { margin: 0; padding: 0; box-sizing: border-box; }
+
+:root {
+  --bg: #0a0e17;
+  --bg2: #111827;
+  --bg3: #1c2333;
+  --text: #e8edf5;
+  --text2: #8b97b0;
+  --cyan: #00d4ff;
+  --cyan-dim: rgba(0,212,255,0.12);
+  --cyan-border: rgba(0,212,255,0.3);
+  --border: rgba(255,255,255,0.07);
+  --radius: 14px;
+  --radius-lg: 20px;
+}
+.light-mode {
+  --bg: #f4f6fb; --bg2: #ffffff; --bg3: #eaeff8;
+  --text: #0f172a; --text2: #4a5568;
+  --cyan: #0077cc;
+  --cyan-dim: rgba(0,119,204,0.08);
+  --cyan-border: rgba(0,119,204,0.3);
+  --border: rgba(0,0,0,0.07);
+}
+
+body { font-family: 'DM Sans', sans-serif; background: var(--bg); color: var(--text); transition: background 0.3s, color 0.3s; }
+
+nav {
+  display: flex; align-items: center; justify-content: space-between;
+  padding: 18px 48px;
+  background: rgba(10,14,23,0.85); backdrop-filter: blur(20px);
+  border-bottom: 0.5px solid var(--border);
+  position: sticky; top: 0; z-index: 200;
+}
+.light-mode nav { background: rgba(244,246,251,0.9); }
+.logo { font-family: 'Syne', sans-serif; font-size: 20px; font-weight: 700; color: var(--cyan); display: flex; align-items: center; gap: 10px; text-decoration: none; }
+.logo .dot { width: 8px; height: 8px; background: var(--cyan); border-radius: 50%; display: inline-block; }
+.nav-links { display: flex; gap: 32px; }
+.nav-links a { color: var(--text2); text-decoration: none; font-size: 14px; transition: color 0.2s; }
+.nav-links a:hover, .nav-links a.active { color: var(--cyan); }
+.nav-right { display: flex; align-items: center; gap: 12px; }
+
+.btn-theme { background: var(--bg3); border: 0.5px solid var(--border); color: var(--text2); padding: 7px 14px; border-radius: 8px; cursor: pointer; font-size: 13px; }
+.btn-primary { background: var(--cyan); color: #fff; border: none; padding: 9px 22px; border-radius: 10px; cursor: pointer; font-size: 14px; font-weight: 500; }
+.btn-outline { background: transparent; color: var(--cyan); border: 1px solid var(--cyan-border); padding: 9px 22px; border-radius: 10px; cursor: pointer; font-size: 14px; }
+
+.section { padding: 96px 48px; max-width: 1140px; margin: 0 auto; }
+.section-label { font-size: 12px; font-weight: 500; letter-spacing: 2px; color: var(--cyan); text-transform: uppercase; margin-bottom: 12px; }
+.section-title { font-family: 'Syne', sans-serif; font-size: 38px; font-weight: 700; line-height: 1.2; margin-bottom: 14px; }
+.section-sub { font-size: 16px; color: var(--text2); line-height: 1.7; max-width: 560px; margin-bottom: 52px; }
+.badge { display: inline-flex; align-items: center; gap: 6px; background: var(--cyan-dim); color: var(--cyan); border: 1px solid var(--cyan-border); font-size: 12px; padding: 5px 14px; border-radius: 20px; margin-bottom: 24px; }
+.card { background: var(--bg2); border: 0.5px solid var(--border); border-radius: var(--radius-lg); padding: 28px; transition: border-color 0.25s, transform 0.2s; }
+.card:hover { border-color: var(--cyan-border); transform: translateY(-3px); }
+
+.form-group { margin-bottom: 20px; }
+.form-group label { display: block; font-size: 13px; color: var(--text2); margin-bottom: 7px; }
+.form-group input, .form-group textarea, .form-group select {
+  width: 100%; background: var(--bg3); border: 0.5px solid var(--border);
+  color: var(--text); border-radius: 10px; padding: 11px 14px;
+  font-size: 14px; font-family: 'DM Sans', sans-serif; outline: none; transition: border-color 0.2s;
+}
+.form-group input:focus, .form-group textarea:focus, .form-group select:focus { border-color: var(--cyan); }
+
+footer { background: var(--bg2); border-top: 0.5px solid var(--border); padding: 28px 48px; display: flex; align-items: center; justify-content: space-between; }
+footer p { font-size: 13px; color: var(--text2); }
+footer .footer-links { display: flex; gap: 24px; }
+footer .footer-links a { font-size: 13px; color: var(--text2); text-decoration: none; }
+footer .footer-links a:hover { color: var(--cyan); }
+
+@media (max-width: 768px) {
+  nav { padding: 14px 20px; }
+  .nav-links { display: none; }
+  .section { padding: 60px 20px; }
+  .section-title { font-size: 28px; }
+  footer { padding: 20px; flex-direction: column; gap: 12px; }
+}

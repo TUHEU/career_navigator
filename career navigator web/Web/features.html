@@ -1,0 +1,145 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>CareerNavigator — Features</title>
+  <link rel="stylesheet" href="style.css" />
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@tabler/icons-webfont@2.44.0/tabler-icons.min.css" />
+  <style>
+    .page-hero { padding: 80px 48px 64px; max-width: 1140px; margin: 0 auto; }
+    .feature-row { display: grid; grid-template-columns: 1fr 1fr; gap: 60px; align-items: center; margin-bottom: 64px; }
+    .feature-row.reverse { direction: rtl; }
+    .feature-row.reverse > * { direction: ltr; }
+    .feature-visual { background: var(--bg2); border: 0.5px solid var(--border); border-radius: var(--radius-lg); padding: 40px; text-align: center; min-height: 260px; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 16px; }
+    .feature-visual .big-icon { font-size: 64px; color: var(--cyan); }
+    .mock-bar { width: 100%; background: var(--bg3); border-radius: 8px; height: 8px; overflow: hidden; }
+    .mock-bar-fill { height: 100%; background: var(--cyan); border-radius: 8px; }
+    .feature-text h2 { font-family: 'Syne', sans-serif; font-size: 28px; font-weight: 700; margin-bottom: 14px; }
+    .feature-text p { font-size: 15px; color: var(--text2); line-height: 1.8; margin-bottom: 20px; }
+    .feature-list { list-style: none; display: flex; flex-direction: column; gap: 10px; }
+    .feature-list li { display: flex; align-items: center; gap: 10px; font-size: 14px; color: var(--text2); }
+    .feature-list li i { color: var(--cyan); }
+    .mini-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); gap: 16px; }
+    .mini-card { background: var(--bg2); border: 0.5px solid var(--border); border-radius: var(--radius); padding: 20px; display: flex; align-items: flex-start; gap: 14px; }
+    .mini-card-icon { font-size: 22px; color: var(--cyan); flex-shrink: 0; }
+    .mini-card h4 { font-size: 14px; font-weight: 500; margin-bottom: 4px; }
+    .mini-card p { font-size: 13px; color: var(--text2); line-height: 1.5; }
+    @media (max-width: 768px) { .feature-row { grid-template-columns: 1fr; } .feature-row.reverse { direction: ltr; } .page-hero { padding: 60px 20px 40px; } }
+  </style>
+</head>
+<body>
+<nav>
+  <a class="logo" href="HomePage.html"><span class="dot"></span> CareerNavigator</a>
+  <div class="nav-links">
+    <a href="HomePage.html">Home</a>
+    <a href="features.html" class="active">Features</a>
+    <a href="about.html">About</a>
+    <a href="download.html">Download</a>
+    <a href="contact.html">Contact</a>
+  </div>
+  <div class="nav-right">
+    <button class="btn-theme" onclick="toggleTheme()" id="themeBtn"><i class="ti ti-sun"></i> Light</button>
+    <a href="download.html"><button class="btn-primary">Get started</button></a>
+  </div>
+</nav>
+
+<main>
+  <div class="page-hero">
+    <div class="badge"><i class="ti ti-sparkles"></i> Built for growth</div>
+    <h1 class="section-title">Powerful features for every career stage</h1>
+    <p class="section-sub">From your first session to your dream role — CareerNavigator has the tools to get you there.</p>
+  </div>
+
+  <div class="section" style="padding-top:0">
+    <div class="feature-row">
+      <div class="feature-visual">
+        <div class="big-icon"><i class="ti ti-users"></i></div>
+        <div style="width:100%">
+          <div style="display:flex;justify-content:space-between;font-size:12px;color:var(--text2);margin-bottom:6px;"><span>Match score</span><span>94%</span></div>
+          <div class="mock-bar"><div class="mock-bar-fill" style="width:94%"></div></div>
+        </div>
+      </div>
+      <div class="feature-text">
+        <h2>Smart mentor matching</h2>
+        <p>Our intelligent matching engine pairs you with mentors who align with your specific career goals, industry, and working style.</p>
+        <ul class="feature-list">
+          <li><i class="ti ti-check"></i> Goal-based filtering by industry and role</li>
+          <li><i class="ti ti-check"></i> Personality and communication style match</li>
+          <li><i class="ti ti-check"></i> Availability-aware scheduling suggestions</li>
+          <li><i class="ti ti-check"></i> Rating and review system</li>
+        </ul>
+      </div>
+    </div>
+
+    <div class="feature-row reverse">
+      <div class="feature-visual">
+        <div class="big-icon"><i class="ti ti-calendar-event"></i></div>
+        <div style="width:100%;display:flex;flex-direction:column;gap:8px;">
+          <div style="background:var(--bg3);border-radius:8px;padding:10px 14px;text-align:left;"><div style="font-size:12px;color:var(--cyan);">Mon, 10:00 AM</div><div style="font-size:13px;">Session with James K.</div></div>
+          <div style="background:var(--bg3);border-radius:8px;padding:10px 14px;text-align:left;opacity:0.6;"><div style="font-size:12px;color:var(--text2);">Wed, 2:00 PM</div><div style="font-size:13px;">Career review call</div></div>
+        </div>
+      </div>
+      <div class="feature-text">
+        <h2>Flexible session scheduling</h2>
+        <p>Book, reschedule, and manage mentorship sessions with ease. Set your availability once and let CareerNavigator handle the rest.</p>
+        <ul class="feature-list">
+          <li><i class="ti ti-check"></i> One-tap session booking</li>
+          <li><i class="ti ti-check"></i> Automatic calendar sync</li>
+          <li><i class="ti ti-check"></i> Smart reminders before each session</li>
+          <li><i class="ti ti-check"></i> Session notes and follow-up tracking</li>
+        </ul>
+      </div>
+    </div>
+
+    <div class="feature-row">
+      <div class="feature-visual">
+        <div class="big-icon"><i class="ti ti-chart-bar"></i></div>
+        <div style="width:100%;display:flex;flex-direction:column;gap:8px;">
+          <div style="display:flex;justify-content:space-between;font-size:12px;color:var(--text2);margin-bottom:2px;"><span>Communication</span><span>82%</span></div>
+          <div class="mock-bar"><div class="mock-bar-fill" style="width:82%"></div></div>
+          <div style="display:flex;justify-content:space-between;font-size:12px;color:var(--text2);margin-top:4px;margin-bottom:2px;"><span>Leadership</span><span>70%</span></div>
+          <div class="mock-bar"><div class="mock-bar-fill" style="width:70%"></div></div>
+          <div style="display:flex;justify-content:space-between;font-size:12px;color:var(--text2);margin-top:4px;margin-bottom:2px;"><span>Technical skills</span><span>91%</span></div>
+          <div class="mock-bar"><div class="mock-bar-fill" style="width:91%"></div></div>
+        </div>
+      </div>
+      <div class="feature-text">
+        <h2>Progress tracking dashboard</h2>
+        <p>Visualize your career growth over time. Set goals, track skill development, and celebrate milestones with a beautiful personal dashboard.</p>
+        <ul class="feature-list">
+          <li><i class="ti ti-check"></i> Skill development radar charts</li>
+          <li><i class="ti ti-check"></i> Goal milestones and completion tracking</li>
+          <li><i class="ti ti-check"></i> Session history and outcome logs</li>
+          <li><i class="ti ti-check"></i> Shareable progress reports</li>
+        </ul>
+      </div>
+    </div>
+
+    <div class="section-label" style="margin-top:32px;">More features</div>
+    <h2 class="section-title" style="margin-bottom:32px;">Everything else you love</h2>
+    <div class="mini-grid">
+      <div class="mini-card"><div class="mini-card-icon"><i class="ti ti-message-circle"></i></div><div><h4>Real-time messaging</h4><p>Secure, direct chat with your mentor between sessions.</p></div></div>
+      <div class="mini-card"><div class="mini-card-icon"><i class="ti ti-certificate"></i></div><div><h4>Mentor profiles</h4><p>Rich profiles with bios, expertise tags, and reviews.</p></div></div>
+      <div class="mini-card"><div class="mini-card-icon"><i class="ti ti-lock"></i></div><div><h4>Secure auth</h4><p>Token-based authentication keeps your account safe.</p></div></div>
+      <div class="mini-card"><div class="mini-card-icon"><i class="ti ti-color-swatch"></i></div><div><h4>Dark & light theme</h4><p>Switch themes anytime from your settings page.</p></div></div>
+      <div class="mini-card"><div class="mini-card-icon"><i class="ti ti-language"></i></div><div><h4>Multi-language</h4><p>Full support for English and Spanish.</p></div></div>
+      <div class="mini-card"><div class="mini-card-icon"><i class="ti ti-device-mobile"></i></div><div><h4>Cross-platform</h4><p>Available on Android, iOS, and Windows via Flutter.</p></div></div>
+    </div>
+  </div>
+</main>
+
+<footer>
+  <p>© 2026 CareerNavigator. All rights reserved.</p>
+  <div class="footer-links"><a href="HomePage.html">Home</a><a href="about.html">About</a><a href="contact.html">Contact</a></div>
+</footer>
+<script>
+  let isLight = false;
+  function toggleTheme() {
+    isLight = !isLight;
+    document.body.classList.toggle('light-mode', isLight);
+    document.getElementById('themeBtn').innerHTML = isLight ? '<i class="ti ti-moon"></i> Dark' : '<i class="ti ti-sun"></i> Light';
+  }
+</script>
+</body>
+</html>
