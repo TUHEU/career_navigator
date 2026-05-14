@@ -1,0 +1,123 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>CareerNavigator — Contact</title>
+  <link rel="stylesheet" href="style.css" />
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@tabler/icons-webfont@2.44.0/tabler-icons.min.css" />
+  <style>
+    .page-hero { padding: 80px 48px 64px; max-width: 1140px; margin: 0 auto; }
+    .contact-layout { display: grid; grid-template-columns: 1fr 1.6fr; gap: 48px; align-items: start; }
+    .contact-info h2 { font-family: 'Syne', sans-serif; font-size: 28px; font-weight: 700; margin-bottom: 16px; }
+    .contact-info p { font-size: 15px; color: var(--text2); line-height: 1.8; margin-bottom: 32px; }
+    .info-items { display: flex; flex-direction: column; gap: 20px; }
+    .info-item { display: flex; align-items: flex-start; gap: 14px; }
+    .info-icon { font-size: 22px; color: var(--cyan); flex-shrink: 0; margin-top: 2px; }
+    .info-item h4 { font-size: 14px; font-weight: 500; margin-bottom: 2px; }
+    .info-item p { font-size: 13px; color: var(--text2); margin: 0; }
+    .contact-form { background: var(--bg2); border: 0.5px solid var(--border); border-radius: var(--radius-lg); padding: 40px; }
+    .form-row { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; }
+    .form-group textarea { height: 130px; }
+    .submit-btn { width: 100%; background: var(--cyan); color: #fff; border: none; padding: 14px; border-radius: 12px; font-size: 15px; font-weight: 500; cursor: pointer; font-family: 'DM Sans', sans-serif; transition: opacity 0.2s; }
+    .submit-btn:hover { opacity: 0.88; }
+    .success-msg { display: none; background: var(--cyan-dim); border: 1px solid var(--cyan-border); color: var(--cyan); padding: 14px; border-radius: 10px; text-align: center; margin-top: 16px; font-size: 14px; }
+    @media (max-width: 768px) { .contact-layout { grid-template-columns: 1fr; } .form-row { grid-template-columns: 1fr; } .page-hero { padding: 60px 20px 40px; } .contact-form { padding: 24px; } }
+  </style>
+</head>
+<body>
+<nav>
+  <a class="logo" href="index.html"><span class="dot"></span> CareerNavigator</a>
+  <div class="nav-links">
+    <a href="index.html">Home</a>
+    <a href="features.html">Features</a>
+    <a href="about.html">About</a>
+    <a href="download.html">Download</a>
+    <a href="contact.html" class="active">Contact</a>
+  </div>
+  <div class="nav-right">
+    <button class="btn-theme" onclick="toggleTheme()" id="themeBtn"><i class="ti ti-sun"></i> Light</button>
+    <a href="download.html"><button class="btn-primary">Get started</button></a>
+  </div>
+</nav>
+
+<main>
+  <div class="page-hero">
+    <div class="badge"><i class="ti ti-mail"></i> Get in touch</div>
+    <h1 class="section-title">We'd love to hear from you</h1>
+    <p class="section-sub">Have a question, want to become a mentor, or just want to say hello? We're here.</p>
+  </div>
+
+  <div class="section" style="padding-top:0">
+    <div class="contact-layout">
+      <div class="contact-info">
+        <h2>Let's talk</h2>
+        <p>Whether you're a mentor wanting to join our platform, a user needing support, or a potential partner — reach out and we'll get back to you within 24 hours.</p>
+        <div class="info-items">
+          <div class="info-item">
+            <div class="info-icon"><i class="ti ti-mail"></i></div>
+            <div><h4>Email</h4><p>hello@careernavigator.app</p></div>
+          </div>
+          <div class="info-item">
+            <div class="info-icon"><i class="ti ti-brand-github"></i></div>
+            <div><h4>GitHub</h4><p>github.com/TUHEU/career_navigator</p></div>
+          </div>
+          <div class="info-item">
+            <div class="info-icon"><i class="ti ti-clock"></i></div>
+            <div><h4>Response time</h4><p>We typically reply within 24 hours</p></div>
+          </div>
+          <div class="info-item">
+            <div class="info-icon"><i class="ti ti-world"></i></div>
+            <div><h4>Based in</h4><p>Yaoundé, Cameroon 🇨🇲</p></div>
+          </div>
+        </div>
+      </div>
+
+      <div class="contact-form">
+        <div class="form-row">
+          <div class="form-group"><label>First name</label><input type="text" placeholder="John" id="fname" /></div>
+          <div class="form-group"><label>Last name</label><input type="text" placeholder="Doe" id="lname" /></div>
+        </div>
+        <div class="form-group"><label>Email address</label><input type="email" placeholder="john@example.com" id="email" /></div>
+        <div class="form-group">
+          <label>Subject</label>
+          <select id="subject">
+            <option>General inquiry</option>
+            <option>Become a mentor</option>
+            <option>Technical support</option>
+            <option>Partnership</option>
+            <option>Feedback</option>
+          </select>
+        </div>
+        <div class="form-group"><label>Message</label><textarea placeholder="Tell us how we can help..." id="message"></textarea></div>
+        <button class="submit-btn" onclick="submitForm()">Send message <i class="ti ti-send"></i></button>
+        <div class="success-msg" id="successMsg">✓ Message sent! We'll get back to you within 24 hours.</div>
+      </div>
+    </div>
+  </div>
+</main>
+
+<footer>
+  <p>© 2026 CareerNavigator. All rights reserved.</p>
+  <div class="footer-links"><a href="index.html">Home</a><a href="features.html">Features</a><a href="about.html">About</a></div>
+</footer>
+<script>
+  let isLight = false;
+  function toggleTheme() {
+    isLight = !isLight;
+    document.body.classList.toggle('light-mode', isLight);
+    document.getElementById('themeBtn').innerHTML = isLight ? '<i class="ti ti-moon"></i> Dark' : '<i class="ti ti-sun"></i> Light';
+  }
+  function submitForm() {
+    const fname = document.getElementById('fname').value;
+    const email = document.getElementById('email').value;
+    if (!fname || !email) { alert('Please fill in your name and email.'); return; }
+    document.getElementById('successMsg').style.display = 'block';
+    document.getElementById('fname').value = '';
+    document.getElementById('lname').value = '';
+    document.getElementById('email').value = '';
+    document.getElementById('message').value = '';
+  }
+</script>
+</body>
+</html>
