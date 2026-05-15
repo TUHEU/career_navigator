@@ -1,9 +1,11 @@
+import 'dart:convert';
 import 'package:flutter/material.dart';
+import 'package:http/http.dart' as http;
 import 'package:provider/provider.dart';
 
+import '../../../core/constants/app_constants.dart';
 import '../../../core/themes/app_theme.dart';
 import '../../../core/utils/helpers.dart';
-import '../../../data/datasources/remote/api_service.dart';
 import '../../../providers/auth_provider.dart';
 import '../../../providers/theme_provider.dart';
 
@@ -22,7 +24,6 @@ class MentorReviewPage extends StatefulWidget {
 }
 
 class _MentorReviewPageState extends State<MentorReviewPage> {
-  final _api = ApiService();
   final _reviewCtrl = TextEditingController();
 
   List<Map<String, dynamic>> _reviews = [];
@@ -45,25 +46,42 @@ class _MentorReviewPageState extends State<MentorReviewPage> {
     super.dispose();
   }
 
+  // ── HTTP helpers ──────────────────────────────────────────
+  Map<String, String> _headers(String token) => {
+    'Content-Type': 'application/json',
+    'Authorization': 'Bearer $token',
+  };
+
   Future<void> _load() async {
     setState(() => _isLoading = true);
     try {
       final token = await context.read<AuthProvider>().getAccessToken() ?? '';
       final uid = context.read<AuthProvider>().currentUser?.id;
-      final res = await _api.getRequest(
-        '/mentors/${widget.mentorId}/reviews',
-        token,
-      );
-      if (mounted && res['success'] == true) {
-        final data = res['data'] as Map<String, dynamic>;
+
+      final res = await http
+          .get(
+            Uri.parse(
+              '${AppConstants.baseUrl}/mentors/${widget.mentorId}/reviews',
+            ),
+            headers: _headers(token),
+          )
+          .timeout(AppConstants.connectionTimeout);
+
+      final body = jsonDecode(res.body) as Map<String, dynamic>;
+
+      if (mounted && body['success'] == true) {
+        final data = body['data'] as Map<String, dynamic>;
         final list = List<Map<String, dynamic>>.from(data['reviews'] ?? []);
+        final avgRaw = data['avg_rating'];
+        final total = data['total'] as int? ?? 0;
+
         setState(() {
           _reviews = list;
-          _avgRating = data['avg_rating'] != null
-              ? (data['avg_rating'] as num).toDouble()
-              : null;
-          _totalReviews = data['total'] as int? ?? 0;
-          // Check if current user already reviewed
+          _avgRating = avgRaw != null ? (avgRaw as num).toDouble() : null;
+          _totalReviews = total;
+          _isLoading = false;
+
+          // Pre-fill if user already reviewed
           if (uid != null) {
             final mine = list.where((r) => r['reviewer_id'] == uid).toList();
             if (mine.isNotEmpty) {
@@ -72,7 +90,6 @@ class _MentorReviewPageState extends State<MentorReviewPage> {
               _reviewCtrl.text = mine.first['review'] as String? ?? '';
             }
           }
-          _isLoading = false;
         });
       } else {
         if (mounted) setState(() => _isLoading = false);
@@ -90,19 +107,30 @@ class _MentorReviewPageState extends State<MentorReviewPage> {
     setState(() => _isSubmitting = true);
     try {
       final token = await context.read<AuthProvider>().getAccessToken() ?? '';
-      final res = await _api.postRequest(
-        '/mentors/${widget.mentorId}/reviews',
-        token,
-        {'rating': _myRating, 'review': _reviewCtrl.text.trim()},
-      );
+
+      final res = await http
+          .post(
+            Uri.parse(
+              '${AppConstants.baseUrl}/mentors/${widget.mentorId}/reviews',
+            ),
+            headers: _headers(token),
+            body: jsonEncode({
+              'rating': _myRating,
+              'review': _reviewCtrl.text.trim(),
+            }),
+          )
+          .timeout(AppConstants.connectionTimeout);
+
+      final body = jsonDecode(res.body) as Map<String, dynamic>;
+
       if (mounted) {
-        if (res['success'] == true) {
+        if (body['success'] == true) {
           Helpers.showSnackBar(context, 'Review submitted!');
           _load();
         } else {
           Helpers.showSnackBar(
             context,
-            res['message'] ?? 'Failed',
+            body['message'] as String? ?? 'Failed to submit',
             isError: true,
           );
         }
@@ -135,7 +163,7 @@ class _MentorReviewPageState extends State<MentorReviewPage> {
     }),
   );
 
-  // ── Rating bar ────────────────────────────────────────────
+  // ── Rating overview bar ───────────────────────────────────
   Widget _ratingBar(bool isDark) => Container(
     padding: const EdgeInsets.all(20),
     decoration: BoxDecoration(
@@ -198,10 +226,10 @@ class _MentorReviewPageState extends State<MentorReviewPage> {
                       ),
                     ),
                     const SizedBox(width: 4),
-                    Icon(
+                    const Icon(
                       Icons.star_rounded,
                       size: 12,
-                      color: const Color(0xFFFFC107),
+                      color: Color(0xFFFFC107),
                     ),
                     const SizedBox(width: 6),
                     Expanded(
@@ -339,18 +367,20 @@ class _MentorReviewPageState extends State<MentorReviewPage> {
         elevation: 0,
       ),
       body: _isLoading
-          ? const Center(child: CircularProgressIndicator())
+          ? const Center(
+              child: CircularProgressIndicator(color: AppColors.primaryCyan),
+            )
           : RefreshIndicator(
               onRefresh: _load,
               color: AppColors.primaryCyan,
               child: ListView(
                 padding: const EdgeInsets.all(16),
                 children: [
-                  // ── Rating overview ──────────────────────
+                  // Rating overview
                   _ratingBar(isDark),
                   const SizedBox(height: 24),
 
-                  // ── Write review ─────────────────────────
+                  // Write / update review
                   Text(
                     _hasReviewed ? 'Update Your Review' : 'Write a Review',
                     style: TextStyle(
@@ -408,7 +438,7 @@ class _MentorReviewPageState extends State<MentorReviewPage> {
                   ),
                   const SizedBox(height: 28),
 
-                  // ── Reviews list ─────────────────────────
+                  // Reviews list
                   if (_reviews.isNotEmpty) ...[
                     Text(
                       'All Reviews ($_totalReviews)',

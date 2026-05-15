@@ -64,7 +64,7 @@ class _SkillProgressPageState extends State<SkillProgressPage>
 
   void _loadSkills() {
     final user = context.read<AuthProvider>().currentUser;
-    final raw = user?.skills as List<dynamic>? ?? [];
+    final raw = user?.expertiseAreas ?? [];
     final colors = [
       const Color(0xFF00B8D4),
       const Color(0xFF7C3AED),
