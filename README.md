@@ -50,3 +50,7 @@ Author
 
 Fahdil Tuhue
 https://github.com/TUHEU
+
+downloading link
+
+https://careernavigator.duckdns.org
