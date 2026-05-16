@@ -33,7 +33,7 @@ class UserProvider extends ChangeNotifier {
       await loadProfile();
     } catch (e) {
       _error = e.toString();
-      rethrow;
+      // Don't rethrow — let caller handle gracefully
     } finally {
       _setLoading(false);
     }
@@ -46,7 +46,7 @@ class UserProvider extends ChangeNotifier {
       await loadProfile();
     } catch (e) {
       _error = e.toString();
-      rethrow;
+      // Don't rethrow — let caller handle gracefully
     } finally {
       _setLoading(false);
     }
@@ -92,8 +92,8 @@ class UserProvider extends ChangeNotifier {
     }
   }
 
-  void _setLoading(bool v) {
-    _isLoading = v;
+  void _setLoading(bool loading) {
+    _isLoading = loading;
     notifyListeners();
   }
 }

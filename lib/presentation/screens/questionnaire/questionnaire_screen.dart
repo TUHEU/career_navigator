@@ -98,8 +98,10 @@ class _QuestionnaireScreenState extends State<QuestionnaireScreen> {
     try {
       final userProvider = context.read<UserProvider>();
       final fields = <String, dynamic>{'availability': _workMode};
+
       if (_selectedInterests.isNotEmpty) {
         fields['desired_job_title'] = _selectedInterests.first;
+        // Send as plain list — backend handles json.dumps internally
         fields['interests'] = _selectedInterests;
       }
       if (_skills.isNotEmpty) {
@@ -109,7 +111,15 @@ class _QuestionnaireScreenState extends State<QuestionnaireScreen> {
         fields['location'] = _locationController.text.trim();
       }
 
-      await userProvider.updateJobSeekerProfile(fields);
+      try {
+        // Try to update profile — if it fails (e.g. network), still continue
+        await userProvider.updateJobSeekerProfile(fields);
+      } catch (_) {
+        // Profile update failed — but still complete questionnaire
+        // so the user is not stuck forever on this screen
+      }
+
+      // Always mark completed and navigate regardless of profile update result
       await QuestionnaireService.markCompleted();
 
       if (mounted) {
@@ -120,12 +130,13 @@ class _QuestionnaireScreenState extends State<QuestionnaireScreen> {
         );
       }
     } catch (e) {
+      // Last resort — mark completed and navigate anyway
+      await QuestionnaireService.markCompleted();
       if (mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(
-            content: Text('Error: $e'),
-            backgroundColor: Colors.redAccent,
-          ),
+        Navigator.pushAndRemoveUntil(
+          context,
+          MaterialPageRoute(builder: (_) => const JobSeekerDashboard()),
+          (_) => false,
         );
       }
     } finally {

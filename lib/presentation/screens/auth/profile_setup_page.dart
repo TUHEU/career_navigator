@@ -10,7 +10,6 @@ import '../../../providers/auth_provider.dart';
 import '../../../providers/theme_provider.dart';
 import '../../widgets/shared/buttons.dart';
 import '../../widgets/shared/inputs.dart';
-import '../dashboard/job_seeker_dashboard.dart';
 import '../dashboard/mentor_dashboard.dart';
 import '../questionnaire/questionnaire_screen.dart';
 

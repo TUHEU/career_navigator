@@ -21,14 +21,6 @@ class SkillProgress {
   });
 }
 
-// ── Category colours ──────────────────────────────────────────
-const _catColors = {
-  'Technical': Color(0xFF00B8D4),
-  'Soft Skills': Color(0xFF7C3AED),
-  'Tools': Color(0xFF059669),
-  'Languages': Color(0xFFF97316),
-};
-
 class SkillProgressPage extends StatefulWidget {
   const SkillProgressPage({super.key});
   @override

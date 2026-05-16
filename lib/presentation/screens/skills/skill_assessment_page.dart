@@ -519,7 +519,7 @@ class _SkillAssessmentPageState extends State<SkillAssessmentPage> {
                               decoration: BoxDecoration(
                                 shape: BoxShape.circle,
                                 color: borderColor != null
-                                    ? borderColor!.withOpacity(0.15)
+                                    ? borderColor.withOpacity(0.15)
                                     : AppColors.border(isDark).withOpacity(0.2),
                               ),
                               child: _answered && (isCorrect || selected)
