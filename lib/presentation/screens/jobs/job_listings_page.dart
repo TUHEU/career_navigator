@@ -6,8 +6,6 @@ import '../../../core/utils/helpers.dart';
 import '../../../data/datasources/remote/api_service.dart';
 import '../../../providers/auth_provider.dart';
 import '../../../providers/theme_provider.dart';
-import '../../widgets/shared/buttons.dart';
-import '../../widgets/shared/inputs.dart';
 import '../../widgets/shared/loading_widgets.dart';
 
 class JobListingsPage extends StatefulWidget {

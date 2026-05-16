@@ -1,5 +1,4 @@
 import 'dart:io';
-import 'package:career_navigator/presentation/screens/questionnaire/questionnaire_screen.dart';
 import 'package:flutter/material.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:provider/provider.dart';
@@ -10,7 +9,6 @@ import '../../../providers/auth_provider.dart';
 import '../../../providers/theme_provider.dart';
 import '../../widgets/shared/buttons.dart';
 import '../../widgets/shared/inputs.dart';
-import '../dashboard/job_seeker_dashboard.dart';
 import '../dashboard/mentor_dashboard.dart';
 import '../questionnaire/questionnaire_screen.dart';
 

@@ -7,7 +7,6 @@ import '../../../providers/auth_provider.dart';
 import '../../../providers/theme_provider.dart';
 import '../../widgets/shared/bottom_nav.dart';
 import '../../widgets/shared/buttons.dart';
-import '../../widgets/shared/loading_widgets.dart';
 import '../profile/edit_profile_page.dart';
 import '../profile/mentor_profile_page.dart';
 import '../jobs/job_listings_page.dart';
@@ -56,7 +55,7 @@ class _MentorDashboardState extends State<MentorDashboard> {
           Container(
             color: isDark
                 ? AppColors.darkBackground.withOpacity(0.80)
-                : Colors.white.withOpacity(0.97),
+                : Colors.white.withOpacity(0.92),
           ),
           SafeArea(child: _pages[_currentIndex]),
         ],
@@ -112,8 +111,8 @@ class _HomePage extends StatelessWidget {
                     'Mentor Dashboard',
                     style: TextStyle(
                       color: isDark
-                          ? Colors.white.withOpacity(0.75)
-                          : const Color(0xFF1C2333),
+                          ? Colors.white.withOpacity(0.5)
+                          : AppColors.lightTextSecondary,
                       fontSize: 12,
                     ),
                   ),
@@ -122,7 +121,7 @@ class _HomePage extends StatelessWidget {
               IconButton(
                 icon: Icon(
                   Icons.search,
-                  color: isDark ? Colors.white70 : const Color(0xFF1C2333),
+                  color: isDark ? Colors.white70 : Colors.grey.shade600,
                 ),
                 onPressed: () => Navigator.push(
                   context,
@@ -137,7 +136,7 @@ class _HomePage extends StatelessWidget {
             decoration: BoxDecoration(
               color: isDark
                   ? Colors.white.withOpacity(0.06)
-                  : const Color(0xFFE2EAF4),
+                  : Colors.grey.shade100,
               borderRadius: BorderRadius.circular(22),
               border: Border.all(
                 color: AppColors.primaryCyan.withOpacity(0.25),

@@ -22,14 +22,16 @@ class AppColors {
 
   // Text — all very dark
   static const Color lightText = Color(0xFF0F172A); // main text (original)
-  static const Color lightTextSecondary = Color(0xFF1C2333); // very dark grey
+  static const Color lightTextSecondary = Color(
+    0xFF334155,
+  ); // slate-700 readable on white
   static const Color lightTextMuted = Color(
-    0xFF4A5568,
-  ); // medium dark grey — still readable
+    0xFF64748B,
+  ); // slate-500 muted readable
 
   // Inputs
-  static const Color lightInputFill = Color(0xFFD8E0ED);
-  static const Color lightBorder = Color(0xFF8896B0);
+  static const Color lightInputFill = Color(0xFFEEF2F8); // light grey fill ✅
+  static const Color lightBorder = Color(0xFFB0BEC5); // visible grey border ✅
 
   // Status
   static const Color success = Color(0xFF16A34A);

@@ -3,7 +3,6 @@ import 'package:provider/provider.dart';
 
 import '../../../core/themes/app_theme.dart';
 import '../../../core/utils/helpers.dart';
-import '../../../core/utils/validators.dart';
 import '../../../data/models/user_model.dart';
 import '../../../providers/auth_provider.dart';
 import '../../../providers/theme_provider.dart';
