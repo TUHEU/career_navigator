@@ -34,24 +34,35 @@ class _SplashScreenState extends State<SplashScreen> {
     final hasToken = await authProvider.getAccessToken() != null;
 
     if (hasToken) {
-      await authProvider.loadUserProfile();
+      // Validate token by loading profile — if it fails, token is expired/invalid
+      final profileLoaded = await authProvider.loadUserProfile();
       if (!mounted) return;
 
-      final user = authProvider.currentUser;
-      if (user?.role == 'admin') {
-        Navigator.pushReplacement(
-          context,
-          MaterialPageRoute(builder: (_) => const AdminDashboard()),
-        );
-      } else if (user?.role == 'mentor') {
-        Navigator.pushReplacement(
-          context,
-          MaterialPageRoute(builder: (_) => const MentorDashboard()),
-        );
+      if (profileLoaded) {
+        final user = authProvider.currentUser;
+        if (user?.role == 'admin') {
+          Navigator.pushReplacement(
+            context,
+            MaterialPageRoute(builder: (_) => const AdminDashboard()),
+          );
+        } else if (user?.role == 'mentor') {
+          Navigator.pushReplacement(
+            context,
+            MaterialPageRoute(builder: (_) => const MentorDashboard()),
+          );
+        } else {
+          Navigator.pushReplacement(
+            context,
+            MaterialPageRoute(builder: (_) => const JobSeekerDashboard()),
+          );
+        }
       } else {
+        // Token expired or invalid — clear it and go to sign in
+        await authProvider.logout();
+        if (!mounted) return;
         Navigator.pushReplacement(
           context,
-          MaterialPageRoute(builder: (_) => const JobSeekerDashboard()),
+          MaterialPageRoute(builder: (_) => const SignInPage()),
         );
       }
     } else {
