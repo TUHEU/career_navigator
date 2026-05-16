@@ -1,5 +1,4 @@
 import 'dart:io';
-import 'package:career_navigator/presentation/screens/questionnaire/questionnaire_screen.dart';
 import 'package:flutter/material.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:provider/provider.dart';
