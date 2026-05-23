@@ -1,3 +1,11 @@
+// PyMySQL can return numeric columns as String — this helper handles both.
+int? _toInt(dynamic v) {
+  if (v == null) return null;
+  if (v is int) return v;
+  if (v is double) return v.toInt();
+  return int.tryParse(v.toString());
+}
+
 class Conversation {
   final int id;
   final int otherUserId;
@@ -19,15 +27,15 @@ class Conversation {
 
   factory Conversation.fromJson(Map<String, dynamic> json) {
     return Conversation(
-      id: json['id'] as int,
-      otherUserId: json['other_user_id'] as int,
+      id: _toInt(json['id']) ?? 0,
+      otherUserId: _toInt(json['other_user_id']) ?? 0,
       otherName: json['other_name'] as String? ?? 'Unknown',
       otherPicture: json['other_picture'] as String?,
       lastMessage: json['last_message'] as String?,
       lastMessageAt: json['last_message_at'] != null
           ? DateTime.tryParse(json['last_message_at'].toString())
           : null,
-      unreadCount: json['unread_count'] as int? ?? 0,
+      unreadCount: _toInt(json['unread_count']) ?? 0,
     );
   }
 
@@ -66,9 +74,9 @@ class ChatMessage {
 
   factory ChatMessage.fromJson(Map<String, dynamic> json) {
     return ChatMessage(
-      id: json['id'] as int,
-      conversationId: json['conversation_id'] as int? ?? 0,
-      senderId: json['sender_id'] as int,
+      id: _toInt(json['id']) ?? 0,
+      conversationId: _toInt(json['conversation_id']) ?? 0,
+      senderId: _toInt(json['sender_id']) ?? 0,
       senderName: json['sender_name'] as String? ?? 'User',
       senderPicture: json['sender_picture'] as String?,
       content: json['content'] as String? ?? '',

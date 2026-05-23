@@ -1,6 +1,14 @@
 import 'package:flutter/material.dart';
 import '../../core/themes/app_theme.dart';
 
+// PyMySQL can return numeric columns as String — this helper handles both.
+int? _toInt(dynamic v) {
+  if (v == null) return null;
+  if (v is int) return v;
+  if (v is double) return v.toInt();
+  return int.tryParse(v.toString());
+}
+
 class NotificationModel {
   final int id;
   final String type;
@@ -26,12 +34,12 @@ class NotificationModel {
 
   factory NotificationModel.fromJson(Map<String, dynamic> json) {
     return NotificationModel(
-      id: json['id'] as int,
+      id: _toInt(json['id']) ?? 0,
       type: json['type'] as String? ?? 'system',
       title: json['title'] as String? ?? '',
       body: json['body'] as String?,
       isRead: json['is_read'] == 1 || json['is_read'] == true,
-      referenceId: json['reference_id'] as int?,
+      referenceId: _toInt(json['reference_id']),
       senderName: json['sender_name'] as String?,
       senderPicture: json['sender_picture'] as String?,
       createdAt:
