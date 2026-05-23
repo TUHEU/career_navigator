@@ -1,3 +1,11 @@
+// PyMySQL can return numeric columns as String — this helper handles both.
+int? _toInt(dynamic v) {
+  if (v == null) return null;
+  if (v is int) return v;
+  if (v is double) return v.toInt();
+  return int.tryParse(v.toString());
+}
+
 class MentorModel {
   final int id;
   final String fullName;
@@ -35,7 +43,7 @@ class MentorModel {
     }
 
     return MentorModel(
-      id: json['id'] as int,
+      id: _toInt(json['id']) ?? 0,
       fullName: json['full_name'] as String? ?? 'Unknown',
       profilePictureUrl: json['profile_picture_url'] as String?,
       headline: json['headline'] as String?,
@@ -48,7 +56,7 @@ class MentorModel {
       rating: json['rating'] != null
           ? double.tryParse(json['rating'].toString())
           : null,
-      totalSessions: json['total_sessions'] as int? ?? 0,
+      totalSessions: _toInt(json['total_sessions']) ?? 0,
       isAcceptingMentees:
           json['is_accepting_mentees'] == 1 ||
           json['is_accepting_mentees'] == true,

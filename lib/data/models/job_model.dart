@@ -1,5 +1,13 @@
 import 'package:flutter/material.dart';
 
+// PyMySQL can return numeric columns as String — this helper handles both.
+int? _toInt(dynamic v) {
+  if (v == null) return null;
+  if (v is int) return v;
+  if (v is double) return v.toInt();
+  return int.tryParse(v.toString());
+}
+
 // ============================================================
 // JOB LISTING
 // ============================================================
@@ -65,7 +73,7 @@ class JobListing {
       } catch (_) {}
     }
     return JobListing(
-      id: json['id'] as int,
+      id: _toInt(json['id']) ?? 0,
       title: json['title'] as String? ?? '',
       company: json['company'] as String? ?? '',
       companyLogo: json['company_logo'] as String?,
@@ -73,18 +81,18 @@ class JobListing {
       locationType: json['location_type'] as String? ?? 'onsite',
       employmentType: json['employment_type'] as String? ?? 'full_time',
       experienceLevel: json['experience_level'] as String? ?? 'mid',
-      salaryMin: json['salary_min'] as int?,
-      salaryMax: json['salary_max'] as int?,
+      salaryMin: _toInt(json['salary_min']),
+      salaryMax: _toInt(json['salary_max']),
       salaryCurrency: json['salary_currency'] as String? ?? 'USD',
       description: json['description'] as String? ?? '',
       requirements: json['requirements'] as String? ?? '',
       responsibilities: json['responsibilities'] as String? ?? '',
       benefits: json['benefits'] as String?,
       skillsRequired: skills,
-      postedBy: json['posted_by'] as int?,
-      isActive: (json['is_active'] as int?) == 1,
-      viewsCount: json['views_count'] as int? ?? 0,
-      applicationsCount: json['applications_count'] as int? ?? 0,
+      postedBy: _toInt(json['posted_by']),
+      isActive: _toInt(json['is_active']) == 1,
+      viewsCount: _toInt(json['views_count']) ?? 0,
+      applicationsCount: _toInt(json['applications_count']) ?? 0,
       expiresAt: json['expires_at'] != null
           ? DateTime.tryParse(json['expires_at'] as String)
           : null,
@@ -265,8 +273,8 @@ class JobApplication {
   });
 
   factory JobApplication.fromJson(Map<String, dynamic> json) => JobApplication(
-    id: json['id'] as int? ?? 0,
-    jobId: json['job_id'] as int? ?? 0,
+    id: _toInt(json['id']) ?? 0,
+    jobId: _toInt(json['job_id']) ?? 0,
     status: json['status'] as String? ?? 'pending',
     coverLetter: json['cover_letter'] as String?,
     appliedAt:
@@ -276,8 +284,8 @@ class JobApplication {
     company: json['company'] as String? ?? '',
     location: json['location'] as String?,
     employmentType: json['employment_type'] as String?,
-    salaryMin: json['salary_min'] as int?,
-    salaryMax: json['salary_max'] as int?,
+    salaryMin: _toInt(json['salary_min']),
+    salaryMax: _toInt(json['salary_max']),
     salaryCurrency: json['salary_currency'] as String?,
   );
 

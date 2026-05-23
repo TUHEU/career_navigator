@@ -12,6 +12,7 @@ import '../jobs/job_listings_page.dart';
 import '../chat/chat_page.dart';
 import '../search/search_page.dart';
 import '../settings/settings_page.dart';
+import '../ai/ai_hub_page.dart';
 
 class JobSeekerDashboard extends StatefulWidget {
   const JobSeekerDashboard({super.key});
@@ -188,7 +189,7 @@ class _HomePage extends StatelessWidget {
                         ),
                         child: Row(
                           mainAxisSize: MainAxisSize.min,
-                          children: const [
+                          children: [
                             Icon(
                               Icons.search_rounded,
                               color: AppColors.primaryCyan,
@@ -221,6 +222,74 @@ class _HomePage extends StatelessWidget {
             ).then((_) => authProvider.loadUserProfile()),
             icon: Icons.edit_outlined,
           ),
+          const SizedBox(height: 12),
+          // AI Tools button
+          GestureDetector(
+            onTap: () => Navigator.push(
+              context,
+              MaterialPageRoute(builder: (_) => const AIHubPage()),
+            ),
+            child: Container(
+              width: double.infinity,
+              padding: const EdgeInsets.all(16),
+              decoration: BoxDecoration(
+                gradient: LinearGradient(
+                  colors: [
+                    AppColors.primaryCyan.withOpacity(0.15),
+                    AppColors.primaryCyan.withOpacity(0.05),
+                  ],
+                ),
+                borderRadius: BorderRadius.circular(14),
+                border: Border.all(
+                  color: AppColors.primaryCyan.withOpacity(0.3),
+                ),
+              ),
+              child: Row(
+                children: [
+                  Container(
+                    padding: const EdgeInsets.all(8),
+                    decoration: BoxDecoration(
+                      color: AppColors.primaryCyan.withOpacity(0.15),
+                      shape: BoxShape.circle,
+                    ),
+                    child: const Icon(
+                      Icons.auto_awesome,
+                      color: AppColors.primaryCyan,
+                      size: 20,
+                    ),
+                  ),
+                  const SizedBox(width: 12),
+                  Expanded(
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Text(
+                          'AI Career Tools',
+                          style: TextStyle(
+                            color: isDark ? Colors.white : AppColors.lightText,
+                            fontWeight: FontWeight.bold,
+                            fontSize: 14,
+                          ),
+                        ),
+                        Text(
+                          'Career paths, salary negotiation, review coach...',
+                          style: TextStyle(
+                            color: AppColors.primaryCyan.withOpacity(0.8),
+                            fontSize: 11,
+                          ),
+                        ),
+                      ],
+                    ),
+                  ),
+                  Icon(
+                    Icons.arrow_forward_ios,
+                    size: 14,
+                    color: AppColors.primaryCyan,
+                  ),
+                ],
+              ),
+            ),
+          ),
           const SizedBox(height: 20),
           Container(
             padding: const EdgeInsets.all(16),
@@ -232,13 +301,13 @@ class _HomePage extends StatelessWidget {
               ),
             ),
             child: Row(
-              children: const [
-                Icon(
+              children: [
+                const Icon(
                   Icons.rocket_launch_outlined,
                   color: AppColors.primaryCyan,
                   size: 20,
                 ),
-                SizedBox(width: 12),
+                const SizedBox(width: 12),
                 Expanded(
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
@@ -246,15 +315,18 @@ class _HomePage extends StatelessWidget {
                       Text(
                         'More features coming soon',
                         style: TextStyle(
-                          color: Colors.white,
+                          color: AppColors.text(isDark),
                           fontWeight: FontWeight.w600,
                           fontSize: 13,
                         ),
                       ),
-                      SizedBox(height: 3),
+                      const SizedBox(height: 3),
                       Text(
                         'AI recommendations & skill assessments.',
-                        style: TextStyle(color: Colors.white70, fontSize: 12),
+                        style: TextStyle(
+                          color: AppColors.textSecondary(isDark),
+                          fontSize: 12,
+                        ),
                       ),
                     ],
                   ),

@@ -11,6 +11,7 @@ import 'providers/notification_provider.dart';
 import 'providers/theme_provider.dart';
 import 'providers/user_provider.dart';
 import 'presentation/screens/auth/splash_screen.dart';
+import 'router/app_router.dart';
 
 void main() async {
   final widgetsBinding = WidgetsFlutterBinding.ensureInitialized();
@@ -51,6 +52,7 @@ class MyApp extends StatelessWidget {
       debugShowCheckedModeBanner: false,
       title: 'Career Navigator',
       theme: _buildTheme(isDark),
+      onGenerateRoute: generateRoute,
       home: const SplashScreen(),
     );
   }

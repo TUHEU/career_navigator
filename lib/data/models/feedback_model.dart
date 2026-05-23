@@ -1,3 +1,13 @@
+// data/models/feedback_model.dart
+// FIX: replaced bare 'as int' casts with _toInt() — PyMySQL returns int columns
+// as strings in some MySQL/MariaDB versions.
+int? _toInt(dynamic v) {
+  if (v == null) return null;
+  if (v is int) return v;
+  if (v is double) return v.toInt();
+  return int.tryParse(v.toString());
+}
+
 class FeedbackModel {
   final int id;
   final int userId;
@@ -25,23 +35,21 @@ class FeedbackModel {
 
   factory FeedbackModel.fromJson(Map<String, dynamic> json) {
     return FeedbackModel(
-      id: json['id'] as int,
-      userId: json['user_id'] as int,
-      subject: json['subject'] as String? ?? '',
-      message: json['message'] as String? ?? '',
-      category: json['category'] as String? ?? 'General',
-      rating: json['rating'] as int?,
-      status: json['status'] as String? ?? 'pending',
-      createdAt:
-          DateTime.tryParse(json['created_at']?.toString() ?? '') ??
-          DateTime.now(),
-      userName: json['full_name'] as String?,
-      userEmail: json['email'] as String?,
+      id:        _toInt(json['id'])      ?? 0,
+      userId:    _toInt(json['user_id']) ?? 0,
+      subject:   json['subject']  as String? ?? '',
+      message:   json['message']  as String? ?? '',
+      category:  json['category'] as String? ?? 'General',
+      rating:    _toInt(json['rating']),
+      status:    json['status']   as String? ?? 'pending',
+      createdAt: DateTime.tryParse(json['created_at']?.toString() ?? '') ?? DateTime.now(),
+      userName:  json['full_name'] as String?,
+      userEmail: json['email']     as String?,
     );
   }
 
   String get ratingText => rating != null ? '⭐' * rating! : 'No rating';
-  bool get isPending => status == 'pending';
+  bool get isPending  => status == 'pending';
   bool get isReviewed => status == 'reviewed';
   bool get isResolved => status == 'resolved';
 }

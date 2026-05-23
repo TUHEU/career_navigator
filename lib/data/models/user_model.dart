@@ -1,5 +1,13 @@
 // ─── user_model.dart ────────────────────────────────────────────────────────
 
+// PyMySQL can return numeric columns as String — this helper handles both.
+int? _toInt(dynamic v) {
+  if (v == null) return null;
+  if (v is int) return v;
+  if (v is double) return v.toInt();
+  return int.tryParse(v.toString());
+}
+
 class User {
   final int id;
   final String email;
@@ -54,7 +62,7 @@ class User {
   factory User.fromJson(Map<String, dynamic> json) {
     final mentorProfile = json['mentor_profile'] as Map<String, dynamic>? ?? {};
     return User(
-      id: json['id'] as int,
+      id: _toInt(json['id']) ?? 0,
       email: json['email'] as String,
       fullName: json['full_name'] as String?,
       profilePictureUrl: json['profile_picture_url'] as String?,
@@ -70,9 +78,9 @@ class User {
           json['current_job_title'] as String? ??
           mentorProfile['current_job_title'] as String?,
       desiredJobTitle: json['desired_job_title'] as String?,
-      yearsOfExperience:
-          (json['years_of_experience'] ?? mentorProfile['years_of_experience'])
-              as int?,
+      yearsOfExperience: _toInt(
+        json['years_of_experience'] ?? mentorProfile['years_of_experience'],
+      ),
       availability: json['availability'] as String?,
       education:
           (json['education'] as List?)
@@ -97,7 +105,7 @@ class User {
       rating: mentorProfile['rating'] != null
           ? double.tryParse(mentorProfile['rating'].toString())
           : null,
-      totalSessions: mentorProfile['total_sessions'] as int?,
+      totalSessions: _toInt(mentorProfile['total_sessions']),
     );
   }
 
@@ -135,12 +143,12 @@ class Education {
   });
 
   factory Education.fromJson(Map<String, dynamic> json) => Education(
-    id: json['id'] as int?,
+    id: _toInt(json['id']),
     institution: json['institution'] as String? ?? '',
     degree: json['degree'] as String? ?? '',
     fieldOfStudy: json['field_of_study'] as String? ?? '',
-    startYear: json['start_year'] as int? ?? 0,
-    endYear: json['end_year'] as int?,
+    startYear: _toInt(json['start_year']) ?? 0,
+    endYear: _toInt(json['end_year']),
     isCurrent: json['is_current'] == 1 || json['is_current'] == true,
     description: json['description'] as String?,
   );
@@ -187,7 +195,7 @@ class WorkExperience {
   });
 
   factory WorkExperience.fromJson(Map<String, dynamic> json) => WorkExperience(
-    id: json['id'] as int?,
+    id: _toInt(json['id']),
     company: json['company'] as String? ?? '',
     jobTitle: json['job_title'] as String? ?? '',
     employmentType: json['employment_type'] as String? ?? 'full_time',
