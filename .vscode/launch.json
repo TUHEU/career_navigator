@@ -5,12 +5,12 @@
     // ── Flutter: Career Navigator ─────────────────────────────
 
     {
-      "name": "📱 Android Phone (USB)",
+      "name": "📱 Android Phone (2409BRN2CA)",
       "type": "dart",
       "request": "launch",
       "program": "lib/main.dart",
       "flutterMode": "debug",
-      "deviceId": "android"
+      "deviceId": "2409BRN2CA"
     },
     {
       "name": "🤖 Android Emulator",
@@ -18,7 +18,7 @@
       "request": "launch",
       "program": "lib/main.dart",
       "flutterMode": "debug",
-      "deviceId": "emulator"
+      "deviceId": "emulator-5554"
     },
     {
       "name": "🪟 Windows Desktop",
@@ -37,12 +37,12 @@
       "deviceId": "chrome"
     },
     {
-      "name": "🚀 Android Release (APK)",
+      "name": "🚀 Android Phone Release",
       "type": "dart",
       "request": "launch",
       "program": "lib/main.dart",
       "flutterMode": "release",
-      "deviceId": "android"
+      "deviceId": "2409BRN2CA"
     },
 
     // ── Web App (separate project) ────────────────────────────
@@ -57,20 +57,11 @@
 
   ],
 
-  // ── Run multiple at once ──────────────────────────────────
   "compounds": [
     {
       "name": "🔥 Phone + Web App",
       "configurations": [
-        "📱 Android Phone (USB)",
-        "🕸️ Web App (localhost:8080)"
-      ],
-      "stopAll": true
-    },
-    {
-      "name": "💻 Emulator + Web App",
-      "configurations": [
-        "🤖 Android Emulator",
+        "📱 Android Phone (2409BRN2CA)",
         "🕸️ Web App (localhost:8080)"
       ],
       "stopAll": true
