@@ -83,10 +83,12 @@ class ApiService {
     String? location, String? employmentType, String? search, int page = 1,
   }) {
     final p = <String, String>{'page': '$page'};
-    if (location != null && location.isNotEmpty && location.toLowerCase() != 'all')
+    if (location != null && location.isNotEmpty && location.toLowerCase() != 'all') {
       p['location'] = location;
-    if (employmentType != null && employmentType.isNotEmpty && employmentType.toLowerCase() != 'all')
+    }
+    if (employmentType != null && employmentType.isNotEmpty && employmentType.toLowerCase() != 'all') {
       p['employment_type'] = employmentType;
+    }
     if (search != null && search.isNotEmpty) p['search'] = search;
     return _c.getWithParams(ApiEndpoints.jobs, p);
   }
@@ -126,7 +128,7 @@ class ApiService {
     required String message,  String category = 'General', int? rating,
   }) => _c.post(ApiEndpoints.feedback, {
         'subject': subject, 'message': message,
-        'category': category, if (rating != null) 'rating': rating,
+        'category': category, 'rating': ?rating,
       }, token: token);
   Future<Map<String, dynamic>> getMentorReviews(String token, int mentorId) =>
       _c.get(ApiEndpoints.mentorReviews(mentorId), token: token);

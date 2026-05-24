@@ -159,10 +159,10 @@ class _JobDetailPageState extends State<JobDetailPage> {
                     Container(
                       padding: const EdgeInsets.all(16),
                       decoration: BoxDecoration(
-                        color: Colors.green.withOpacity(0.1),
+                        color: Colors.green.withValues(alpha: 0.1),
                         borderRadius: BorderRadius.circular(12),
                         border: Border.all(
-                          color: Colors.green.withOpacity(0.3),
+                          color: Colors.green.withValues(alpha: 0.3),
                         ),
                       ),
                       child: const Row(
@@ -188,10 +188,10 @@ class _JobDetailPageState extends State<JobDetailPage> {
     return Container(
       padding: const EdgeInsets.all(16),
       decoration: BoxDecoration(
-        color: isDark ? Colors.white.withOpacity(0.04) : Colors.grey.shade100,
+        color: isDark ? Colors.white.withValues(alpha: 0.04) : Colors.grey.shade100,
         borderRadius: BorderRadius.circular(16),
         border: Border.all(
-          color: isDark ? Colors.white.withOpacity(0.07) : Colors.grey.shade300,
+          color: isDark ? Colors.white.withValues(alpha: 0.07) : Colors.grey.shade300,
         ),
       ),
       child: Column(
@@ -203,7 +203,7 @@ class _JobDetailPageState extends State<JobDetailPage> {
                 width: 60,
                 height: 60,
                 decoration: BoxDecoration(
-                  color: AppColors.primaryCyan.withOpacity(0.1),
+                  color: AppColors.primaryCyan.withValues(alpha: 0.1),
                   borderRadius: BorderRadius.circular(12),
                 ),
                 child: const Icon(
@@ -231,7 +231,7 @@ class _JobDetailPageState extends State<JobDetailPage> {
                       style: TextStyle(
                         fontSize: 12,
                         color: isDark
-                            ? Colors.white.withOpacity(0.5)
+                            ? Colors.white.withValues(alpha: 0.5)
                             : AppColors.lightTextSecondary,
                       ),
                     ),
@@ -243,7 +243,7 @@ class _JobDetailPageState extends State<JobDetailPage> {
           const SizedBox(height: 12),
           Divider(
             color: isDark
-                ? Colors.white.withOpacity(0.1)
+                ? Colors.white.withValues(alpha: 0.1)
                 : Colors.grey.shade300,
           ),
           const SizedBox(height: 12),
@@ -321,7 +321,7 @@ class _JobDetailPageState extends State<JobDetailPage> {
             fontSize: 14,
             height: 1.6,
             color: isDark
-                ? Colors.white.withOpacity(0.7)
+                ? Colors.white.withValues(alpha: 0.7)
                 : AppColors.lightTextSecondary,
           ),
         ),

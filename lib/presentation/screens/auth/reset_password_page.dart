@@ -38,8 +38,12 @@ class _ResetPasswordPageState extends State<ResetPasswordPage> {
 
   @override
   void dispose() {
-    for (final c in _codeControllers) c.dispose();
-    for (final f in _focusNodes) f.dispose();
+    for (final c in _codeControllers) {
+      c.dispose();
+    }
+    for (final f in _focusNodes) {
+      f.dispose();
+    }
     _newPassController.dispose();
     _confirmPassController.dispose();
     super.dispose();
@@ -66,7 +70,9 @@ class _ResetPasswordPageState extends State<ResetPasswordPage> {
 
     if (success) {
       Helpers.showSnackBar(context, 'New code sent to ${widget.email}!');
-      for (final c in _codeControllers) c.clear();
+      for (final c in _codeControllers) {
+        c.clear();
+      }
       _focusNodes[0].requestFocus();
       _autoSubmitTriggered = false;
     } else {
@@ -138,7 +144,9 @@ class _ResetPasswordPageState extends State<ResetPasswordPage> {
         isError: true,
       );
       // Clear code boxes on failure
-      for (final c in _codeControllers) c.clear();
+      for (final c in _codeControllers) {
+        c.clear();
+      }
       _focusNodes[0].requestFocus();
       _autoSubmitTriggered = false;
     }
@@ -172,9 +180,9 @@ class _ResetPasswordPageState extends State<ResetPasswordPage> {
               padding: const EdgeInsets.all(20),
               decoration: BoxDecoration(
                 shape: BoxShape.circle,
-                color: AppColors.primaryCyan.withOpacity(0.1),
+                color: AppColors.primaryCyan.withValues(alpha: 0.1),
                 border: Border.all(
-                  color: AppColors.primaryCyan.withOpacity(0.3),
+                  color: AppColors.primaryCyan.withValues(alpha: 0.3),
                 ),
               ),
               child: const Icon(
@@ -199,7 +207,7 @@ class _ResetPasswordPageState extends State<ResetPasswordPage> {
               'We sent a 6-digit code to',
               style: TextStyle(
                 color: isDark
-                    ? Colors.white.withOpacity(0.6)
+                    ? Colors.white.withValues(alpha: 0.6)
                     : AppColors.lightTextSecondary,
                 fontSize: 14,
               ),
@@ -253,7 +261,7 @@ class _ResetPasswordPageState extends State<ResetPasswordPage> {
                           decoration: InputDecoration(
                             counterText: '',
                             filled: true,
-                            fillColor: Colors.white.withOpacity(0.07),
+                            fillColor: Colors.white.withValues(alpha: 0.07),
                             contentPadding: EdgeInsets.zero,
                             border: OutlineInputBorder(
                               borderRadius: BorderRadius.circular(12),
@@ -263,7 +271,7 @@ class _ResetPasswordPageState extends State<ResetPasswordPage> {
                               borderRadius: BorderRadius.circular(12),
                               borderSide: BorderSide(
                                 color: isDark
-                                    ? Colors.white.withOpacity(0.2)
+                                    ? Colors.white.withValues(alpha: 0.2)
                                     : Colors.grey.shade300,
                               ),
                             ),
@@ -322,7 +330,7 @@ class _ResetPasswordPageState extends State<ResetPasswordPage> {
                   "Didn't receive the code? ",
                   style: TextStyle(
                     color: isDark
-                        ? Colors.white.withOpacity(0.6)
+                        ? Colors.white.withValues(alpha: 0.6)
                         : AppColors.lightTextSecondary,
                   ),
                 ),
@@ -372,11 +380,11 @@ class _ResetPasswordPageState extends State<ResetPasswordPage> {
         ),
         labelText: label,
         labelStyle: TextStyle(
-          color: isDark ? Colors.white.withOpacity(0.6) : Colors.grey.shade600,
+          color: isDark ? Colors.white.withValues(alpha: 0.6) : Colors.grey.shade600,
         ),
         filled: true,
         fillColor: isDark
-            ? Colors.white.withOpacity(0.05)
+            ? Colors.white.withValues(alpha: 0.05)
             : Colors.grey.shade100,
         border: OutlineInputBorder(
           borderRadius: BorderRadius.circular(15),
@@ -386,7 +394,7 @@ class _ResetPasswordPageState extends State<ResetPasswordPage> {
           borderRadius: BorderRadius.circular(15),
           borderSide: BorderSide(
             color: isDark
-                ? Colors.white.withOpacity(0.15)
+                ? Colors.white.withValues(alpha: 0.15)
                 : Colors.grey.shade300,
           ),
         ),

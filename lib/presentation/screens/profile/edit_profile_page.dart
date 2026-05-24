@@ -16,8 +16,6 @@ import '../../../l10n/language_provider.dart';
 import '../../../providers/auth_provider.dart';
 import '../../../providers/theme_provider.dart';
 import '../../../providers/user_provider.dart';
-import '../../widgets/shared/buttons.dart';
-import '../../widgets/shared/inputs.dart';
 
 class EditProfilePage extends StatefulWidget {
   const EditProfilePage({super.key});
@@ -174,7 +172,7 @@ class _EditProfilePageState extends State<EditProfilePage> {
                               radius: 58,
                               backgroundImage: FileImage(_imageFile!),
                               backgroundColor:
-                                  AppColors.primaryCyan.withOpacity(0.2))
+                                  AppColors.primaryCyan.withValues(alpha: 0.2))
                           : ProfilePictureStore.avatar(
                               remoteUrl: _remoteUrl,
                               name: _nameCtrl.text,
@@ -288,7 +286,7 @@ class _SaveButtonState extends State<_SaveButton>
             begin: Alignment.topLeft, end: Alignment.bottomRight),
           borderRadius: BorderRadius.circular(16),
           boxShadow: [BoxShadow(
-            color: AppColors.primaryCyan.withOpacity(0.4),
+            color: AppColors.primaryCyan.withValues(alpha: 0.4),
             blurRadius: 20, offset: const Offset(0, 6))]),
         child: Center(child: widget.isLoading
             ? const SizedBox(width: 22, height: 22,

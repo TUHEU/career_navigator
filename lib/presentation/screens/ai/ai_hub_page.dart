@@ -84,21 +84,21 @@ class AIHubPage extends StatelessWidget {
             decoration: BoxDecoration(
               gradient: LinearGradient(
                 colors: [
-                  AppColors.primaryCyan.withOpacity(0.15),
-                  AppColors.primaryCyan.withOpacity(0.05),
+                  AppColors.primaryCyan.withValues(alpha: 0.15),
+                  AppColors.primaryCyan.withValues(alpha: 0.05),
                 ],
                 begin: Alignment.topLeft,
                 end: Alignment.bottomRight,
               ),
               borderRadius: BorderRadius.circular(18),
-              border: Border.all(color: AppColors.primaryCyan.withOpacity(0.3)),
+              border: Border.all(color: AppColors.primaryCyan.withValues(alpha: 0.3)),
             ),
             child: Row(
               children: [
                 Container(
                   padding: const EdgeInsets.all(14),
                   decoration: BoxDecoration(
-                    color: AppColors.primaryCyan.withOpacity(0.15),
+                    color: AppColors.primaryCyan.withValues(alpha: 0.15),
                     shape: BoxShape.circle,
                   ),
                   child: const Icon(
@@ -238,7 +238,7 @@ class _ToolCard extends StatelessWidget {
             width: 52,
             height: 52,
             decoration: BoxDecoration(
-              color: tool.color.withOpacity(0.12),
+              color: tool.color.withValues(alpha: 0.12),
               borderRadius: BorderRadius.circular(14),
             ),
             child: Icon(tool.icon, color: tool.color, size: 26),
@@ -266,7 +266,7 @@ class _ToolCard extends StatelessWidget {
                         vertical: 3,
                       ),
                       decoration: BoxDecoration(
-                        color: tool.color.withOpacity(0.1),
+                        color: tool.color.withValues(alpha: 0.1),
                         borderRadius: BorderRadius.circular(8),
                       ),
                       child: Text(

@@ -71,20 +71,24 @@ class _OnboardingScreenState extends State<OnboardingScreen>
     } else {
       final prefs = await SharedPreferences.getInstance();
       await prefs.setBool('onboarding_done', true);
-      if (mounted) Navigator.pushReplacement(context, PageRouteBuilder(
-        pageBuilder: (_, __, ___) => const SignInPage(),
+      if (mounted) {
+        Navigator.pushReplacement(context, PageRouteBuilder(
+        pageBuilder: (_, _, _) => const SignInPage(),
         transitionDuration: const Duration(milliseconds: 500),
-        transitionsBuilder: (_, a, __, child) =>
+        transitionsBuilder: (_, a, _, child) =>
             FadeTransition(opacity: a, child: child),
       ));
+      }
     }
   }
 
   Future<void> _skip() async {
     final prefs = await SharedPreferences.getInstance();
     await prefs.setBool('onboarding_done', true);
-    if (mounted) Navigator.pushReplacement(context,
+    if (mounted) {
+      Navigator.pushReplacement(context,
         MaterialPageRoute(builder: (_) => const SignInPage()));
+    }
   }
 
   @override
@@ -99,14 +103,14 @@ class _OnboardingScreenState extends State<OnboardingScreen>
         // Animated bg
         Positioned.fill(child: AnimatedBuilder(
           animation: _bgCtrl,
-          builder: (_, __) => CustomPaint(
+          builder: (_, _) => CustomPaint(
             painter: _BgPainter(progress: _bgCtrl.value, color: color)),
         )),
 
         // Rotating rings
         Center(child: AnimatedBuilder(
           animation: _bgCtrl,
-          builder: (_, __) => Stack(alignment: Alignment.center,
+          builder: (_, _) => Stack(alignment: Alignment.center,
             children: List.generate(3, (i) {
               final sz = 200.0 + i * 90;
               return Transform.rotate(
@@ -114,7 +118,7 @@ class _OnboardingScreenState extends State<OnboardingScreen>
                 child: Container(width: sz, height: sz,
                   decoration: BoxDecoration(shape: BoxShape.circle,
                     border: Border.all(
-                      color: color.withOpacity(0.04 + i * 0.01), width: 1))),
+                      color: color.withValues(alpha: 0.04 + i * 0.01), width: 1))),
               );
             }),
           ),
@@ -125,14 +129,14 @@ class _OnboardingScreenState extends State<OnboardingScreen>
           duration: const Duration(milliseconds: 500),
           width: 220, height: 220,
           decoration: BoxDecoration(shape: BoxShape.circle,
-            color: color.withOpacity(0.04),
-            border: Border.all(color: color.withOpacity(0.07))),
+            color: color.withValues(alpha: 0.04),
+            border: Border.all(color: color.withValues(alpha: 0.07))),
         )),
         Positioned(top: -50, right: -30, child: AnimatedContainer(
           duration: const Duration(milliseconds: 500),
           width: 160, height: 160,
           decoration: BoxDecoration(shape: BoxShape.circle,
-            border: Border.all(color: color.withOpacity(0.06))),
+            border: Border.all(color: color.withValues(alpha: 0.06))),
         )),
 
         SafeArea(child: Column(children: [
@@ -142,7 +146,7 @@ class _OnboardingScreenState extends State<OnboardingScreen>
             child: Padding(padding: const EdgeInsets.fromLTRB(0, 8, 8, 0),
               child: TextButton(onPressed: _skip,
                 child: Text(lang.t(S.skip), style: TextStyle(
-                  color: Colors.white.withOpacity(0.35),
+                  color: Colors.white.withValues(alpha: 0.35),
                   fontSize: 11, fontWeight: FontWeight.w700, letterSpacing: 2,
                 )),
               ),
@@ -181,7 +185,7 @@ class _OnboardingScreenState extends State<OnboardingScreen>
                     margin: const EdgeInsets.symmetric(horizontal: 4),
                     width: active ? 28 : 6, height: 6,
                     decoration: BoxDecoration(
-                      color: active ? color : Colors.white.withOpacity(0.2),
+                      color: active ? color : Colors.white.withValues(alpha: 0.2),
                       borderRadius: BorderRadius.circular(3)),
                   );
                 }),
@@ -227,10 +231,10 @@ class _PageView extends StatelessWidget {
         child: Container(
           width: 136, height: 136,
           decoration: BoxDecoration(shape: BoxShape.circle,
-            color: color.withOpacity(0.08),
-            border: Border.all(color: color.withOpacity(0.3), width: 1.5),
+            color: color.withValues(alpha: 0.08),
+            border: Border.all(color: color.withValues(alpha: 0.3), width: 1.5),
             boxShadow: [BoxShadow(
-              color: color.withOpacity(0.22), blurRadius: 50, spreadRadius: 8)]),
+              color: color.withValues(alpha: 0.22), blurRadius: 50, spreadRadius: 8)]),
           child: Icon(icon, color: color, size: 62),
         ),
       ),
@@ -241,9 +245,9 @@ class _PageView extends StatelessWidget {
         child: Container(
           padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 6),
           decoration: BoxDecoration(
-            color: color.withOpacity(0.1),
+            color: color.withValues(alpha: 0.1),
             borderRadius: BorderRadius.circular(20),
-            border: Border.all(color: color.withOpacity(0.35))),
+            border: Border.all(color: color.withValues(alpha: 0.35))),
           child: Text(tag, style: TextStyle(color: color, fontSize: 10,
               fontWeight: FontWeight.w800, letterSpacing: 2)),
         ),
@@ -265,7 +269,7 @@ class _PageView extends StatelessWidget {
         builder: (_, child) => Opacity(opacity: fade.value * 0.85, child: child),
         child: Text(sub, textAlign: TextAlign.center,
           style: TextStyle(fontSize: 15,
-              color: Colors.white.withOpacity(0.6), height: 1.65)),
+              color: Colors.white.withValues(alpha: 0.6), height: 1.65)),
       ),
     ]),
   );
@@ -300,11 +304,11 @@ class _CTAButtonState extends State<_CTAButton>
         width: double.infinity, height: 56,
         decoration: BoxDecoration(
           gradient: LinearGradient(
-            colors: [widget.color, widget.color.withOpacity(0.7)],
+            colors: [widget.color, widget.color.withValues(alpha: 0.7)],
             begin: Alignment.topLeft, end: Alignment.bottomRight),
           borderRadius: BorderRadius.circular(16),
           boxShadow: [BoxShadow(
-            color: widget.color.withOpacity(0.4),
+            color: widget.color.withValues(alpha: 0.4),
             blurRadius: 24, offset: const Offset(0, 8))]),
         child: Row(mainAxisAlignment: MainAxisAlignment.center, children: [
           Text(widget.label, style: const TextStyle(color: Colors.white,
@@ -325,7 +329,7 @@ class _BgPainter extends CustomPainter {
     final paint = Paint()
       ..shader = RadialGradient(
         center: Alignment(0.2 * sin(progress * 2 * pi), -0.5), radius: 1.0,
-        colors: [color.withOpacity(0.07), const Color(0xFF080A12)],
+        colors: [color.withValues(alpha: 0.07), const Color(0xFF080A12)],
       ).createShader(Rect.fromLTWH(0, 0, size.width, size.height));
     canvas.drawRect(Rect.fromLTWH(0, 0, size.width, size.height), paint);
   }

@@ -7,18 +7,18 @@ class AppException implements Exception {
   String toString() => message;
 }
 class NetworkException extends AppException {
-  const NetworkException([String msg = 'Network error. Check your connection.']) : super(msg);
+  const NetworkException([super.msg = 'Network error. Check your connection.']);
 }
 class AuthException extends AppException {
-  const AuthException([String msg = 'Authentication required.']) : super(msg);
+  const AuthException([super.msg = 'Authentication required.']);
 }
 class ServerException extends AppException {
   final int? statusCode;
-  const ServerException(String msg, {this.statusCode}) : super(msg);
+  const ServerException(super.msg, {this.statusCode});
 }
 class NotFoundException extends AppException {
-  const NotFoundException([String msg = 'Resource not found.']) : super(msg);
+  const NotFoundException([super.msg = 'Resource not found.']);
 }
 class ValidationException extends AppException {
-  const ValidationException(String msg) : super(msg);
+  const ValidationException(super.msg);
 }

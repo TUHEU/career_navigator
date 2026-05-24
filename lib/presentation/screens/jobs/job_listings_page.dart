@@ -206,9 +206,9 @@ class _JobListingsPageState extends State<JobListingsPage> {
                         _loadJobs();
                       },
                       backgroundColor: isDark
-                          ? Colors.white.withOpacity(0.05)
+                          ? Colors.white.withValues(alpha: 0.05)
                           : Colors.grey.shade100,
-                      selectedColor: AppColors.primaryCyan.withOpacity(0.3),
+                      selectedColor: AppColors.primaryCyan.withValues(alpha: 0.3),
                       labelStyle: TextStyle(
                         color: _selectedLocation == loc
                             ? AppColors.primaryCyan
@@ -243,9 +243,9 @@ class _JobListingsPageState extends State<JobListingsPage> {
                         _loadJobs();
                       },
                       backgroundColor: isDark
-                          ? Colors.white.withOpacity(0.05)
+                          ? Colors.white.withValues(alpha: 0.05)
                           : Colors.grey.shade100,
-                      selectedColor: AppColors.primaryCyan.withOpacity(0.3),
+                      selectedColor: AppColors.primaryCyan.withValues(alpha: 0.3),
                       labelStyle: TextStyle(
                         color: _selectedType == type
                             ? AppColors.primaryCyan
@@ -279,7 +279,7 @@ class _JobListingsPageState extends State<JobListingsPage> {
                           'No jobs found',
                           style: TextStyle(
                             color: isDark
-                                ? Colors.white.withOpacity(0.4)
+                                ? Colors.white.withValues(alpha: 0.4)
                                 : Colors.grey.shade600,
                             fontSize: 16,
                           ),
@@ -289,7 +289,7 @@ class _JobListingsPageState extends State<JobListingsPage> {
                           'Try adjusting your filters',
                           style: TextStyle(
                             color: isDark
-                                ? Colors.white.withOpacity(0.3)
+                                ? Colors.white.withValues(alpha: 0.3)
                                 : Colors.grey.shade500,
                             fontSize: 13,
                           ),
@@ -321,10 +321,10 @@ class _JobListingsPageState extends State<JobListingsPage> {
       margin: const EdgeInsets.only(bottom: 12),
       padding: const EdgeInsets.all(16),
       decoration: BoxDecoration(
-        color: isDark ? Colors.white.withOpacity(0.04) : Colors.grey.shade100,
+        color: isDark ? Colors.white.withValues(alpha: 0.04) : Colors.grey.shade100,
         borderRadius: BorderRadius.circular(16),
         border: Border.all(
-          color: isDark ? Colors.white.withOpacity(0.07) : Colors.grey.shade300,
+          color: isDark ? Colors.white.withValues(alpha: 0.07) : Colors.grey.shade300,
         ),
       ),
       child: Column(
@@ -336,7 +336,7 @@ class _JobListingsPageState extends State<JobListingsPage> {
                 width: 48,
                 height: 48,
                 decoration: BoxDecoration(
-                  color: AppColors.primaryCyan.withOpacity(0.1),
+                  color: AppColors.primaryCyan.withValues(alpha: 0.1),
                   borderRadius: BorderRadius.circular(12),
                 ),
                 child: const Icon(
@@ -372,7 +372,7 @@ class _JobListingsPageState extends State<JobListingsPage> {
               Container(
                 padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
                 decoration: BoxDecoration(
-                  color: AppColors.primaryCyan.withOpacity(0.1),
+                  color: AppColors.primaryCyan.withValues(alpha: 0.1),
                   borderRadius: BorderRadius.circular(12),
                 ),
                 child: Text(
@@ -395,7 +395,7 @@ class _JobListingsPageState extends State<JobListingsPage> {
               Icon(
                 Icons.location_on_outlined,
                 color: isDark
-                    ? Colors.white.withOpacity(0.4)
+                    ? Colors.white.withValues(alpha: 0.4)
                     : Colors.grey.shade500,
                 size: 14,
               ),
@@ -404,7 +404,7 @@ class _JobListingsPageState extends State<JobListingsPage> {
                 job['location'] ?? '',
                 style: TextStyle(
                   color: isDark
-                      ? Colors.white.withOpacity(0.5)
+                      ? Colors.white.withValues(alpha: 0.5)
                       : Colors.grey.shade600,
                   fontSize: 12,
                 ),
@@ -458,7 +458,7 @@ class SearchField extends StatelessWidget {
       decoration: InputDecoration(
         hintText: 'Search jobs...',
         hintStyle: TextStyle(
-          color: isDark ? Colors.white.withOpacity(0.35) : Colors.grey.shade500,
+          color: isDark ? Colors.white.withValues(alpha: 0.35) : Colors.grey.shade500,
         ),
         prefixIcon: const Icon(Icons.search, color: AppColors.primaryCyan),
         suffixIcon: controller.text.isNotEmpty && onClear != null
@@ -466,7 +466,7 @@ class SearchField extends StatelessWidget {
                 icon: Icon(
                   Icons.clear,
                   color: isDark
-                      ? Colors.white.withOpacity(0.5)
+                      ? Colors.white.withValues(alpha: 0.5)
                       : Colors.grey.shade500,
                 ),
                 onPressed: onClear,
@@ -474,7 +474,7 @@ class SearchField extends StatelessWidget {
             : null,
         filled: true,
         fillColor: isDark
-            ? Colors.white.withOpacity(0.06)
+            ? Colors.white.withValues(alpha: 0.06)
             : Colors.grey.shade100,
         border: OutlineInputBorder(
           borderRadius: BorderRadius.circular(16),
