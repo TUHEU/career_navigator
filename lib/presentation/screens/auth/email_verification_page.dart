@@ -1,9 +1,13 @@
+// presentation/screens/auth/email_verification_page.dart
+// FIX: OTP boxes visible in both dark AND light mode
+// FIX: Language support (EN/FR)
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:provider/provider.dart';
 
 import '../../../core/themes/app_theme.dart';
 import '../../../core/utils/helpers.dart';
+import '../../../l10n/language_provider.dart';
 import '../../../providers/auth_provider.dart';
 import '../../../providers/theme_provider.dart';
 import '../../widgets/shared/buttons.dart';
@@ -29,21 +33,21 @@ class _EmailVerificationPageState extends State<EmailVerificationPage> {
   bool _isResending = false;
   bool _autoVerifyTriggered = false;
 
-  // ── lifecycle ───────────────────────────────────────────
   @override
   void dispose() {
-    for (final c in _controllers) c.dispose();
-    for (final f in _focusNodes) f.dispose();
+    for (final c in _controllers) {
+      c.dispose();
+    }
+    for (final f in _focusNodes) {
+      f.dispose();
+    }
     super.dispose();
   }
 
-  // ── helpers ─────────────────────────────────────────────
   String get _fullCode => _controllers.map((c) => c.text).join();
 
-  // ── actions ─────────────────────────────────────────────
   Future<void> _verify() async {
     if (_isVerifying) return;
-
     final code = _fullCode;
     if (code.length < 6) {
       Helpers.showSnackBar(
@@ -53,15 +57,11 @@ class _EmailVerificationPageState extends State<EmailVerificationPage> {
       );
       return;
     }
-
     setState(() => _isVerifying = true);
-
-    final authProvider = context.read<AuthProvider>();
-    final success = await authProvider.verifyEmail(widget.email, code);
-
+    final auth = context.read<AuthProvider>();
+    final success = await auth.verifyEmail(widget.email, code);
     if (!mounted) return;
     setState(() => _isVerifying = false);
-
     if (success) {
       Navigator.pushReplacement(
         context,
@@ -70,11 +70,11 @@ class _EmailVerificationPageState extends State<EmailVerificationPage> {
     } else {
       Helpers.showSnackBar(
         context,
-        authProvider.error ?? 'Invalid code',
+        auth.error ?? 'Invalid code',
         isError: true,
       );
-      for (var controller in _controllers) {
-        controller.clear();
+      for (var c in _controllers) {
+        c.clear();
       }
       _focusNodes[0].requestFocus();
       _autoVerifyTriggered = false;
@@ -83,26 +83,22 @@ class _EmailVerificationPageState extends State<EmailVerificationPage> {
 
   Future<void> _resend() async {
     if (_isResending) return;
-
     setState(() => _isResending = true);
-
-    final authProvider = context.read<AuthProvider>();
-    final success = await authProvider.resendCode(widget.email);
-
+    final auth = context.read<AuthProvider>();
+    final success = await auth.resendCode(widget.email);
     if (!mounted) return;
     setState(() => _isResending = false);
-
     if (success) {
       Helpers.showSnackBar(context, 'New verification code sent!');
-      for (var controller in _controllers) {
-        controller.clear();
+      for (var c in _controllers) {
+        c.clear();
       }
       _focusNodes[0].requestFocus();
       _autoVerifyTriggered = false;
     } else {
       Helpers.showSnackBar(
         context,
-        authProvider.error ?? 'Failed to resend code',
+        auth.error ?? 'Failed to resend',
         isError: true,
       );
     }
@@ -114,7 +110,6 @@ class _EmailVerificationPageState extends State<EmailVerificationPage> {
     } else if (value.isEmpty && index > 0) {
       FocusScope.of(context).requestFocus(_focusNodes[index - 1]);
     }
-
     if (_fullCode.length == 6 && !_autoVerifyTriggered && !_isVerifying) {
       _autoVerifyTriggered = true;
       _verify();
@@ -123,266 +118,216 @@ class _EmailVerificationPageState extends State<EmailVerificationPage> {
     }
   }
 
-  // ── build ────────────────────────────────────────────────
   @override
   Widget build(BuildContext context) {
-    final themeProvider = context.watch<ThemeProvider>();
-    final authProvider = context.watch<AuthProvider>();
-    final isDark = themeProvider.isDarkMode;
-    final isLoading = _isVerifying || authProvider.isLoading;
+    final isDark = context.watch<ThemeProvider>().isDarkMode;
+    final lang = context.watch<LanguageProvider>();
+    final isLoading = _isVerifying || context.watch<AuthProvider>().isLoading;
 
     return Scaffold(
-      backgroundColor: isDark
-          ? AppColors.darkBackground
-          : AppColors.lightBackground,
+      backgroundColor: AppColors.background(isDark),
       body: SafeArea(
         child: Center(
           child: SingleChildScrollView(
             padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 20),
             child: Column(
               mainAxisSize: MainAxisSize.min,
-              mainAxisAlignment: MainAxisAlignment.center,
-              crossAxisAlignment: CrossAxisAlignment.center,
               children: [
                 const SizedBox(height: 20),
-                _buildLogo(),
+                // Logo
+                Container(
+                  width: 80,
+                  height: 80,
+                  decoration: BoxDecoration(
+                    shape: BoxShape.circle,
+                    boxShadow: [
+                      BoxShadow(
+                        color: AppColors.primaryCyan.withValues(alpha: 0.35),
+                        blurRadius: 20,
+                      ),
+                    ],
+                  ),
+                  child: ClipOval(
+                    child: Image.asset(
+                      'assets/logo/logo.png',
+                      fit: BoxFit.cover,
+                      errorBuilder: (_, _, _) => Container(
+                        color: AppColors.primaryCyan.withValues(alpha: 0.2),
+                        child: const Icon(
+                          Icons.school_outlined,
+                          color: AppColors.primaryCyan,
+                          size: 40,
+                        ),
+                      ),
+                    ),
+                  ),
+                ),
                 const SizedBox(height: 24),
-                _buildEmailIcon(),
+                // Email icon
+                Container(
+                  padding: const EdgeInsets.all(16),
+                  decoration: BoxDecoration(
+                    shape: BoxShape.circle,
+                    color: AppColors.primaryCyan.withValues(alpha: 0.12),
+                    border: Border.all(
+                      color: AppColors.primaryCyan.withValues(alpha: 0.3),
+                      width: 1.5,
+                    ),
+                  ),
+                  child: const Icon(
+                    Icons.mark_email_read_outlined,
+                    color: AppColors.primaryCyan,
+                    size: 48,
+                  ),
+                ),
                 const SizedBox(height: 24),
-                _buildTitle(),
+                Text(
+                  lang.t('verifyEmail'),
+                  style: TextStyle(
+                    fontSize: 28,
+                    fontWeight: FontWeight.bold,
+                    color: AppColors.text(isDark),
+                  ),
+                  textAlign: TextAlign.center,
+                ),
                 const SizedBox(height: 12),
-                _buildSubtitle(isDark),
+                Text(
+                  lang.t('verifyEmailSub'),
+                  textAlign: TextAlign.center,
+                  style: TextStyle(
+                    color: AppColors.textSecondary(isDark),
+                    fontSize: 14,
+                  ),
+                ),
                 const SizedBox(height: 6),
-                _buildEmailLabel(),
+                Text(
+                  widget.email,
+                  textAlign: TextAlign.center,
+                  style: const TextStyle(
+                    color: AppColors.primaryCyan,
+                    fontSize: 14,
+                    fontWeight: FontWeight.w600,
+                  ),
+                ),
                 const SizedBox(height: 32),
-                _buildCodeInput(),
+                // ── OTP BOXES FIX ─────────────────────────────────
+                LayoutBuilder(
+                  builder: (context, constraints) {
+                    const boxCount = 6;
+                    const marginTotal = 8.0 * boxCount;
+                    const padTotal = 32.0;
+                    final boxSize =
+                        ((constraints.maxWidth - marginTotal - padTotal) /
+                                boxCount)
+                            .clamp(40.0, 54.0);
+
+                    return Padding(
+                      padding: const EdgeInsets.symmetric(horizontal: 8),
+                      child: Row(
+                        mainAxisAlignment: MainAxisAlignment.center,
+                        children: List.generate(boxCount, (i) {
+                          return Container(
+                            width: boxSize,
+                            height: boxSize + 8,
+                            margin: const EdgeInsets.symmetric(horizontal: 4),
+                            decoration: BoxDecoration(
+                              // FIX: solid background visible in light mode
+                              color: isDark
+                                  ? Colors.white.withValues(alpha: 0.08)
+                                  : AppColors.lightInputFill,
+                              borderRadius: BorderRadius.circular(12),
+                              border: Border.all(
+                                color: AppColors.border(isDark),
+                                width: 1.5,
+                              ),
+                            ),
+                            child: TextFormField(
+                              controller: _controllers[i],
+                              focusNode: _focusNodes[i],
+                              textAlign: TextAlign.center,
+                              keyboardType: TextInputType.number,
+                              maxLength: 1,
+                              style: TextStyle(
+                                fontSize: boxSize * 0.44,
+                                fontWeight: FontWeight.bold,
+                                color: AppColors.primaryCyan,
+                              ),
+                              inputFormatters: [
+                                FilteringTextInputFormatter.digitsOnly,
+                              ],
+                              decoration: InputDecoration(
+                                counterText: '',
+                                filled: false,
+                                contentPadding: EdgeInsets.zero,
+                                border: InputBorder.none,
+                                enabledBorder: InputBorder.none,
+                                focusedBorder: OutlineInputBorder(
+                                  borderRadius: BorderRadius.circular(12),
+                                  borderSide: const BorderSide(
+                                    color: AppColors.primaryCyan,
+                                    width: 2,
+                                  ),
+                                ),
+                              ),
+                              onChanged: (v) => _onCodeChanged(i, v),
+                            ),
+                          );
+                        }),
+                      ),
+                    );
+                  },
+                ),
                 const SizedBox(height: 32),
                 PrimaryButton(
-                  text: 'VERIFY EMAIL',
+                  text: lang.t('verifyBtn'),
                   onPressed: isLoading ? null : _verify,
                   isLoading: isLoading,
                 ),
                 const SizedBox(height: 20),
-                _buildResendRow(isDark),
+                // Resend row
+                Row(
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  children: [
+                    Text(
+                      '${lang.t('didntReceive')} ',
+                      style: TextStyle(color: AppColors.textSecondary(isDark)),
+                    ),
+                    GestureDetector(
+                      onTap: _isResending ? null : _resend,
+                      child: _isResending
+                          ? const SizedBox(
+                              width: 16,
+                              height: 16,
+                              child: CircularProgressIndicator(
+                                strokeWidth: 2,
+                                color: AppColors.primaryCyan,
+                              ),
+                            )
+                          : Text(
+                              lang.t('resendCode'),
+                              style: const TextStyle(
+                                color: AppColors.primaryCyan,
+                                fontWeight: FontWeight.bold,
+                              ),
+                            ),
+                    ),
+                  ],
+                ),
                 const SizedBox(height: 16),
-                _buildBackButton(isDark),
+                TextButton(
+                  onPressed: () => Navigator.pushReplacement(
+                    context,
+                    MaterialPageRoute(builder: (_) => const SignInPage()),
+                  ),
+                  child: Text(
+                    lang.t('backToSignIn'),
+                    style: TextStyle(color: AppColors.textMuted(isDark)),
+                  ),
+                ),
                 const SizedBox(height: 20),
               ],
             ),
           ),
-        ),
-      ),
-    );
-  }
-
-  // ── sub-widgets ──────────────────────────────────────────
-
-  Widget _buildLogo() {
-    return Container(
-      width: 80,
-      height: 80,
-      decoration: BoxDecoration(
-        shape: BoxShape.circle,
-        boxShadow: [
-          BoxShadow(
-            color: AppColors.primaryCyan.withOpacity(0.35),
-            blurRadius: 20,
-          ),
-        ],
-      ),
-      child: ClipOval(
-        child: Image.asset(
-          'assets/logo/logo.png',
-          fit: BoxFit.cover,
-          errorBuilder: (_, __, ___) => Container(
-            color: AppColors.primaryCyan.withOpacity(0.2),
-            child: const Icon(
-              Icons.school_outlined,
-              color: AppColors.primaryCyan,
-              size: 40,
-            ),
-          ),
-        ),
-      ),
-    );
-  }
-
-  Widget _buildEmailIcon() {
-    return Container(
-      padding: const EdgeInsets.all(16),
-      decoration: BoxDecoration(
-        shape: BoxShape.circle,
-        color: AppColors.primaryCyan.withOpacity(0.12),
-        border: Border.all(
-          color: AppColors.primaryCyan.withOpacity(0.3),
-          width: 1.5,
-        ),
-      ),
-      child: const Icon(
-        Icons.mark_email_read_outlined,
-        color: AppColors.primaryCyan,
-        size: 48,
-      ),
-    );
-  }
-
-  Widget _buildTitle() {
-    return const Text(
-      'Verify Your Email',
-      style: TextStyle(
-        fontSize: 28,
-        fontWeight: FontWeight.bold,
-        letterSpacing: 1,
-      ),
-      textAlign: TextAlign.center,
-    );
-  }
-
-  Widget _buildSubtitle(bool isDark) {
-    return Text(
-      'We sent a 6-digit verification code to',
-      textAlign: TextAlign.center,
-      style: TextStyle(
-        color: isDark
-            ? Colors.white.withOpacity(0.65)
-            : AppColors.lightTextSecondary,
-        fontSize: 14,
-      ),
-    );
-  }
-
-  Widget _buildEmailLabel() {
-    return Text(
-      widget.email,
-      textAlign: TextAlign.center,
-      style: const TextStyle(
-        color: AppColors.primaryCyan,
-        fontSize: 14,
-        fontWeight: FontWeight.w600,
-      ),
-    );
-  }
-
-  /// Responsive OTP input — boxes always fit and stay centered
-  Widget _buildCodeInput() {
-    return LayoutBuilder(
-      builder: (context, constraints) {
-        // Available width = column width (screen - 24*2 outer padding)
-        // Each box has 4px margin on each side = 8px total per box
-        // Total margin for 6 boxes = 48px
-        // We also add 16px inner padding on each side = 32px
-        // So usable width for boxes = constraints.maxWidth - 48 - 32
-        const int boxCount = 6;
-        const double marginPerBox = 8.0; // 4 left + 4 right
-        const double innerPadding = 16.0; // padding on each side of the row
-        final double totalMargins = marginPerBox * boxCount;
-        final double available =
-            constraints.maxWidth - totalMargins - (innerPadding * 2);
-        // Clamp so boxes are never too big or too small
-        final double boxSize = (available / boxCount).clamp(36.0, 50.0);
-        final double boxHeight = boxSize + 6;
-
-        return Padding(
-          padding: const EdgeInsets.symmetric(horizontal: 16),
-          child: Row(
-            mainAxisAlignment: MainAxisAlignment.center,
-            children: List.generate(boxCount, (i) {
-              return Container(
-                width: boxSize,
-                height: boxHeight,
-                margin: const EdgeInsets.symmetric(horizontal: 4),
-                child: TextFormField(
-                  controller: _controllers[i],
-                  focusNode: _focusNodes[i],
-                  textAlign: TextAlign.center,
-                  keyboardType: TextInputType.number,
-                  maxLength: 1,
-                  style: TextStyle(
-                    fontSize: boxSize * 0.44,
-                    fontWeight: FontWeight.bold,
-                    color: AppColors.primaryCyan,
-                  ),
-                  inputFormatters: [FilteringTextInputFormatter.digitsOnly],
-                  decoration: InputDecoration(
-                    counterText: '',
-                    filled: true,
-                    fillColor: Colors.white.withOpacity(0.07),
-                    contentPadding: EdgeInsets.zero,
-                    border: OutlineInputBorder(
-                      borderRadius: BorderRadius.circular(12),
-                      borderSide: BorderSide.none,
-                    ),
-                    enabledBorder: OutlineInputBorder(
-                      borderRadius: BorderRadius.circular(12),
-                      borderSide: BorderSide(
-                        color: Colors.white.withOpacity(0.2),
-                      ),
-                    ),
-                    focusedBorder: OutlineInputBorder(
-                      borderRadius: BorderRadius.circular(12),
-                      borderSide: const BorderSide(
-                        color: AppColors.primaryCyan,
-                        width: 2,
-                      ),
-                    ),
-                  ),
-                  onChanged: (value) => _onCodeChanged(i, value),
-                ),
-              );
-            }),
-          ),
-        );
-      },
-    );
-  }
-
-  Widget _buildResendRow(bool isDark) {
-    return Row(
-      mainAxisAlignment: MainAxisAlignment.center,
-      children: [
-        Text(
-          "Didn't receive the code? ",
-          style: TextStyle(
-            color: isDark
-                ? Colors.white.withOpacity(0.6)
-                : AppColors.lightTextSecondary,
-          ),
-        ),
-        GestureDetector(
-          onTap: _isResending ? null : _resend,
-          child: _isResending
-              ? const SizedBox(
-                  width: 16,
-                  height: 16,
-                  child: CircularProgressIndicator(
-                    strokeWidth: 2,
-                    color: AppColors.primaryCyan,
-                  ),
-                )
-              : const Text(
-                  'Resend',
-                  style: TextStyle(
-                    color: AppColors.primaryCyan,
-                    fontWeight: FontWeight.bold,
-                  ),
-                ),
-        ),
-      ],
-    );
-  }
-
-  Widget _buildBackButton(bool isDark) {
-    return TextButton(
-      onPressed: () => Navigator.pushReplacement(
-        context,
-        MaterialPageRoute(builder: (_) => const SignInPage()),
-      ),
-      child: Text(
-        '← Back to Sign In',
-        style: TextStyle(
-          color: isDark
-              ? Colors.white.withOpacity(0.5)
-              : AppColors.lightTextSecondary,
         ),
       ),
     );

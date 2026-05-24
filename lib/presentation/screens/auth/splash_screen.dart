@@ -99,7 +99,7 @@ class _SplashScreenState extends State<SplashScreen> {
                   shape: BoxShape.circle,
                   boxShadow: [
                     BoxShadow(
-                      color: AppColors.primaryCyan.withOpacity(0.45),
+                      color: AppColors.primaryCyan.withValues(alpha: 0.45),
                       blurRadius: 40,
                       spreadRadius: 8,
                     ),
@@ -109,8 +109,8 @@ class _SplashScreenState extends State<SplashScreen> {
                   child: Image.asset(
                     'assets/logo/logo.png',
                     fit: BoxFit.cover,
-                    errorBuilder: (_, __, ___) => Container(
-                      color: AppColors.primaryCyan.withOpacity(0.2),
+                    errorBuilder: (_, _, _) => Container(
+                      color: AppColors.primaryCyan.withValues(alpha: 0.2),
                       child: const Icon(
                         Icons.school,
                         color: AppColors.primaryCyan,

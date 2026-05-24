@@ -88,8 +88,8 @@ class _SignInPageState extends State<SignInPage> {
           ),
           Container(
             color: isDark
-                ? Colors.black.withOpacity(0.50)
-                : Colors.white.withOpacity(0.92),
+                ? Colors.black.withValues(alpha: 0.50)
+                : Colors.white.withValues(alpha: 0.92),
           ),
           SafeArea(
             child: Center(
@@ -124,7 +124,7 @@ class _SignInPageState extends State<SignInPage> {
           shape: BoxShape.circle,
           boxShadow: [
             BoxShadow(
-              color: AppColors.primaryCyan.withOpacity(0.4),
+              color: AppColors.primaryCyan.withValues(alpha: 0.4),
               blurRadius: 24,
               spreadRadius: 4,
             ),
@@ -134,8 +134,8 @@ class _SignInPageState extends State<SignInPage> {
           child: Image.asset(
             'assets/logo/logo.png',
             fit: BoxFit.cover,
-            errorBuilder: (_, __, ___) => Container(
-              color: AppColors.primaryCyan.withOpacity(0.2),
+            errorBuilder: (_, _, _) => Container(
+              color: AppColors.primaryCyan.withValues(alpha: 0.2),
               child: const Icon(
                 Icons.school,
                 color: AppColors.primaryCyan,
@@ -160,7 +160,7 @@ class _SignInPageState extends State<SignInPage> {
         'Sign in to continue your journey',
         style: TextStyle(
           color: isDark
-              ? Colors.white.withOpacity(0.55)
+              ? Colors.white.withValues(alpha: 0.55)
               : AppColors.lightTextSecondary,
           fontSize: 14,
         ),
@@ -175,11 +175,11 @@ class _SignInPageState extends State<SignInPage> {
       child: Container(
         padding: const EdgeInsets.all(24),
         decoration: BoxDecoration(
-          color: isDark ? Colors.white.withOpacity(0.07) : Colors.white,
+          color: isDark ? Colors.white.withValues(alpha: 0.07) : Colors.white,
           borderRadius: BorderRadius.circular(28),
           border: Border.all(
             color: isDark
-                ? Colors.white.withOpacity(0.13)
+                ? Colors.white.withValues(alpha: 0.13)
                 : Colors.grey.shade200,
           ),
         ),
@@ -248,7 +248,7 @@ class _SignInPageState extends State<SignInPage> {
         "Don't have an account? ",
         style: TextStyle(
           color: isDark
-              ? Colors.white.withOpacity(0.60)
+              ? Colors.white.withValues(alpha: 0.60)
               : AppColors.lightTextSecondary,
         ),
       ),
@@ -305,7 +305,7 @@ class _SignInPageState extends State<SignInPage> {
                   "Enter your email and we'll send a reset code.",
                   style: TextStyle(
                     color: isDark
-                        ? Colors.white.withOpacity(0.55)
+                        ? Colors.white.withValues(alpha: 0.55)
                         : AppColors.lightTextSecondary,
                   ),
                 ),
