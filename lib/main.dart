@@ -228,14 +228,14 @@ class MyApp extends StatelessWidget {
 
       // Switch
       switchTheme: SwitchThemeData(
-        thumbColor: MaterialStateProperty.resolveWith(
-          (s) => s.contains(MaterialState.selected) ? cyan : Colors.grey,
+        thumbColor: WidgetStateProperty.resolveWith(
+          (s) => s.contains(WidgetState.selected) ? cyan : Colors.grey,
         ),
-        trackColor: MaterialStateProperty.resolveWith(
-          (s) => s.contains(MaterialState.selected)
-              ? cyan.withOpacity(0.4)
+        trackColor: WidgetStateProperty.resolveWith(
+          (s) => s.contains(WidgetState.selected)
+              ? cyan.withValues(alpha: 0.4)
               : (isDark
-                    ? Colors.white.withOpacity(0.12)
+                    ? Colors.white.withValues(alpha: 0.12)
                     : Colors.grey.shade400),
         ),
       ),
@@ -250,7 +250,7 @@ class MyApp extends StatelessWidget {
         ),
         side: BorderSide(color: border),
         shape: RoundedRectangleBorder(borderRadius: r12),
-        selectedColor: cyan.withOpacity(0.2),
+        selectedColor: cyan.withValues(alpha: 0.2),
         checkmarkColor: cyan,
       ),
 
@@ -293,22 +293,22 @@ class MyApp extends StatelessWidget {
       // NavigationBar (Material 3)
       navigationBarTheme: NavigationBarThemeData(
         backgroundColor: surface,
-        indicatorColor: cyan.withOpacity(0.15),
-        iconTheme: MaterialStateProperty.resolveWith(
+        indicatorColor: cyan.withValues(alpha: 0.15),
+        iconTheme: WidgetStateProperty.resolveWith(
           (s) => IconThemeData(
-            color: s.contains(MaterialState.selected)
+            color: s.contains(WidgetState.selected)
                 ? cyan
                 : (isDark ? const Color(0xFF8899BB) : AppColors.lightTextMuted),
             size: 24,
           ),
         ),
-        labelTextStyle: MaterialStateProperty.resolveWith(
+        labelTextStyle: WidgetStateProperty.resolveWith(
           (s) => TextStyle(
-            color: s.contains(MaterialState.selected)
+            color: s.contains(WidgetState.selected)
                 ? cyan
                 : (isDark ? const Color(0xFF8899BB) : AppColors.lightTextMuted),
             fontSize: 11,
-            fontWeight: s.contains(MaterialState.selected)
+            fontWeight: s.contains(WidgetState.selected)
                 ? FontWeight.w600
                 : FontWeight.w400,
           ),
@@ -333,7 +333,7 @@ class MyApp extends StatelessWidget {
       dropdownMenuTheme: DropdownMenuThemeData(
         textStyle: TextStyle(color: txtPrimary),
         menuStyle: MenuStyle(
-          backgroundColor: MaterialStatePropertyAll(surface),
+          backgroundColor: WidgetStatePropertyAll(surface),
         ),
       ),
 
@@ -361,10 +361,10 @@ class MyApp extends StatelessWidget {
 
       // Checkbox
       checkboxTheme: CheckboxThemeData(
-        fillColor: MaterialStateProperty.resolveWith(
-          (s) => s.contains(MaterialState.selected) ? cyan : Colors.transparent,
+        fillColor: WidgetStateProperty.resolveWith(
+          (s) => s.contains(WidgetState.selected) ? cyan : Colors.transparent,
         ),
-        checkColor: MaterialStatePropertyAll(
+        checkColor: WidgetStatePropertyAll(
           isDark ? Colors.black : Colors.white,
         ),
         side: BorderSide(color: border, width: 2),
@@ -373,8 +373,8 @@ class MyApp extends StatelessWidget {
 
       // Radio
       radioTheme: RadioThemeData(
-        fillColor: MaterialStateProperty.resolveWith(
-          (s) => s.contains(MaterialState.selected) ? cyan : txtMuted,
+        fillColor: WidgetStateProperty.resolveWith(
+          (s) => s.contains(WidgetState.selected) ? cyan : txtMuted,
         ),
       ),
     );

@@ -76,12 +76,16 @@ class _QuestionnaireScreenState extends State<QuestionnaireScreen> {
       if (_locCtrl.text.trim().isNotEmpty) f['location'] = _locCtrl.text.trim();
       try { await up.updateJobSeekerProfile(f); } catch (_) {}
       await QuestionnaireService.markCompleted();
-      if (mounted) Navigator.pushAndRemoveUntil(
+      if (mounted) {
+        Navigator.pushAndRemoveUntil(
         context, MaterialPageRoute(builder: (_) => const JobSeekerDashboard()), (_) => false);
+      }
     } catch (_) {
       await QuestionnaireService.markCompleted();
-      if (mounted) Navigator.pushAndRemoveUntil(
+      if (mounted) {
+        Navigator.pushAndRemoveUntil(
         context, MaterialPageRoute(builder: (_) => const JobSeekerDashboard()), (_) => false);
+      }
     } finally {
       if (mounted) setState(() => _loading = false);
     }
@@ -106,7 +110,7 @@ class _QuestionnaireScreenState extends State<QuestionnaireScreen> {
   Widget _buildStep1(bool d) => Form(key: _step1Key, child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
     _label('Education Level', d),
     DropdownButtonFormField<String>(
-      value: _eduLevel, dropdownColor: AppColors.surface(d),
+      initialValue: _eduLevel, dropdownColor: AppColors.surface(d),
       style: TextStyle(color: AppColors.text(d), fontSize: 14),
       items: ["High School","Diploma","Bachelor's","Master's","PhD"]
           .map((e) => DropdownMenuItem(value: e, child: Text(e, style: TextStyle(color: AppColors.text(d)))))
@@ -136,12 +140,16 @@ class _QuestionnaireScreenState extends State<QuestionnaireScreen> {
           fontWeight: sel ? FontWeight.w600 : FontWeight.normal, fontSize: 13,
         )),
         selected: sel,
-        selectedColor: AppColors.primaryCyan.withOpacity(0.15),
+        selectedColor: AppColors.primaryCyan.withValues(alpha: 0.15),
         backgroundColor: AppColors.inputFill(d),
         checkmarkColor: AppColors.primaryCyan,
         side: BorderSide(color: sel ? AppColors.primaryCyan : AppColors.border(d), width: sel ? 1.5 : 1),
         onSelected: (v) => setState(() {
-          if (v) _selectedInterests.add(interest); else _selectedInterests.remove(interest);
+          if (v) {
+            _selectedInterests.add(interest);
+          } else {
+            _selectedInterests.remove(interest);
+          }
         }),
       );
     }).toList()),
@@ -183,7 +191,7 @@ class _QuestionnaireScreenState extends State<QuestionnaireScreen> {
   Widget _buildStep4(bool d) => Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
     _label('Job Type', d),
     DropdownButtonFormField<String>(
-      value: _jobType, dropdownColor: AppColors.surface(d),
+      initialValue: _jobType, dropdownColor: AppColors.surface(d),
       style: TextStyle(color: AppColors.text(d), fontSize: 14),
       items: const [
         DropdownMenuItem(value: 'full_time',  child: Text('Full-time')),
@@ -198,7 +206,7 @@ class _QuestionnaireScreenState extends State<QuestionnaireScreen> {
     const SizedBox(height: 20),
     _label('Work Mode', d),
     DropdownButtonFormField<String>(
-      value: _workMode, dropdownColor: AppColors.surface(d),
+      initialValue: _workMode, dropdownColor: AppColors.surface(d),
       style: TextStyle(color: AppColors.text(d), fontSize: 14),
       items: const [
         DropdownMenuItem(value: 'onsite', child: Text('Onsite')),

@@ -12,7 +12,6 @@ import '../../../l10n/language_provider.dart';
 import '../../../providers/auth_provider.dart';
 import '../../../providers/guest_provider.dart';
 import '../../../providers/theme_provider.dart';
-import '../../widgets/shared/buttons.dart';
 import '../../widgets/shared/inputs.dart';
 import 'registration_page.dart';
 import 'reset_password_page.dart';
@@ -98,8 +97,8 @@ class _SignInPageState extends State<SignInPage>
         ),
         Container(
           color: isDark
-              ? Colors.black.withOpacity(0.55)
-              : Colors.white.withOpacity(0.90),
+              ? Colors.black.withValues(alpha: 0.55)
+              : Colors.white.withValues(alpha: 0.90),
         ),
 
         SafeArea(child: FadeTransition(
@@ -128,10 +127,10 @@ class _SignInPageState extends State<SignInPage>
 
                 // Sign up row
                 Row(mainAxisAlignment: MainAxisAlignment.center, children: [
-                  Text(lang.t(S.dontHaveAccount) + ' ',
+                  Text('${lang.t(S.dontHaveAccount)} ',
                     style: TextStyle(
                       color: isDark
-                          ? Colors.white.withOpacity(0.60)
+                          ? Colors.white.withValues(alpha: 0.60)
                           : AppColors.lightTextSecondary)),
                   GestureDetector(
                     onTap: () => Navigator.push(context,
@@ -160,12 +159,12 @@ class _Header extends StatelessWidget {
     Container(
       width: 88, height: 88,
       decoration: BoxDecoration(shape: BoxShape.circle, boxShadow: [
-        BoxShadow(color: AppColors.primaryCyan.withOpacity(0.4),
+        BoxShadow(color: AppColors.primaryCyan.withValues(alpha: 0.4),
             blurRadius: 28, spreadRadius: 4)]),
       child: ClipOval(child: Image.asset('assets/logo/logo.png',
         fit: BoxFit.cover,
-        errorBuilder: (_, __, ___) => Container(
-          color: AppColors.primaryCyan.withOpacity(0.2),
+        errorBuilder: (_, _, _) => Container(
+          color: AppColors.primaryCyan.withValues(alpha: 0.2),
           child: const Icon(Icons.compass_calibration_outlined,
               color: AppColors.primaryCyan, size: 42)))),
     ),
@@ -175,7 +174,7 @@ class _Header extends StatelessWidget {
       color: isDark ? Colors.white : AppColors.lightText, letterSpacing: 0.5)),
     const SizedBox(height: 6),
     Text('Sign in to continue your journey', style: TextStyle(
-      color: isDark ? Colors.white.withOpacity(0.55) : AppColors.lightTextSecondary,
+      color: isDark ? Colors.white.withValues(alpha: 0.55) : AppColors.lightTextSecondary,
       fontSize: 14)),
   ]);
 }
@@ -202,10 +201,10 @@ class _Card extends StatelessWidget {
       child: Container(
         padding: const EdgeInsets.all(24),
         decoration: BoxDecoration(
-          color: isDark ? Colors.white.withOpacity(0.07) : Colors.white,
+          color: isDark ? Colors.white.withValues(alpha: 0.07) : Colors.white,
           borderRadius: BorderRadius.circular(28),
           border: Border.all(color: isDark
-              ? Colors.white.withOpacity(0.13) : Colors.grey.shade200)),
+              ? Colors.white.withValues(alpha: 0.13) : Colors.grey.shade200)),
         child: Form(key: formKey, child: Column(children: [
           CustomTextField(
             controller: emailCtrl, icon: Icons.email_outlined,
@@ -274,7 +273,7 @@ class _SignInButtonState extends State<_SignInButton>
             begin: Alignment.topLeft, end: Alignment.bottomRight),
           borderRadius: BorderRadius.circular(16),
           boxShadow: [BoxShadow(
-            color: AppColors.primaryCyan.withOpacity(0.4),
+            color: AppColors.primaryCyan.withValues(alpha: 0.4),
             blurRadius: 20, offset: const Offset(0, 6))]),
         child: Center(child: widget.isLoading
             ? const SizedBox(width: 22, height: 22,
@@ -301,7 +300,7 @@ class _GuestButtonState extends State<_GuestButton>
     with SingleTickerProviderStateMixin {
   late AnimationController _c;
   late Animation<double> _s;
-  bool _hover = false;
+  final bool _hover = false;
   @override void initState() {
     super.initState();
     _c = AnimationController(vsync: this,
@@ -332,12 +331,12 @@ class _GuestButtonState extends State<_GuestButton>
             width: double.infinity, height: 52,
             decoration: BoxDecoration(
               color: isDark
-                  ? Colors.white.withOpacity(0.05)
+                  ? Colors.white.withValues(alpha: 0.05)
                   : Colors.grey.shade100,
               borderRadius: BorderRadius.circular(16),
               border: Border.all(
                 color: isDark
-                    ? Colors.white.withOpacity(0.15)
+                    ? Colors.white.withValues(alpha: 0.15)
                     : Colors.grey.shade300),
             ),
             child: Row(mainAxisAlignment: MainAxisAlignment.center, children: [

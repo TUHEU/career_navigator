@@ -70,7 +70,7 @@ class _ConversationsPageState extends State<ConversationsPage> {
                     'No conversations yet',
                     style: TextStyle(
                       color: isDark
-                          ? Colors.white.withOpacity(0.3)
+                          ? Colors.white.withValues(alpha: 0.3)
                           : Colors.grey.shade500,
                       fontSize: 15,
                     ),
@@ -80,7 +80,7 @@ class _ConversationsPageState extends State<ConversationsPage> {
                     'Send an invite to a mentor to start chatting.',
                     style: TextStyle(
                       color: isDark
-                          ? Colors.white.withOpacity(0.2)
+                          ? Colors.white.withValues(alpha: 0.2)
                           : Colors.grey.shade400,
                       fontSize: 12,
                     ),
@@ -128,11 +128,11 @@ class _ConversationsPageState extends State<ConversationsPage> {
         margin: const EdgeInsets.only(bottom: 10),
         padding: const EdgeInsets.all(14),
         decoration: BoxDecoration(
-          color: isDark ? Colors.white.withOpacity(0.04) : Colors.grey.shade100,
+          color: isDark ? Colors.white.withValues(alpha: 0.04) : Colors.grey.shade100,
           borderRadius: BorderRadius.circular(14),
           border: Border.all(
             color: isDark
-                ? Colors.white.withOpacity(0.07)
+                ? Colors.white.withValues(alpha: 0.07)
                 : Colors.grey.shade300,
           ),
         ),
@@ -140,7 +140,7 @@ class _ConversationsPageState extends State<ConversationsPage> {
           children: [
             CircleAvatar(
               radius: 26,
-              backgroundColor: AppColors.primaryCyan.withOpacity(0.2),
+              backgroundColor: AppColors.primaryCyan.withValues(alpha: 0.2),
               backgroundImage: picture != null ? NetworkImage(picture) : null,
               child: picture == null
                   ? Text(
@@ -197,7 +197,7 @@ class _ConversationsPageState extends State<ConversationsPage> {
                     overflow: TextOverflow.ellipsis,
                     style: TextStyle(
                       color: isDark
-                          ? Colors.white.withOpacity(0.45)
+                          ? Colors.white.withValues(alpha: 0.45)
                           : AppColors.lightTextSecondary,
                       fontSize: 12,
                     ),
@@ -210,7 +210,7 @@ class _ConversationsPageState extends State<ConversationsPage> {
               Helpers.getRelativeTime(lastTime),
               style: TextStyle(
                 color: isDark
-                    ? Colors.white.withOpacity(0.3)
+                    ? Colors.white.withValues(alpha: 0.3)
                     : Colors.grey.shade500,
                 fontSize: 10,
               ),
@@ -345,7 +345,7 @@ class _ChatPageState extends State<ChatPage> {
                           'No messages yet',
                           style: TextStyle(
                             color: isDark
-                                ? Colors.white.withOpacity(0.5)
+                                ? Colors.white.withValues(alpha: 0.5)
                                 : Colors.grey.shade600,
                           ),
                         ),
@@ -355,7 +355,7 @@ class _ChatPageState extends State<ChatPage> {
                           style: TextStyle(
                             fontSize: 12,
                             color: isDark
-                                ? Colors.white.withOpacity(0.3)
+                                ? Colors.white.withValues(alpha: 0.3)
                                 : Colors.grey.shade500,
                           ),
                         ),
@@ -394,9 +394,9 @@ class _ChatPageState extends State<ChatPage> {
         ),
         decoration: BoxDecoration(
           color: isMine
-              ? AppColors.primaryCyan.withOpacity(0.85)
+              ? AppColors.primaryCyan.withValues(alpha: 0.85)
               : (isDark
-                    ? Colors.white.withOpacity(0.08)
+                    ? Colors.white.withValues(alpha: 0.08)
                     : Colors.grey.shade200),
           borderRadius: BorderRadius.only(
             topLeft: const Radius.circular(16),
@@ -408,7 +408,7 @@ class _ChatPageState extends State<ChatPage> {
               ? null
               : Border.all(
                   color: isDark
-                      ? Colors.white.withOpacity(0.08)
+                      ? Colors.white.withValues(alpha: 0.08)
                       : Colors.grey.shade300,
                 ),
         ),
@@ -431,9 +431,9 @@ class _ChatPageState extends State<ChatPage> {
               Helpers.getRelativeTime(createdAt),
               style: TextStyle(
                 color: isMine
-                    ? Colors.black.withOpacity(0.5)
+                    ? Colors.black.withValues(alpha: 0.5)
                     : (isDark
-                          ? Colors.white.withOpacity(0.3)
+                          ? Colors.white.withValues(alpha: 0.3)
                           : Colors.grey.shade500),
                 fontSize: 10,
               ),
@@ -452,7 +452,7 @@ class _ChatPageState extends State<ChatPage> {
         border: Border(
           top: BorderSide(
             color: isDark
-                ? Colors.white.withOpacity(0.08)
+                ? Colors.white.withValues(alpha: 0.08)
                 : Colors.grey.shade200,
           ),
         ),
@@ -470,7 +470,7 @@ class _ChatPageState extends State<ChatPage> {
                 hintText: 'Type a message...',
                 hintStyle: TextStyle(
                   color: isDark
-                      ? Colors.white.withOpacity(0.3)
+                      ? Colors.white.withValues(alpha: 0.3)
                       : Colors.grey.shade500,
                 ),
                 border: OutlineInputBorder(
@@ -479,7 +479,7 @@ class _ChatPageState extends State<ChatPage> {
                 ),
                 filled: true,
                 fillColor: isDark
-                    ? Colors.white.withOpacity(0.06)
+                    ? Colors.white.withValues(alpha: 0.06)
                     : Colors.grey.shade100,
                 contentPadding: const EdgeInsets.symmetric(
                   horizontal: 16,

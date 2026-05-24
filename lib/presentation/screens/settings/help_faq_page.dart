@@ -73,10 +73,10 @@ class _HelpFaqPageState extends State<HelpFaqPage> {
           Container(
             padding: const EdgeInsets.all(18),
             decoration: BoxDecoration(
-              color: AppColors.primaryCyan.withOpacity(0.08),
+              color: AppColors.primaryCyan.withValues(alpha: 0.08),
               borderRadius: BorderRadius.circular(16),
               border: Border.all(
-                color: AppColors.primaryCyan.withOpacity(0.25),
+                color: AppColors.primaryCyan.withValues(alpha: 0.25),
               ),
             ),
             child: Row(
@@ -92,7 +92,7 @@ class _HelpFaqPageState extends State<HelpFaqPage> {
                     'Find answers to the most common questions about Career Navigator.',
                     style: TextStyle(
                       color: isDark
-                          ? Colors.white.withOpacity(0.65)
+                          ? Colors.white.withValues(alpha: 0.65)
                           : AppColors.lightTextSecondary,
                       fontSize: 13,
                       height: 1.6,
@@ -113,16 +113,16 @@ class _HelpFaqPageState extends State<HelpFaqPage> {
                 margin: const EdgeInsets.only(bottom: 10),
                 decoration: BoxDecoration(
                   color: isExpanded
-                      ? AppColors.primaryCyan.withOpacity(0.06)
+                      ? AppColors.primaryCyan.withValues(alpha: 0.06)
                       : (isDark
-                            ? Colors.white.withOpacity(0.04)
+                            ? Colors.white.withValues(alpha: 0.04)
                             : Colors.grey.shade100),
                   borderRadius: BorderRadius.circular(14),
                   border: Border.all(
                     color: isExpanded
-                        ? AppColors.primaryCyan.withOpacity(0.3)
+                        ? AppColors.primaryCyan.withValues(alpha: 0.3)
                         : (isDark
-                              ? Colors.white.withOpacity(0.07)
+                              ? Colors.white.withValues(alpha: 0.07)
                               : Colors.grey.shade300),
                   ),
                 ),
@@ -155,7 +155,7 @@ class _HelpFaqPageState extends State<HelpFaqPage> {
                             color: isExpanded
                                 ? AppColors.primaryCyan
                                 : (isDark
-                                      ? Colors.white.withOpacity(0.5)
+                                      ? Colors.white.withValues(alpha: 0.5)
                                       : Colors.grey.shade500),
                           ),
                         ],
@@ -163,7 +163,7 @@ class _HelpFaqPageState extends State<HelpFaqPage> {
                     ),
                     if (isExpanded) ...[
                       Divider(
-                        color: AppColors.primaryCyan.withOpacity(0.2),
+                        color: AppColors.primaryCyan.withValues(alpha: 0.2),
                         height: 1,
                         indent: 18,
                         endIndent: 18,
@@ -174,7 +174,7 @@ class _HelpFaqPageState extends State<HelpFaqPage> {
                           faq['answer']!,
                           style: TextStyle(
                             color: isDark
-                                ? Colors.white.withOpacity(0.55)
+                                ? Colors.white.withValues(alpha: 0.55)
                                 : AppColors.lightTextSecondary,
                             fontSize: 13,
                             height: 1.7,
@@ -192,12 +192,12 @@ class _HelpFaqPageState extends State<HelpFaqPage> {
             padding: const EdgeInsets.all(16),
             decoration: BoxDecoration(
               color: isDark
-                  ? Colors.white.withOpacity(0.04)
+                  ? Colors.white.withValues(alpha: 0.04)
                   : Colors.grey.shade100,
               borderRadius: BorderRadius.circular(14),
               border: Border.all(
                 color: isDark
-                    ? Colors.white.withOpacity(0.07)
+                    ? Colors.white.withValues(alpha: 0.07)
                     : Colors.grey.shade300,
               ),
             ),
@@ -206,7 +206,7 @@ class _HelpFaqPageState extends State<HelpFaqPage> {
                 Icon(
                   Icons.support_agent_outlined,
                   color: isDark
-                      ? Colors.white.withOpacity(0.35)
+                      ? Colors.white.withValues(alpha: 0.35)
                       : Colors.grey.shade500,
                   size: 20,
                 ),
@@ -216,7 +216,7 @@ class _HelpFaqPageState extends State<HelpFaqPage> {
                     'Still have questions? Use Send Feedback in Settings to reach our team.',
                     style: TextStyle(
                       color: isDark
-                          ? Colors.white.withOpacity(0.4)
+                          ? Colors.white.withValues(alpha: 0.4)
                           : AppColors.lightTextSecondary,
                       fontSize: 12.5,
                       height: 1.6,

@@ -84,16 +84,16 @@ Route<dynamic> generateRoute(RouteSettings settings) {
 }
 
 PageRouteBuilder _fade(Widget page) => PageRouteBuilder(
-  pageBuilder:        (_, __, ___) => page,
+  pageBuilder:        (_, _, _) => page,
   transitionDuration: const Duration(milliseconds: 250),
-  transitionsBuilder: (_, anim, __, child) =>
+  transitionsBuilder: (_, anim, _, child) =>
       FadeTransition(opacity: anim, child: child),
 );
 
 PageRouteBuilder _slide(Widget page) => PageRouteBuilder(
-  pageBuilder:        (_, __, ___) => page,
+  pageBuilder:        (_, _, _) => page,
   transitionDuration: const Duration(milliseconds: 280),
-  transitionsBuilder: (_, anim, __, child) => SlideTransition(
+  transitionsBuilder: (_, anim, _, child) => SlideTransition(
     position: Tween<Offset>(begin: const Offset(1, 0), end: Offset.zero)
         .animate(CurvedAnimation(parent: anim, curve: Curves.easeInOut)),
     child: child,

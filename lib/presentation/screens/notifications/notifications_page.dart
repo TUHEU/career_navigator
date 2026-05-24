@@ -56,7 +56,7 @@ class _NotificationsPageState extends State<NotificationsPage> {
                     'No notifications yet',
                     style: TextStyle(
                       color: isDark
-                          ? Colors.white.withOpacity(0.3)
+                          ? Colors.white.withValues(alpha: 0.3)
                           : Colors.grey.shade500,
                       fontSize: 15,
                     ),
@@ -66,7 +66,7 @@ class _NotificationsPageState extends State<NotificationsPage> {
                     'When you receive notifications, they will appear here.',
                     style: TextStyle(
                       color: isDark
-                          ? Colors.white.withOpacity(0.2)
+                          ? Colors.white.withValues(alpha: 0.2)
                           : Colors.grey.shade400,
                       fontSize: 12,
                     ),
@@ -96,13 +96,13 @@ class _NotificationsPageState extends State<NotificationsPage> {
       padding: const EdgeInsets.all(14),
       decoration: BoxDecoration(
         color: notification.isRead
-            ? (isDark ? Colors.white.withOpacity(0.03) : Colors.grey.shade50)
-            : AppColors.primaryCyan.withOpacity(0.06),
+            ? (isDark ? Colors.white.withValues(alpha: 0.03) : Colors.grey.shade50)
+            : AppColors.primaryCyan.withValues(alpha: 0.06),
         borderRadius: BorderRadius.circular(14),
         border: Border.all(
           color: notification.isRead
-              ? (isDark ? Colors.white.withOpacity(0.06) : Colors.grey.shade200)
-              : AppColors.primaryCyan.withOpacity(0.2),
+              ? (isDark ? Colors.white.withValues(alpha: 0.06) : Colors.grey.shade200)
+              : AppColors.primaryCyan.withValues(alpha: 0.2),
         ),
       ),
       child: Row(
@@ -111,7 +111,7 @@ class _NotificationsPageState extends State<NotificationsPage> {
           Container(
             padding: const EdgeInsets.all(8),
             decoration: BoxDecoration(
-              color: notification.iconColor.withOpacity(0.12),
+              color: notification.iconColor.withValues(alpha: 0.12),
               borderRadius: BorderRadius.circular(10),
             ),
             child: Icon(
@@ -144,7 +144,7 @@ class _NotificationsPageState extends State<NotificationsPage> {
                     overflow: TextOverflow.ellipsis,
                     style: TextStyle(
                       color: isDark
-                          ? Colors.white.withOpacity(0.55)
+                          ? Colors.white.withValues(alpha: 0.55)
                           : AppColors.lightTextSecondary,
                       fontSize: 12,
                     ),
@@ -155,7 +155,7 @@ class _NotificationsPageState extends State<NotificationsPage> {
                   notification.formattedTime,
                   style: TextStyle(
                     color: isDark
-                        ? Colors.white.withOpacity(0.3)
+                        ? Colors.white.withValues(alpha: 0.3)
                         : Colors.grey.shade500,
                     fontSize: 10,
                   ),

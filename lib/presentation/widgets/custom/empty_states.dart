@@ -47,7 +47,7 @@ class EmptyState extends StatelessWidget {
               style: TextStyle(
                 fontSize: 14,
                 color: isDark
-                    ? Colors.white.withOpacity(0.5)
+                    ? Colors.white.withValues(alpha: 0.5)
                     : AppColors.lightTextSecondary,
               ),
               textAlign: TextAlign.center,
