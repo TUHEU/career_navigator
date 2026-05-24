@@ -1,9 +1,7 @@
 {
   "editor.formatOnSave": true,
-
   "java.enabled": false,
   "java.jdt.ls.enabled": false,
-
   "[dart]": {
     "editor.formatOnSave": true,
     "editor.selectionHighlight": false,

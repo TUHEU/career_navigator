@@ -3,8 +3,9 @@
   "configurations": [
 
     // ── Flutter: Career Navigator ─────────────────────────────
+
     {
-      "name": "📱 Career Navigator (Android)",
+      "name": "📱 Android Phone (USB)",
       "type": "dart",
       "request": "launch",
       "program": "lib/main.dart",
@@ -12,7 +13,15 @@
       "deviceId": "android"
     },
     {
-      "name": "🪟 Career Navigator (Windows)",
+      "name": "🤖 Android Emulator",
+      "type": "dart",
+      "request": "launch",
+      "program": "lib/main.dart",
+      "flutterMode": "debug",
+      "deviceId": "emulator"
+    },
+    {
+      "name": "🪟 Windows Desktop",
       "type": "dart",
       "request": "launch",
       "program": "lib/main.dart",
@@ -20,7 +29,7 @@
       "deviceId": "windows"
     },
     {
-      "name": "🌐 Career Navigator (Chrome)",
+      "name": "🌐 Flutter Web (Chrome)",
       "type": "dart",
       "request": "launch",
       "program": "lib/main.dart",
@@ -28,30 +37,41 @@
       "deviceId": "chrome"
     },
     {
-      "name": "🚀 Career Navigator (Release)",
+      "name": "🚀 Android Release (APK)",
       "type": "dart",
       "request": "launch",
       "program": "lib/main.dart",
-      "flutterMode": "release"
+      "flutterMode": "release",
+      "deviceId": "android"
     },
 
-    // ── Web App ───────────────────────────────────────────────
+    // ── Web App (separate project) ────────────────────────────
+
     {
-      "name": "🕸️ Web App (Chrome localhost:8080)",
+      "name": "🕸️ Web App (localhost:8080)",
       "type": "chrome",
       "request": "launch",
       "url": "http://localhost:8080",
       "webRoot": "${workspaceFolder}"
     }
+
   ],
 
-  // ── Compound: run both at the same time ───────────────────
+  // ── Run multiple at once ──────────────────────────────────
   "compounds": [
     {
-      "name": "🔥 Run Both (Mobile + Web)",
+      "name": "🔥 Phone + Web App",
       "configurations": [
-        "📱 Career Navigator (Android)",
-        "🕸️ Web App (Chrome localhost:8080)"
+        "📱 Android Phone (USB)",
+        "🕸️ Web App (localhost:8080)"
+      ],
+      "stopAll": true
+    },
+    {
+      "name": "💻 Emulator + Web App",
+      "configurations": [
+        "🤖 Android Emulator",
+        "🕸️ Web App (localhost:8080)"
       ],
       "stopAll": true
     }
