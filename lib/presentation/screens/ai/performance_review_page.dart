@@ -83,19 +83,21 @@ Use confident, professional language. Focus on business impact, not tasks.''';
         if (mounted) setState(() => _result += chunk);
       },
       onDone: () {
-        if (mounted)
+        if (mounted) {
           setState(() {
             _isStreaming = false;
             _hasResult = true;
           });
+        }
       },
       onError: (error) {
-        if (mounted)
+        if (mounted) {
           setState(() {
             _result = 'Error: $error';
             _isStreaming = false;
             _hasResult = false;
           });
+        }
       },
     );
   }
@@ -119,10 +121,10 @@ Use confident, professional language. Focus on business impact, not tasks.''';
             Container(
               padding: const EdgeInsets.all(16),
               decoration: BoxDecoration(
-                color: const Color(0xFFDC2626).withOpacity(0.08),
+                color: const Color(0xFFDC2626).withValues(alpha: 0.08),
                 borderRadius: BorderRadius.circular(14),
                 border: Border.all(
-                  color: const Color(0xFFDC2626).withOpacity(0.25),
+                  color: const Color(0xFFDC2626).withValues(alpha: 0.25),
                 ),
               ),
               child: Row(
@@ -130,7 +132,7 @@ Use confident, professional language. Focus on business impact, not tasks.''';
                   Container(
                     padding: const EdgeInsets.all(10),
                     decoration: BoxDecoration(
-                      color: const Color(0xFFDC2626).withOpacity(0.15),
+                      color: const Color(0xFFDC2626).withValues(alpha: 0.15),
                       shape: BoxShape.circle,
                     ),
                     child: Icon(

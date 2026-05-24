@@ -84,32 +84,42 @@ class _EditProfilePageState extends State<EditProfilePage> {
 
     try {
       final fields = <String, dynamic>{};
-      if (_phoneController.text.trim().isNotEmpty)
+      if (_phoneController.text.trim().isNotEmpty) {
         fields['phone'] = _phoneController.text.trim();
-      if (_locationController.text.trim().isNotEmpty)
+      }
+      if (_locationController.text.trim().isNotEmpty) {
         fields['location'] = _locationController.text.trim();
-      if (_headlineController.text.trim().isNotEmpty)
+      }
+      if (_headlineController.text.trim().isNotEmpty) {
         fields['headline'] = _headlineController.text.trim();
-      if (_bioController.text.trim().isNotEmpty)
+      }
+      if (_bioController.text.trim().isNotEmpty) {
         fields['bio'] = _bioController.text.trim();
+      }
 
       if (_role == 'job_seeker') {
-        if (_currentJobController.text.trim().isNotEmpty)
+        if (_currentJobController.text.trim().isNotEmpty) {
           fields['current_job_title'] = _currentJobController.text.trim();
-        if (_desiredJobController.text.trim().isNotEmpty)
+        }
+        if (_desiredJobController.text.trim().isNotEmpty) {
           fields['desired_job_title'] = _desiredJobController.text.trim();
-        if (_yearsController.text.trim().isNotEmpty)
+        }
+        if (_yearsController.text.trim().isNotEmpty) {
           fields['years_of_experience'] =
               int.tryParse(_yearsController.text.trim()) ?? 0;
-        if (_availabilityController.text.trim().isNotEmpty)
+        }
+        if (_availabilityController.text.trim().isNotEmpty) {
           fields['availability'] = _availabilityController.text.trim();
+        }
         await userRepo.updateJobSeekerProfile(fields);
       } else if (_role == 'mentor') {
-        if (_currentJobController.text.trim().isNotEmpty)
+        if (_currentJobController.text.trim().isNotEmpty) {
           fields['current_job_title'] = _currentJobController.text.trim();
-        if (_yearsController.text.trim().isNotEmpty)
+        }
+        if (_yearsController.text.trim().isNotEmpty) {
           fields['years_of_experience'] =
               int.tryParse(_yearsController.text.trim()) ?? 0;
+        }
         await userRepo.updateMentorProfile(fields);
       }
 
@@ -126,12 +136,13 @@ class _EditProfilePageState extends State<EditProfilePage> {
         Navigator.pop(context);
       }
     } catch (e) {
-      if (mounted)
+      if (mounted) {
         Helpers.showSnackBar(
           context,
           'Failed to update profile: $e',
           isError: true,
         );
+      }
     } finally {
       if (mounted) setState(() => _isSaving = false);
     }
@@ -287,7 +298,7 @@ class _EditProfilePageState extends State<EditProfilePage> {
         children: [
           CircleAvatar(
             radius: 58,
-            backgroundColor: AppColors.primaryCyan.withOpacity(0.2),
+            backgroundColor: AppColors.primaryCyan.withValues(alpha: 0.2),
             backgroundImage: _image != null
                 ? FileImage(_image!)
                 : (_pictureUrl != null && _pictureUrl!.isNotEmpty

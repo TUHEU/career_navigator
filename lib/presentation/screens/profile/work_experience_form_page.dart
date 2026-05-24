@@ -92,8 +92,9 @@ class _WorkExperienceFormPageState extends State<WorkExperienceFormPage> {
 
       if (mounted) Navigator.pop(context, true);
     } catch (e) {
-      if (mounted)
+      if (mounted) {
         Helpers.showSnackBar(context, 'Failed to save: $e', isError: true);
+      }
     } finally {
       if (mounted) setState(() => _isLoading = false);
     }
@@ -152,7 +153,7 @@ class _WorkExperienceFormPageState extends State<WorkExperienceFormPage> {
               ),
               const SizedBox(height: 16),
               DropdownButtonFormField<String>(
-                value: _employmentType,
+                initialValue: _employmentType,
                 dropdownColor: isDark ? AppColors.darkSurface : Colors.white,
                 style: TextStyle(
                   color: isDark ? Colors.white : AppColors.lightText,
@@ -165,12 +166,12 @@ class _WorkExperienceFormPageState extends State<WorkExperienceFormPage> {
                   labelText: 'Employment Type',
                   labelStyle: TextStyle(
                     color: isDark
-                        ? Colors.white.withOpacity(0.6)
+                        ? Colors.white.withValues(alpha: 0.6)
                         : Colors.grey.shade600,
                   ),
                   filled: true,
                   fillColor: isDark
-                      ? Colors.white.withOpacity(0.05)
+                      ? Colors.white.withValues(alpha: 0.05)
                       : Colors.grey.shade100,
                   border: OutlineInputBorder(
                     borderRadius: BorderRadius.circular(15),
@@ -180,7 +181,7 @@ class _WorkExperienceFormPageState extends State<WorkExperienceFormPage> {
                     borderRadius: BorderRadius.circular(15),
                     borderSide: BorderSide(
                       color: isDark
-                          ? Colors.white.withOpacity(0.15)
+                          ? Colors.white.withValues(alpha: 0.15)
                           : Colors.grey.shade300,
                     ),
                   ),
@@ -234,12 +235,12 @@ class _WorkExperienceFormPageState extends State<WorkExperienceFormPage> {
                 ),
                 decoration: BoxDecoration(
                   color: isDark
-                      ? Colors.white.withOpacity(0.04)
+                      ? Colors.white.withValues(alpha: 0.04)
                       : Colors.grey.shade100,
                   borderRadius: BorderRadius.circular(14),
                   border: Border.all(
                     color: isDark
-                        ? Colors.white.withOpacity(0.08)
+                        ? Colors.white.withValues(alpha: 0.08)
                         : Colors.grey.shade300,
                   ),
                 ),
@@ -250,14 +251,14 @@ class _WorkExperienceFormPageState extends State<WorkExperienceFormPage> {
                       'I currently work here',
                       style: TextStyle(
                         color: isDark
-                            ? Colors.white.withOpacity(0.75)
+                            ? Colors.white.withValues(alpha: 0.75)
                             : AppColors.lightText,
                         fontSize: 14,
                       ),
                     ),
                     Switch(
                       value: _isCurrent,
-                      activeColor: AppColors.primaryCyan,
+                      activeThumbColor: AppColors.primaryCyan,
                       onChanged: (v) => setState(() => _isCurrent = v),
                     ),
                   ],

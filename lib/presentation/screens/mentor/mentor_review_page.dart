@@ -240,7 +240,7 @@ class _MentorReviewPageState extends State<MentorReviewPage> {
                           minHeight: 6,
                           backgroundColor: AppColors.border(
                             isDark,
-                          ).withOpacity(0.3),
+                          ).withValues(alpha: 0.3),
                           valueColor: const AlwaysStoppedAnimation(
                             Color(0xFFFFC107),
                           ),
@@ -288,7 +288,7 @@ class _MentorReviewPageState extends State<MentorReviewPage> {
             children: [
               CircleAvatar(
                 radius: 20,
-                backgroundColor: AppColors.primaryCyan.withOpacity(0.2),
+                backgroundColor: AppColors.primaryCyan.withValues(alpha: 0.2),
                 backgroundImage: picture != null ? NetworkImage(picture) : null,
                 child: picture == null
                     ? Text(

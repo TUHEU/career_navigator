@@ -71,12 +71,12 @@ class PrivacyPolicyPage extends StatelessWidget {
             padding: const EdgeInsets.all(16),
             decoration: BoxDecoration(
               color: isDark
-                  ? Colors.white.withOpacity(0.04)
+                  ? Colors.white.withValues(alpha: 0.04)
                   : Colors.grey.shade100,
               borderRadius: BorderRadius.circular(14),
               border: Border.all(
                 color: isDark
-                    ? Colors.white.withOpacity(0.07)
+                    ? Colors.white.withValues(alpha: 0.07)
                     : Colors.grey.shade300,
               ),
             ),
@@ -85,7 +85,7 @@ class PrivacyPolicyPage extends StatelessWidget {
               textAlign: TextAlign.center,
               style: TextStyle(
                 color: isDark
-                    ? Colors.white.withOpacity(0.35)
+                    ? Colors.white.withValues(alpha: 0.35)
                     : AppColors.lightTextSecondary,
                 fontSize: 12,
                 height: 1.6,
@@ -102,9 +102,11 @@ class PrivacyPolicyPage extends StatelessWidget {
     return Container(
       padding: const EdgeInsets.all(18),
       decoration: BoxDecoration(
-        color: AppColors.primaryCyan.withOpacity(0.08),
+        color: AppColors.primaryCyan.withValues(alpha: 0.08),
         borderRadius: BorderRadius.circular(16),
-        border: Border.all(color: AppColors.primaryCyan.withOpacity(0.25)),
+        border: Border.all(
+          color: AppColors.primaryCyan.withValues(alpha: 0.25),
+        ),
       ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
@@ -132,7 +134,7 @@ class PrivacyPolicyPage extends StatelessWidget {
             'Last updated: June 1, 2026\nEffective date: June 1, 2026',
             style: TextStyle(
               color: isDark
-                  ? Colors.white.withOpacity(0.45)
+                  ? Colors.white.withValues(alpha: 0.45)
                   : AppColors.lightTextSecondary,
               fontSize: 12,
               height: 1.6,
@@ -143,7 +145,7 @@ class PrivacyPolicyPage extends StatelessWidget {
             'This Privacy Policy explains how Career Navigator collects, uses, shares, and protects your personal information when you use our mobile application.',
             style: TextStyle(
               color: isDark
-                  ? Colors.white.withOpacity(0.65)
+                  ? Colors.white.withValues(alpha: 0.65)
                   : AppColors.lightTextSecondary,
               fontSize: 13,
               height: 1.65,
@@ -165,10 +167,14 @@ class PrivacyPolicyPage extends StatelessWidget {
       margin: const EdgeInsets.only(bottom: 14),
       padding: const EdgeInsets.fromLTRB(18, 16, 18, 18),
       decoration: BoxDecoration(
-        color: isDark ? Colors.white.withOpacity(0.04) : Colors.grey.shade100,
+        color: isDark
+            ? Colors.white.withValues(alpha: 0.04)
+            : Colors.grey.shade100,
         borderRadius: BorderRadius.circular(16),
         border: Border.all(
-          color: isDark ? Colors.white.withOpacity(0.07) : Colors.grey.shade300,
+          color: isDark
+              ? Colors.white.withValues(alpha: 0.07)
+              : Colors.grey.shade300,
         ),
       ),
       child: Column(
@@ -191,7 +197,7 @@ class PrivacyPolicyPage extends StatelessWidget {
               Text(
                 number,
                 style: TextStyle(
-                  color: AppColors.primaryCyan.withOpacity(0.4),
+                  color: AppColors.primaryCyan.withValues(alpha: 0.4),
                   fontSize: 11,
                   fontWeight: FontWeight.bold,
                   fontFamily: 'monospace',
@@ -202,7 +208,7 @@ class PrivacyPolicyPage extends StatelessWidget {
           const SizedBox(height: 12),
           Divider(
             color: isDark
-                ? Colors.white.withOpacity(0.07)
+                ? Colors.white.withValues(alpha: 0.07)
                 : Colors.grey.shade300,
             height: 1,
           ),
@@ -215,8 +221,8 @@ class PrivacyPolicyPage extends StatelessWidget {
                 style: TextStyle(
                   color: isDark
                       ? (text.startsWith('•')
-                            ? Colors.white.withOpacity(0.55)
-                            : Colors.white.withOpacity(0.65))
+                            ? Colors.white.withValues(alpha: 0.55)
+                            : Colors.white.withValues(alpha: 0.65))
                       : (text.startsWith('•')
                             ? AppColors.lightTextSecondary
                             : Colors.grey.shade700),

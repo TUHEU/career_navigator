@@ -76,8 +76,9 @@ class _EducationFormPageState extends State<EducationFormPage> {
 
       if (mounted) Navigator.pop(context, true);
     } catch (e) {
-      if (mounted)
+      if (mounted) {
         Helpers.showSnackBar(context, 'Failed to save: $e', isError: true);
+      }
     } finally {
       if (mounted) setState(() => _isLoading = false);
     }
@@ -166,12 +167,12 @@ class _EducationFormPageState extends State<EducationFormPage> {
                 ),
                 decoration: BoxDecoration(
                   color: isDark
-                      ? Colors.white.withOpacity(0.04)
+                      ? Colors.white.withValues(alpha: 0.04)
                       : Colors.grey.shade100,
                   borderRadius: BorderRadius.circular(14),
                   border: Border.all(
                     color: isDark
-                        ? Colors.white.withOpacity(0.08)
+                        ? Colors.white.withValues(alpha: 0.08)
                         : Colors.grey.shade300,
                   ),
                 ),
@@ -182,14 +183,14 @@ class _EducationFormPageState extends State<EducationFormPage> {
                       'Currently studying here',
                       style: TextStyle(
                         color: isDark
-                            ? Colors.white.withOpacity(0.75)
+                            ? Colors.white.withValues(alpha: 0.75)
                             : AppColors.lightText,
                         fontSize: 14,
                       ),
                     ),
                     Switch(
                       value: _isCurrent,
-                      activeColor: AppColors.primaryCyan,
+                      activeThumbColor: AppColors.primaryCyan,
                       onChanged: (v) => setState(() => _isCurrent = v),
                     ),
                   ],

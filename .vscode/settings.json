@@ -1,3 +1,15 @@
 {
-    "DockerRun.DisableDockerrc": true
+  "editor.formatOnSave": true,
+
+  "java.enabled": false,
+  "java.jdt.ls.enabled": false,
+
+  "[dart]": {
+    "editor.formatOnSave": true,
+    "editor.selectionHighlight": false,
+    "editor.suggest.snippetsPreventQuickSuggestions": false,
+    "editor.suggestSelection": "first",
+    "editor.tabCompletion": "onlySnippets",
+    "editor.wordBasedSuggestions": "off"
+  }
 }
