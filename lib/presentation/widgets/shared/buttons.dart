@@ -123,9 +123,7 @@ class SecondaryButton extends StatelessWidget {
             ? const Size(double.infinity, 52)
             : const Size(140, 48),
         side: BorderSide(
-          color: isDark
-              ? Colors.white.withValues(alpha: 0.3)
-              : Colors.grey.shade400,
+          color: isDark ? Colors.white.withOpacity(0.3) : Colors.grey.shade400,
         ),
         shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(15)),
       ),

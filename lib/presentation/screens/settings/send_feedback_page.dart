@@ -103,10 +103,10 @@ class _SendFeedbackPageState extends State<SendFeedbackPage> {
               width: 72,
               height: 72,
               decoration: BoxDecoration(
-                color: AppColors.primaryCyan.withValues(alpha: 0.12),
+                color: AppColors.primaryCyan.withOpacity(0.12),
                 shape: BoxShape.circle,
                 border: Border.all(
-                  color: AppColors.primaryCyan.withValues(alpha: 0.3),
+                  color: AppColors.primaryCyan.withOpacity(0.3),
                 ),
               ),
               child: const Icon(
@@ -130,7 +130,7 @@ class _SendFeedbackPageState extends State<SendFeedbackPage> {
               textAlign: TextAlign.center,
               style: TextStyle(
                 color: isDark
-                    ? Colors.white.withValues(alpha: 0.5)
+                    ? Colors.white.withOpacity(0.5)
                     : AppColors.lightTextSecondary,
                 fontSize: 14,
                 height: 1.65,
@@ -157,10 +157,10 @@ class _SendFeedbackPageState extends State<SendFeedbackPage> {
           Container(
             padding: const EdgeInsets.all(16),
             decoration: BoxDecoration(
-              color: AppColors.primaryCyan.withValues(alpha: 0.08),
+              color: AppColors.primaryCyan.withOpacity(0.08),
               borderRadius: BorderRadius.circular(14),
               border: Border.all(
-                color: AppColors.primaryCyan.withValues(alpha: 0.25),
+                color: AppColors.primaryCyan.withOpacity(0.25),
               ),
             ),
             child: Row(
@@ -176,7 +176,7 @@ class _SendFeedbackPageState extends State<SendFeedbackPage> {
                     'We read every message. Your feedback helps us build a better Career Navigator.',
                     style: TextStyle(
                       color: isDark
-                          ? Colors.white.withValues(alpha: 0.65)
+                          ? Colors.white.withOpacity(0.65)
                           : AppColors.lightTextSecondary,
                       fontSize: 13,
                       height: 1.6,
@@ -211,7 +211,7 @@ class _SendFeedbackPageState extends State<SendFeedbackPage> {
                     color: i < _rating
                         ? AppColors.primaryCyan
                         : (isDark
-                              ? Colors.white.withValues(alpha: 0.2)
+                              ? Colors.white.withOpacity(0.2)
                               : Colors.grey.shade400),
                     size: 34,
                   ),
@@ -244,16 +244,16 @@ class _SendFeedbackPageState extends State<SendFeedbackPage> {
                   ),
                   decoration: BoxDecoration(
                     color: isSelected
-                        ? AppColors.primaryCyan.withValues(alpha: 0.15)
+                        ? AppColors.primaryCyan.withOpacity(0.15)
                         : (isDark
-                              ? Colors.white.withValues(alpha: 0.04)
+                              ? Colors.white.withOpacity(0.04)
                               : Colors.grey.shade100),
                     borderRadius: BorderRadius.circular(20),
                     border: Border.all(
                       color: isSelected
-                          ? AppColors.primaryCyan.withValues(alpha: 0.5)
+                          ? AppColors.primaryCyan.withOpacity(0.5)
                           : (isDark
-                                ? Colors.white.withValues(alpha: 0.08)
+                                ? Colors.white.withOpacity(0.08)
                                 : Colors.grey.shade300),
                     ),
                   ),
@@ -263,7 +263,7 @@ class _SendFeedbackPageState extends State<SendFeedbackPage> {
                       color: isSelected
                           ? AppColors.primaryCyan
                           : (isDark
-                                ? Colors.white.withValues(alpha: 0.55)
+                                ? Colors.white.withOpacity(0.55)
                                 : Colors.grey.shade600),
                       fontSize: 13,
                       fontWeight: isSelected
@@ -331,15 +331,11 @@ class _SendFeedbackPageState extends State<SendFeedbackPage> {
   InputDecoration _inputDecoration(String hint, bool isDark) => InputDecoration(
     hintText: hint,
     hintStyle: TextStyle(
-      color: isDark
-          ? Colors.white.withValues(alpha: 0.25)
-          : Colors.grey.shade500,
+      color: isDark ? Colors.white.withOpacity(0.25) : Colors.grey.shade500,
       fontSize: 13,
     ),
     filled: true,
-    fillColor: isDark
-        ? Colors.white.withValues(alpha: 0.04)
-        : Colors.grey.shade100,
+    fillColor: isDark ? Colors.white.withOpacity(0.04) : Colors.grey.shade100,
     contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
     border: OutlineInputBorder(
       borderRadius: BorderRadius.circular(14),
@@ -348,9 +344,7 @@ class _SendFeedbackPageState extends State<SendFeedbackPage> {
     enabledBorder: OutlineInputBorder(
       borderRadius: BorderRadius.circular(14),
       borderSide: BorderSide(
-        color: isDark
-            ? Colors.white.withValues(alpha: 0.07)
-            : Colors.grey.shade300,
+        color: isDark ? Colors.white.withOpacity(0.07) : Colors.grey.shade300,
       ),
     ),
     focusedBorder: OutlineInputBorder(

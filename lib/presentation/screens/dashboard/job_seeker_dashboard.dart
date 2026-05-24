@@ -54,8 +54,8 @@ class _JobSeekerDashboardState extends State<JobSeekerDashboard> {
           ),
           Container(
             color: isDark
-                ? AppColors.darkBackground.withValues(alpha: 0.80)
-                : Colors.white.withValues(alpha: 0.92),
+                ? AppColors.darkBackground.withOpacity(0.80)
+                : Colors.white.withOpacity(0.92),
           ),
           SafeArea(child: _pages[_currentIndex]),
         ],
@@ -111,7 +111,7 @@ class _HomePage extends StatelessWidget {
                     'Job Seeker Dashboard',
                     style: TextStyle(
                       color: isDark
-                          ? Colors.white.withValues(alpha: 0.5)
+                          ? Colors.white.withOpacity(0.5)
                           : AppColors.lightTextSecondary,
                       fontSize: 12,
                     ),
@@ -135,18 +135,18 @@ class _HomePage extends StatelessWidget {
             padding: const EdgeInsets.all(20),
             decoration: BoxDecoration(
               color: isDark
-                  ? Colors.white.withValues(alpha: 0.06)
+                  ? Colors.white.withOpacity(0.06)
                   : Colors.grey.shade100,
               borderRadius: BorderRadius.circular(22),
               border: Border.all(
-                color: AppColors.primaryCyan.withValues(alpha: 0.25),
+                color: AppColors.primaryCyan.withOpacity(0.25),
               ),
             ),
             child: Row(
               children: [
                 CircleAvatar(
                   radius: 36,
-                  backgroundColor: AppColors.primaryCyan.withValues(alpha: 0.2),
+                  backgroundColor: AppColors.primaryCyan.withOpacity(0.2),
                   backgroundImage: user?.profilePictureUrl != null
                       ? NetworkImage(user!.profilePictureUrl!)
                       : null,
@@ -181,10 +181,10 @@ class _HomePage extends StatelessWidget {
                           vertical: 4,
                         ),
                         decoration: BoxDecoration(
-                          color: AppColors.primaryCyan.withValues(alpha: 0.12),
+                          color: AppColors.primaryCyan.withOpacity(0.12),
                           borderRadius: BorderRadius.circular(20),
                           border: Border.all(
-                            color: AppColors.primaryCyan.withValues(alpha: 0.3),
+                            color: AppColors.primaryCyan.withOpacity(0.3),
                           ),
                         ),
                         child: Row(
@@ -235,13 +235,13 @@ class _HomePage extends StatelessWidget {
               decoration: BoxDecoration(
                 gradient: LinearGradient(
                   colors: [
-                    AppColors.primaryCyan.withValues(alpha: 0.15),
-                    AppColors.primaryCyan.withValues(alpha: 0.05),
+                    AppColors.primaryCyan.withOpacity(0.15),
+                    AppColors.primaryCyan.withOpacity(0.05),
                   ],
                 ),
                 borderRadius: BorderRadius.circular(14),
                 border: Border.all(
-                  color: AppColors.primaryCyan.withValues(alpha: 0.3),
+                  color: AppColors.primaryCyan.withOpacity(0.3),
                 ),
               ),
               child: Row(
@@ -249,7 +249,7 @@ class _HomePage extends StatelessWidget {
                   Container(
                     padding: const EdgeInsets.all(8),
                     decoration: BoxDecoration(
-                      color: AppColors.primaryCyan.withValues(alpha: 0.15),
+                      color: AppColors.primaryCyan.withOpacity(0.15),
                       shape: BoxShape.circle,
                     ),
                     child: const Icon(
@@ -274,7 +274,7 @@ class _HomePage extends StatelessWidget {
                         Text(
                           'Career paths, salary negotiation, review coach...',
                           style: TextStyle(
-                            color: AppColors.primaryCyan.withValues(alpha: 0.8),
+                            color: AppColors.primaryCyan.withOpacity(0.8),
                             fontSize: 11,
                           ),
                         ),
@@ -294,10 +294,10 @@ class _HomePage extends StatelessWidget {
           Container(
             padding: const EdgeInsets.all(16),
             decoration: BoxDecoration(
-              color: AppColors.primaryCyan.withValues(alpha: 0.06),
+              color: AppColors.primaryCyan.withOpacity(0.06),
               borderRadius: BorderRadius.circular(14),
               border: Border.all(
-                color: AppColors.primaryCyan.withValues(alpha: 0.15),
+                color: AppColors.primaryCyan.withOpacity(0.15),
               ),
             ),
             child: Row(

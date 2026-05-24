@@ -50,8 +50,8 @@ class _AdminDashboardState extends State<AdminDashboard> {
           ),
           Container(
             color: isDark
-                ? AppColors.darkBackground.withValues(alpha: 0.82)
-                : Colors.white.withValues(alpha: 0.97),
+                ? AppColors.darkBackground.withOpacity(0.82)
+                : Colors.white.withOpacity(0.97),
           ),
           SafeArea(child: pages[_currentIndex]),
         ],
@@ -158,7 +158,7 @@ Widget _appBar(
             ],
           ),
         ),
-        ...?actions,
+        if (actions != null) ...actions,
       ],
     ),
   );
@@ -184,7 +184,7 @@ Widget _statCard(
         Container(
           padding: const EdgeInsets.all(8),
           decoration: BoxDecoration(
-            color: color.withValues(alpha: 0.15),
+            color: color.withOpacity(0.15),
             borderRadius: BorderRadius.circular(10),
           ),
           child: Icon(icon, color: color, size: 20),
@@ -244,12 +244,11 @@ class _StatsPageState extends State<_StatsPage> {
         });
       }
     } catch (e) {
-      if (mounted) {
+      if (mounted)
         setState(() {
           _loading = false;
           _error = e.toString();
         });
-      }
     }
   }
 
@@ -276,16 +275,14 @@ class _StatsPageState extends State<_StatsPage> {
                 color: AppColors.card(isDark),
                 borderRadius: BorderRadius.circular(22),
                 border: Border.all(
-                  color: AppColors.cyan(isDark).withValues(alpha: 0.3),
+                  color: AppColors.cyan(isDark).withOpacity(0.3),
                 ),
               ),
               child: Row(
                 children: [
                   CircleAvatar(
                     radius: 34,
-                    backgroundColor: AppColors.cyan(
-                      isDark,
-                    ).withValues(alpha: 0.2),
+                    backgroundColor: AppColors.cyan(isDark).withOpacity(0.2),
                     backgroundImage: user?.profilePictureUrl != null
                         ? NetworkImage(user!.profilePictureUrl!)
                         : null,
@@ -328,14 +325,10 @@ class _StatsPageState extends State<_StatsPage> {
                             vertical: 4,
                           ),
                           decoration: BoxDecoration(
-                            color: AppColors.cyan(
-                              isDark,
-                            ).withValues(alpha: 0.12),
+                            color: AppColors.cyan(isDark).withOpacity(0.12),
                             borderRadius: BorderRadius.circular(20),
                             border: Border.all(
-                              color: AppColors.cyan(
-                                isDark,
-                              ).withValues(alpha: 0.3),
+                              color: AppColors.cyan(isDark).withOpacity(0.3),
                             ),
                           ),
                           child: Row(
@@ -582,7 +575,7 @@ class _UsersPageState extends State<_UsersPage> {
                               radius: 22,
                               backgroundColor: _roleColor(
                                 role,
-                              ).withValues(alpha: 0.15),
+                              ).withOpacity(0.15),
                               backgroundImage: u['profile_picture_url'] != null
                                   ? NetworkImage(u['profile_picture_url'])
                                   : null,
@@ -624,7 +617,7 @@ class _UsersPageState extends State<_UsersPage> {
                                         decoration: BoxDecoration(
                                           color: _roleColor(
                                             role,
-                                          ).withValues(alpha: 0.12),
+                                          ).withOpacity(0.12),
                                           borderRadius: BorderRadius.circular(
                                             10,
                                           ),
@@ -702,7 +695,7 @@ class _UsersPageState extends State<_UsersPage> {
                               Switch(
                                 value: active,
                                 onChanged: (_) => _toggleStatus(u, active),
-                                activeThumbColor: AppColors.cyan(isDark),
+                                activeColor: AppColors.cyan(isDark),
                               ),
                           ],
                         ),
@@ -832,7 +825,7 @@ class _JobsPageState extends State<_JobsPage> {
                   _tf(locCtrl, 'Location *', isDark),
                   const SizedBox(height: 10),
                   DropdownButtonFormField<String>(
-                    initialValue: locType,
+                    value: locType,
                     decoration: const InputDecoration(
                       labelText: 'Location Type',
                     ),
@@ -843,7 +836,7 @@ class _JobsPageState extends State<_JobsPage> {
                   ),
                   const SizedBox(height: 10),
                   DropdownButtonFormField<String>(
-                    initialValue: empType,
+                    value: empType,
                     decoration: const InputDecoration(
                       labelText: 'Employment Type',
                     ),
@@ -879,9 +872,8 @@ class _JobsPageState extends State<_JobsPage> {
                           descCtrl,
                           reqCtrl,
                           respCtrl,
-                        ].any((c) => c.text.isEmpty)) {
+                        ].any((c) => c.text.isEmpty))
                           return;
-                        }
                         // FIX: await getAccessToken()
                         final token =
                             (await context
@@ -900,9 +892,8 @@ class _JobsPageState extends State<_JobsPage> {
                         });
                         if (context.mounted) Navigator.pop(ctx);
                         _load();
-                        if (mounted) {
+                        if (mounted)
                           Helpers.showSnackBar(context, 'Job created!');
-                        }
                       },
                       child: const Text('CREATE JOB'),
                     ),
@@ -933,7 +924,7 @@ class _JobsPageState extends State<_JobsPage> {
   Widget _chip(String label, Color color) => Container(
     padding: const EdgeInsets.symmetric(horizontal: 7, vertical: 2),
     decoration: BoxDecoration(
-      color: color.withValues(alpha: 0.12),
+      color: color.withOpacity(0.12),
       borderRadius: BorderRadius.circular(8),
     ),
     child: Text(
@@ -993,7 +984,7 @@ class _JobsPageState extends State<_JobsPage> {
                                 border: Border.all(
                                   color: active
                                       ? AppColors.border(isDark)
-                                      : Colors.red.withValues(alpha: 0.3),
+                                      : Colors.red.withOpacity(0.3),
                                 ),
                               ),
                               child: Row(
@@ -1003,7 +994,7 @@ class _JobsPageState extends State<_JobsPage> {
                                     decoration: BoxDecoration(
                                       color: AppColors.cyan(
                                         isDark,
-                                      ).withValues(alpha: 0.12),
+                                      ).withOpacity(0.12),
                                       borderRadius: BorderRadius.circular(12),
                                     ),
                                     child: Icon(
@@ -1259,9 +1250,7 @@ class _FeedbackPageState extends State<_FeedbackPage> {
                     label: Text(f[0].toUpperCase() + f.substring(1)),
                     selected: sel,
                     onSelected: (_) => _applyFilter(f),
-                    selectedColor: AppColors.cyan(
-                      isDark,
-                    ).withValues(alpha: 0.2),
+                    selectedColor: AppColors.cyan(isDark).withOpacity(0.2),
                     checkmarkColor: AppColors.cyan(isDark),
                   ),
                 );
@@ -1324,7 +1313,7 @@ class _FeedbackPageState extends State<_FeedbackPage> {
                                       decoration: BoxDecoration(
                                         color: _statusColor(
                                           status,
-                                        ).withValues(alpha: 0.12),
+                                        ).withOpacity(0.12),
                                         borderRadius: BorderRadius.circular(10),
                                       ),
                                       child: Icon(
@@ -1387,7 +1376,7 @@ class _FeedbackPageState extends State<_FeedbackPage> {
                                           decoration: BoxDecoration(
                                             color: _statusColor(
                                               status,
-                                            ).withValues(alpha: 0.12),
+                                            ).withOpacity(0.12),
                                             borderRadius: BorderRadius.circular(
                                               8,
                                             ),

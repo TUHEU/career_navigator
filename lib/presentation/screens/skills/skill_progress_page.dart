@@ -145,9 +145,8 @@ class _SkillProgressPageState extends State<SkillProgressPage>
       'swift',
       'js',
       'typescript',
-    ].any((l) => s.contains(l))) {
+    ].any((l) => s.contains(l)))
       return 'Languages';
-    }
     if ([
       'git',
       'docker',
@@ -155,17 +154,15 @@ class _SkillProgressPageState extends State<SkillProgressPage>
       'vs code',
       'jira',
       'postman',
-    ].any((t) => s.contains(t))) {
+    ].any((t) => s.contains(t)))
       return 'Tools';
-    }
     if ([
       'communication',
       'leadership',
       'teamwork',
       'problem',
-    ].any((t) => s.contains(t))) {
+    ].any((t) => s.contains(t)))
       return 'Soft Skills';
-    }
     return 'Technical';
   }
 
@@ -175,7 +172,7 @@ class _SkillProgressPageState extends State<SkillProgressPage>
 
   List<String> get _categories => [
     'All',
-    ..._skills.map((s) => s.category).toSet(),
+    ..._skills.map((s) => s.category).toSet().toList(),
   ];
 
   @override
@@ -246,7 +243,7 @@ class _SkillProgressPageState extends State<SkillProgressPage>
               ),
               child: AnimatedBuilder(
                 animation: _anim,
-                builder: (_, _) => CustomPaint(
+                builder: (_, __) => CustomPaint(
                   painter: _RadarPainter(
                     skills: _skills.take(6).toList(),
                     progress: _anim.value,
@@ -279,7 +276,7 @@ class _SkillProgressPageState extends State<SkillProgressPage>
                     label: Text(cat),
                     selected: sel,
                     onSelected: (_) => setState(() => _selectedCategory = cat),
-                    selectedColor: AppColors.primaryCyan.withValues(alpha: 0.2),
+                    selectedColor: AppColors.primaryCyan.withOpacity(0.2),
                     checkmarkColor: AppColors.primaryCyan,
                     side: BorderSide(
                       color: sel
@@ -372,14 +369,12 @@ class _SkillProgressPageState extends State<SkillProgressPage>
           const SizedBox(height: 6),
           AnimatedBuilder(
             animation: _anim,
-            builder: (_, _) => ClipRRect(
+            builder: (_, __) => ClipRRect(
               borderRadius: BorderRadius.circular(6),
               child: LinearProgressIndicator(
                 value: skill.level / 100 * _anim.value,
                 minHeight: 10,
-                backgroundColor: AppColors.border(
-                  isDark,
-                ).withValues(alpha: 0.3),
+                backgroundColor: AppColors.border(isDark).withOpacity(0.3),
                 valueColor: AlwaysStoppedAnimation(skill.color),
               ),
             ),
@@ -422,8 +417,8 @@ class _RadarPainter extends CustomPainter {
       ..style = PaintingStyle.stroke
       ..strokeWidth = 1
       ..color = isDark
-          ? Colors.white.withValues(alpha: 0.08)
-          : Colors.black.withValues(alpha: 0.08);
+          ? Colors.white.withOpacity(0.08)
+          : Colors.black.withOpacity(0.08);
 
     for (int ring = 1; ring <= 4; ring++) {
       final r = radius * ring / 4;
@@ -443,8 +438,8 @@ class _RadarPainter extends CustomPainter {
       ..style = PaintingStyle.stroke
       ..strokeWidth = 1
       ..color = isDark
-          ? Colors.white.withValues(alpha: 0.08)
-          : Colors.black.withValues(alpha: 0.08);
+          ? Colors.white.withOpacity(0.08)
+          : Colors.black.withOpacity(0.08);
 
     for (int i = 0; i < n; i++) {
       final angle = step * i - math.pi / 2;
@@ -470,7 +465,7 @@ class _RadarPainter extends CustomPainter {
       path,
       Paint()
         ..style = PaintingStyle.fill
-        ..color = const Color(0xFF00B8D4).withValues(alpha: 0.2),
+        ..color = const Color(0xFF00B8D4).withOpacity(0.2),
     );
     canvas.drawPath(
       path,

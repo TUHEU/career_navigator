@@ -54,8 +54,8 @@ class _MentorDashboardState extends State<MentorDashboard> {
           ),
           Container(
             color: isDark
-                ? AppColors.darkBackground.withValues(alpha: 0.80)
-                : Colors.white.withValues(alpha: 0.92),
+                ? AppColors.darkBackground.withOpacity(0.80)
+                : Colors.white.withOpacity(0.92),
           ),
           SafeArea(child: _pages[_currentIndex]),
         ],
@@ -111,7 +111,7 @@ class _HomePage extends StatelessWidget {
                     'Mentor Dashboard',
                     style: TextStyle(
                       color: isDark
-                          ? Colors.white.withValues(alpha: 0.5)
+                          ? Colors.white.withOpacity(0.5)
                           : AppColors.lightTextSecondary,
                       fontSize: 12,
                     ),
@@ -135,18 +135,18 @@ class _HomePage extends StatelessWidget {
             padding: const EdgeInsets.all(20),
             decoration: BoxDecoration(
               color: isDark
-                  ? Colors.white.withValues(alpha: 0.06)
+                  ? Colors.white.withOpacity(0.06)
                   : Colors.grey.shade100,
               borderRadius: BorderRadius.circular(22),
               border: Border.all(
-                color: AppColors.primaryCyan.withValues(alpha: 0.25),
+                color: AppColors.primaryCyan.withOpacity(0.25),
               ),
             ),
             child: Row(
               children: [
                 CircleAvatar(
                   radius: 36,
-                  backgroundColor: AppColors.primaryCyan.withValues(alpha: 0.2),
+                  backgroundColor: AppColors.primaryCyan.withOpacity(0.2),
                   backgroundImage: user?.profilePictureUrl != null
                       ? NetworkImage(user!.profilePictureUrl!)
                       : null,
@@ -181,10 +181,10 @@ class _HomePage extends StatelessWidget {
                           vertical: 4,
                         ),
                         decoration: BoxDecoration(
-                          color: AppColors.primaryCyan.withValues(alpha: 0.12),
+                          color: AppColors.primaryCyan.withOpacity(0.12),
                           borderRadius: BorderRadius.circular(20),
                           border: Border.all(
-                            color: AppColors.primaryCyan.withValues(alpha: 0.3),
+                            color: AppColors.primaryCyan.withOpacity(0.3),
                           ),
                         ),
                         child: Row(

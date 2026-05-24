@@ -172,9 +172,8 @@ class JobListing {
 
   String get salaryText {
     if (salaryMin == null && salaryMax == null) return 'Salary not specified';
-    if (salaryMin != null && salaryMax != null) {
+    if (salaryMin != null && salaryMax != null)
       return '$salaryCurrency ${_fmt(salaryMin!)} – ${_fmt(salaryMax!)}';
-    }
     if (salaryMin != null) return '$salaryCurrency ${_fmt(salaryMin!)}+';
     return 'Up to $salaryCurrency ${_fmt(salaryMax!)}';
   }
