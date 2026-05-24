@@ -270,7 +270,7 @@ class _SkillAssessmentPageState extends State<SkillAssessmentPage> {
             Container(
               padding: const EdgeInsets.all(24),
               decoration: BoxDecoration(
-                color: AppColors.primaryCyan.withValues(alpha: 0.1),
+                color: AppColors.primaryCyan.withOpacity(0.1),
                 shape: BoxShape.circle,
               ),
               child: const Icon(
@@ -411,9 +411,7 @@ class _SkillAssessmentPageState extends State<SkillAssessmentPage> {
                   child: LinearProgressIndicator(
                     value: (_current + 1) / _questions.length,
                     minHeight: 6,
-                    backgroundColor: AppColors.border(
-                      isDark,
-                    ).withValues(alpha: 0.3),
+                    backgroundColor: AppColors.border(isDark).withOpacity(0.3),
                     valueColor: const AlwaysStoppedAnimation(
                       AppColors.primaryCyan,
                     ),
@@ -425,9 +423,7 @@ class _SkillAssessmentPageState extends State<SkillAssessmentPage> {
                   child: LinearProgressIndicator(
                     value: pct,
                     minHeight: 4,
-                    backgroundColor: AppColors.border(
-                      isDark,
-                    ).withValues(alpha: 0.2),
+                    backgroundColor: AppColors.border(isDark).withOpacity(0.2),
                     valueColor: AlwaysStoppedAnimation(timerColor),
                   ),
                 ),
@@ -449,10 +445,10 @@ class _SkillAssessmentPageState extends State<SkillAssessmentPage> {
                       vertical: 4,
                     ),
                     decoration: BoxDecoration(
-                      color: AppColors.primaryCyan.withValues(alpha: 0.12),
+                      color: AppColors.primaryCyan.withOpacity(0.12),
                       borderRadius: BorderRadius.circular(10),
                       border: Border.all(
-                        color: AppColors.primaryCyan.withValues(alpha: 0.3),
+                        color: AppColors.primaryCyan.withOpacity(0.3),
                       ),
                     ),
                     child: Text(
@@ -489,14 +485,14 @@ class _SkillAssessmentPageState extends State<SkillAssessmentPage> {
                     Color? borderColor;
                     if (_answered) {
                       if (isCorrect) {
-                        bgColor = Colors.green.withValues(alpha: 0.15);
+                        bgColor = Colors.green.withOpacity(0.15);
                         borderColor = Colors.green;
                       } else if (selected) {
-                        bgColor = Colors.red.withValues(alpha: 0.15);
+                        bgColor = Colors.red.withOpacity(0.15);
                         borderColor = Colors.red;
                       }
                     } else if (selected) {
-                      bgColor = AppColors.primaryCyan.withValues(alpha: 0.15);
+                      bgColor = AppColors.primaryCyan.withOpacity(0.15);
                       borderColor = AppColors.primaryCyan;
                     }
 
@@ -523,10 +519,8 @@ class _SkillAssessmentPageState extends State<SkillAssessmentPage> {
                               decoration: BoxDecoration(
                                 shape: BoxShape.circle,
                                 color: borderColor != null
-                                    ? borderColor.withValues(alpha: 0.15)
-                                    : AppColors.border(
-                                        isDark,
-                                      ).withValues(alpha: 0.2),
+                                    ? borderColor.withOpacity(0.15)
+                                    : AppColors.border(isDark).withOpacity(0.2),
                               ),
                               child: _answered && (isCorrect || selected)
                                   ? Icon(
@@ -567,10 +561,10 @@ class _SkillAssessmentPageState extends State<SkillAssessmentPage> {
                     Container(
                       padding: const EdgeInsets.all(14),
                       decoration: BoxDecoration(
-                        color: Colors.blue.withValues(alpha: 0.08),
+                        color: Colors.blue.withOpacity(0.08),
                         borderRadius: BorderRadius.circular(12),
                         border: Border.all(
-                          color: Colors.blue.withValues(alpha: 0.25),
+                          color: Colors.blue.withOpacity(0.25),
                         ),
                       ),
                       child: Row(
@@ -716,7 +710,7 @@ class _SkillAssessmentPageState extends State<SkillAssessmentPage> {
                   .map(
                     (c) => Chip(
                       label: Text(c.category),
-                      backgroundColor: Colors.green.withValues(alpha: 0.12),
+                      backgroundColor: Colors.green.withOpacity(0.12),
                       side: const BorderSide(color: Colors.green),
                       labelStyle: const TextStyle(
                         color: Colors.green,
@@ -740,7 +734,7 @@ class _SkillAssessmentPageState extends State<SkillAssessmentPage> {
                   .map(
                     (c) => Chip(
                       label: Text(c.category),
-                      backgroundColor: Colors.orange.withValues(alpha: 0.12),
+                      backgroundColor: Colors.orange.withOpacity(0.12),
                       side: const BorderSide(color: Colors.orange),
                       labelStyle: const TextStyle(
                         color: Colors.orange,
@@ -775,8 +769,8 @@ class _SkillAssessmentPageState extends State<SkillAssessmentPage> {
                 borderRadius: BorderRadius.circular(14),
                 border: Border.all(
                   color: correct
-                      ? Colors.green.withValues(alpha: 0.4)
-                      : Colors.red.withValues(alpha: 0.4),
+                      ? Colors.green.withOpacity(0.4)
+                      : Colors.red.withOpacity(0.4),
                 ),
               ),
               child: Column(
@@ -880,7 +874,7 @@ class _SkillAssessmentPageState extends State<SkillAssessmentPage> {
           child: LinearProgressIndicator(
             value: c.pct / 100,
             minHeight: 8,
-            backgroundColor: AppColors.border(isDark).withValues(alpha: 0.3),
+            backgroundColor: AppColors.border(isDark).withOpacity(0.3),
             valueColor: AlwaysStoppedAnimation(
               c.pct >= 70 ? Colors.green : Colors.orange,
             ),

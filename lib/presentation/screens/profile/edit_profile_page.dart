@@ -1,135 +1,130 @@
+// presentation/screens/profile/edit_profile_page.dart
+// v8: Fixed — properly loads profile, saves picture locally AND to Cloudinary
 import 'dart:io';
 import 'package:flutter/material.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:provider/provider.dart';
+import 'package:http/http.dart' as http;
 
 import '../../../core/themes/app_theme.dart';
 import '../../../core/utils/helpers.dart';
-import '../../../core/utils/validators.dart';
+import '../../../data/datasources/local/profile_picture_store.dart';
+import '../../../data/datasources/local/token_store.dart';
+import '../../../data/datasources/remote/api_service.dart';
+import '../../../l10n/app_strings.dart';
+import '../../../l10n/language_provider.dart';
 import '../../../providers/auth_provider.dart';
 import '../../../providers/theme_provider.dart';
+import '../../../providers/user_provider.dart';
 import '../../widgets/shared/buttons.dart';
 import '../../widgets/shared/inputs.dart';
 
 class EditProfilePage extends StatefulWidget {
   const EditProfilePage({super.key});
-
   @override
   State<EditProfilePage> createState() => _EditProfilePageState();
 }
 
 class _EditProfilePageState extends State<EditProfilePage> {
-  final _formKey = GlobalKey<FormState>();
-  final _nameController = TextEditingController();
-  final _phoneController = TextEditingController();
-  final _locationController = TextEditingController();
-  final _headlineController = TextEditingController();
-  final _bioController = TextEditingController();
-  final _currentJobController = TextEditingController();
-  final _desiredJobController = TextEditingController();
-  final _yearsController = TextEditingController();
-  final _availabilityController = TextEditingController();
+  final _formKey            = GlobalKey<FormState>();
+  final _nameCtrl           = TextEditingController();
+  final _phoneCtrl          = TextEditingController();
+  final _locationCtrl       = TextEditingController();
+  final _headlineCtrl       = TextEditingController();
+  final _bioCtrl            = TextEditingController();
+  final _currentJobCtrl     = TextEditingController();
+  final _desiredJobCtrl     = TextEditingController();
+  final _yearsCtrl          = TextEditingController();
 
-  final ImagePicker _picker = ImagePicker();
-  File? _image;
-  String? _pictureUrl;
-  bool _isLoading = true;
-  bool _isSaving = false;
-  String _role = 'job_seeker';
+  File?   _imageFile;
+  String? _remoteUrl;
+  bool    _isLoading = true;
+  bool    _isSaving  = false;
+  String  _role      = 'job_seeker';
 
   @override
   void initState() {
     super.initState();
-    _loadProfile();
+    _load();
   }
 
-  Future<void> _loadProfile() async {
-    setState(() => _isLoading = true);
-    final authProvider = context.read<AuthProvider>();
-    await authProvider.loadUserProfile();
+  @override
+  void dispose() {
+    _nameCtrl.dispose(); _phoneCtrl.dispose(); _locationCtrl.dispose();
+    _headlineCtrl.dispose(); _bioCtrl.dispose();
+    _currentJobCtrl.dispose(); _desiredJobCtrl.dispose(); _yearsCtrl.dispose();
+    super.dispose();
+  }
 
-    if (mounted) {
-      final user = authProvider.currentUser;
-      if (user != null) {
-        _role = user.role;
-        _nameController.text = user.fullName ?? '';
-        _pictureUrl = user.profilePictureUrl;
-        _phoneController.text = user.phone ?? '';
-        _locationController.text = user.location ?? '';
-        _headlineController.text = user.headline ?? '';
-        _bioController.text = user.bio ?? '';
-        _currentJobController.text = user.currentJobTitle ?? '';
-        _desiredJobController.text = user.desiredJobTitle ?? '';
-        _yearsController.text = user.yearsOfExperience?.toString() ?? '';
-        _availabilityController.text = user.availability ?? '';
-      }
-      _isLoading = false;
+  Future<void> _load() async {
+    setState(() => _isLoading = true);
+    final auth = context.read<AuthProvider>();
+    await auth.loadUserProfile();
+    if (!mounted) return;
+    final user = auth.currentUser;
+    if (user != null) {
+      _role              = user.role;
+      _nameCtrl.text     = user.fullName ?? '';
+      _remoteUrl         = user.profilePictureUrl;
+      _phoneCtrl.text    = user.phone ?? '';
+      _locationCtrl.text = user.location ?? '';
+      _headlineCtrl.text = user.headline ?? '';
+      _bioCtrl.text      = user.bio ?? '';
+      _currentJobCtrl.text = user.currentJobTitle ?? '';
+      _desiredJobCtrl.text = user.desiredJobTitle ?? '';
+      _yearsCtrl.text    = user.yearsOfExperience?.toString() ?? '';
     }
+    setState(() => _isLoading = false);
   }
 
   Future<void> _pickImage() async {
-    final picked = await _picker.pickImage(
-      source: ImageSource.gallery,
-      imageQuality: 80,
-    );
-    if (picked != null) setState(() => _image = File(picked.path));
+    final picked = await ImagePicker().pickImage(
+        source: ImageSource.gallery, imageQuality: 75);
+    if (picked != null) {
+      final file = File(picked.path);
+      // Save locally immediately so it shows everywhere
+      await ProfilePictureStore.saveFile(file);
+      setState(() => _imageFile = file);
+    }
   }
 
   Future<void> _save() async {
-    if (!_formKey.currentState!.validate()) return;
+    if (!(_formKey.currentState?.validate() ?? false)) return;
     setState(() => _isSaving = true);
 
-    final authProvider = context.read<AuthProvider>();
-    final userRepo = authProvider.userRepository;
-
     try {
-      final fields = <String, dynamic>{};
-      if (_phoneController.text.trim().isNotEmpty) {
-        fields['phone'] = _phoneController.text.trim();
-      }
-      if (_locationController.text.trim().isNotEmpty) {
-        fields['location'] = _locationController.text.trim();
-      }
-      if (_headlineController.text.trim().isNotEmpty) {
-        fields['headline'] = _headlineController.text.trim();
-      }
-      if (_bioController.text.trim().isNotEmpty) {
-        fields['bio'] = _bioController.text.trim();
+      final token = await TokenStore().getAccess();
+      if (token == null) throw Exception('Not authenticated');
+
+      // Upload picture to Cloudinary if changed
+      if (_imageFile != null) {
+        final mf = await http.MultipartFile.fromPath('file', _imageFile!.path);
+        final res = await ApiService().uploadPicture(token, mf);
+        if (res['success'] == true) {
+          _remoteUrl = (res['data'] as Map?)?['url'] as String? ?? _remoteUrl;
+        }
       }
 
-      if (_role == 'job_seeker') {
-        if (_currentJobController.text.trim().isNotEmpty) {
-          fields['current_job_title'] = _currentJobController.text.trim();
-        }
-        if (_desiredJobController.text.trim().isNotEmpty) {
-          fields['desired_job_title'] = _desiredJobController.text.trim();
-        }
-        if (_yearsController.text.trim().isNotEmpty) {
-          fields['years_of_experience'] =
-              int.tryParse(_yearsController.text.trim()) ?? 0;
-        }
-        if (_availabilityController.text.trim().isNotEmpty) {
-          fields['availability'] = _availabilityController.text.trim();
-        }
-        await userRepo.updateJobSeekerProfile(fields);
-      } else if (_role == 'mentor') {
-        if (_currentJobController.text.trim().isNotEmpty) {
-          fields['current_job_title'] = _currentJobController.text.trim();
-        }
-        if (_yearsController.text.trim().isNotEmpty) {
-          fields['years_of_experience'] =
-              int.tryParse(_yearsController.text.trim()) ?? 0;
-        }
-        await userRepo.updateMentorProfile(fields);
+      final fields = <String, dynamic>{
+        if (_nameCtrl.text.trim().isNotEmpty)    'full_name':           _nameCtrl.text.trim(),
+        if (_phoneCtrl.text.trim().isNotEmpty)   'phone':               _phoneCtrl.text.trim(),
+        if (_locationCtrl.text.trim().isNotEmpty)'location':            _locationCtrl.text.trim(),
+        if (_headlineCtrl.text.trim().isNotEmpty)'headline':            _headlineCtrl.text.trim(),
+        if (_bioCtrl.text.trim().isNotEmpty)     'bio':                 _bioCtrl.text.trim(),
+        if (_currentJobCtrl.text.trim().isNotEmpty) 'current_job_title': _currentJobCtrl.text.trim(),
+        if (_desiredJobCtrl.text.trim().isNotEmpty) 'desired_job_title': _desiredJobCtrl.text.trim(),
+        if (_yearsCtrl.text.trim().isNotEmpty)   'years_of_experience': int.tryParse(_yearsCtrl.text.trim()) ?? 0,
+      };
+
+      final up = context.read<UserProvider>();
+      if (_role == 'mentor') {
+        await up.updateMentorProfile(fields);
+      } else {
+        await up.updateJobSeekerProfile(fields);
       }
 
-      if (_nameController.text.trim().isNotEmpty) {
-        await userRepo.setupProfile(
-          fullName: _nameController.text.trim(),
-          dob: '',
-          role: _role,
-        );
-      }
+      // Reload auth profile so dashboard avatar updates
+      await context.read<AuthProvider>().loadUserProfile();
 
       if (mounted) {
         Helpers.showSnackBar(context, 'Profile updated successfully!');
@@ -137,11 +132,8 @@ class _EditProfilePageState extends State<EditProfilePage> {
       }
     } catch (e) {
       if (mounted) {
-        Helpers.showSnackBar(
-          context,
-          'Failed to update profile: $e',
-          isError: true,
-        );
+        Helpers.showSnackBar(context,
+            e.toString().replaceFirst('Exception: ', ''), isError: true);
       }
     } finally {
       if (mounted) setState(() => _isSaving = false);
@@ -149,185 +141,167 @@ class _EditProfilePageState extends State<EditProfilePage> {
   }
 
   @override
-  void dispose() {
-    _nameController.dispose();
-    _phoneController.dispose();
-    _locationController.dispose();
-    _headlineController.dispose();
-    _bioController.dispose();
-    _currentJobController.dispose();
-    _desiredJobController.dispose();
-    _yearsController.dispose();
-    _availabilityController.dispose();
-    super.dispose();
-  }
-
-  @override
   Widget build(BuildContext context) {
-    final themeProvider = context.watch<ThemeProvider>();
-    final isDark = themeProvider.isDarkMode;
+    final isDark = context.watch<ThemeProvider>().isDarkMode;
+    final lang   = context.watch<LanguageProvider>();
 
     return Scaffold(
-      backgroundColor: isDark
-          ? AppColors.darkBackground
-          : AppColors.lightBackground,
+      backgroundColor: AppColors.background(isDark),
       appBar: AppBar(
-        title: const Text('Edit Profile'),
-        actions: [
-          TextButton(
-            onPressed: _isSaving ? null : _save,
-            child: _isSaving
-                ? const SizedBox(
-                    width: 18,
-                    height: 18,
-                    child: CircularProgressIndicator(
-                      strokeWidth: 2,
-                      color: AppColors.primaryCyan,
-                    ),
-                  )
-                : const Text(
-                    'Save',
-                    style: TextStyle(
-                      color: AppColors.primaryCyan,
-                      fontWeight: FontWeight.bold,
-                      fontSize: 15,
-                    ),
-                  ),
-          ),
-        ],
+        title: Text(lang.t(S.myProfile),
+            style: TextStyle(color: AppColors.text(isDark),
+                fontWeight: FontWeight.bold)),
+        backgroundColor: AppColors.surface(isDark),
+        elevation: 0,
+        iconTheme: IconThemeData(color: AppColors.text(isDark)),
       ),
       body: _isLoading
-          ? const Center(
-              child: CircularProgressIndicator(color: AppColors.primaryCyan),
-            )
+          ? const Center(child: CircularProgressIndicator(
+              color: AppColors.primaryCyan))
           : SingleChildScrollView(
-              padding: const EdgeInsets.all(24),
+              padding: const EdgeInsets.all(20),
               child: Form(
                 key: _formKey,
-                child: Column(
-                  children: [
-                    _buildProfileImage(isDark),
-                    const SizedBox(height: 28),
-                    CustomTextField(
-                      controller: _nameController,
-                      icon: Icons.person_outline,
-                      label: 'Full Name',
-                      validator: (v) =>
-                          v == null || v.isEmpty ? 'Required' : null,
-                      isDark: isDark,
-                    ),
-                    const SizedBox(height: 16),
-                    CustomTextField(
-                      controller: _phoneController,
-                      icon: Icons.phone_outlined,
-                      label: 'Phone',
-                      isDark: isDark,
-                    ),
-                    const SizedBox(height: 16),
-                    CustomTextField(
-                      controller: _locationController,
-                      icon: Icons.location_on_outlined,
-                      label: 'Location',
-                      isDark: isDark,
-                    ),
-                    const SizedBox(height: 16),
-                    CustomTextField(
-                      controller: _headlineController,
-                      icon: Icons.title,
-                      label: 'Headline',
-                      isDark: isDark,
-                    ),
-                    const SizedBox(height: 16),
-                    CustomTextField(
-                      controller: _bioController,
-                      icon: Icons.notes_outlined,
-                      label: 'Bio',
-                      maxLines: 4,
-                      isDark: isDark,
-                    ),
-                    const SizedBox(height: 16),
-                    CustomTextField(
-                      controller: _currentJobController,
-                      icon: Icons.work_outline,
-                      label: 'Current Job Title',
-                      isDark: isDark,
-                    ),
-                    if (_role == 'job_seeker') ...[
-                      const SizedBox(height: 16),
-                      CustomTextField(
-                        controller: _desiredJobController,
-                        icon: Icons.flag_outlined,
-                        label: 'Desired Job Title',
-                        isDark: isDark,
+                child: Column(children: [
+
+                  // ── Avatar ───────────────────────────────
+                  GestureDetector(
+                    onTap: _pickImage,
+                    child: Stack(alignment: Alignment.bottomRight, children: [
+                      // Shows local OR remote OR initials
+                      _imageFile != null
+                          ? CircleAvatar(
+                              radius: 58,
+                              backgroundImage: FileImage(_imageFile!),
+                              backgroundColor:
+                                  AppColors.primaryCyan.withOpacity(0.2))
+                          : ProfilePictureStore.avatar(
+                              remoteUrl: _remoteUrl,
+                              name: _nameCtrl.text,
+                              radius: 58,
+                              bgColor: AppColors.primaryCyan),
+                      Container(
+                        padding: const EdgeInsets.all(8),
+                        decoration: const BoxDecoration(
+                          color: AppColors.primaryCyan, shape: BoxShape.circle),
+                        child: const Icon(Icons.camera_alt_rounded,
+                            color: Colors.black, size: 16),
                       ),
-                    ],
-                    const SizedBox(height: 16),
-                    CustomTextField(
-                      controller: _yearsController,
-                      icon: Icons.signal_cellular_alt,
-                      label: 'Years of Experience',
-                      keyboardType: TextInputType.number,
-                      isDark: isDark,
-                    ),
-                    if (_role == 'job_seeker') ...[
-                      const SizedBox(height: 16),
-                      CustomTextField(
-                        controller: _availabilityController,
-                        icon: Icons.hourglass_top_outlined,
-                        label: 'Availability',
-                        isDark: isDark,
-                      ),
-                    ],
-                    const SizedBox(height: 36),
-                    PrimaryButton(
-                      text: 'SAVE CHANGES',
-                      onPressed: _save,
-                      isLoading: _isSaving,
-                    ),
+                    ]),
+                  ),
+                  const SizedBox(height: 6),
+                  Text(lang.t(S.changePhoto), style: TextStyle(
+                      color: AppColors.primaryCyan, fontSize: 12,
+                      fontWeight: FontWeight.w500)),
+                  const SizedBox(height: 28),
+
+                  // ── Fields ───────────────────────────────
+                  _field(lang.t(S.fullName), _nameCtrl,
+                      Icons.person_outline, isDark),
+                  _field('Phone', _phoneCtrl, Icons.phone_outlined, isDark),
+                  _field(lang.t(S.location), _locationCtrl,
+                      Icons.location_on_outlined, isDark),
+                  _field('Headline', _headlineCtrl,
+                      Icons.text_fields_outlined, isDark),
+                  _field(lang.t(S.bio), _bioCtrl,
+                      Icons.info_outline, isDark, maxLines: 3),
+
+                  if (_role != 'mentor') ...[
+                    _field('Current Job Title', _currentJobCtrl,
+                        Icons.work_outline, isDark),
+                    _field('Desired Job Title', _desiredJobCtrl,
+                        Icons.trending_up_outlined, isDark),
                   ],
-                ),
+                  _field('Years of Experience', _yearsCtrl,
+                      Icons.timeline_outlined, isDark,
+                      keyboardType: TextInputType.number),
+                  const SizedBox(height: 28),
+
+                  // Save button
+                  _SaveButton(label: lang.t(S.save),
+                      onTap: _save, isLoading: _isSaving),
+                ]),
               ),
             ),
     );
   }
 
-  Widget _buildProfileImage(bool isDark) {
-    return GestureDetector(
-      onTap: _pickImage,
-      child: Stack(
-        children: [
-          CircleAvatar(
-            radius: 58,
-            backgroundColor: AppColors.primaryCyan.withValues(alpha: 0.2),
-            backgroundImage: _image != null
-                ? FileImage(_image!)
-                : (_pictureUrl != null && _pictureUrl!.isNotEmpty
-                      ? NetworkImage(_pictureUrl!)
-                      : null),
-            child:
-                (_image == null &&
-                    (_pictureUrl == null || _pictureUrl!.isEmpty))
-                ? Icon(Icons.person, color: AppColors.primaryCyan, size: 46)
-                : null,
-          ),
-          Positioned(
-            bottom: 4,
-            right: 4,
-            child: Container(
-              padding: const EdgeInsets.all(7),
-              decoration: const BoxDecoration(
-                color: AppColors.primaryCyan,
-                shape: BoxShape.circle,
-              ),
-              child: const Icon(
-                Icons.camera_alt,
-                color: Colors.black,
-                size: 16,
-              ),
-            ),
-          ),
-        ],
+  Widget _field(String label, TextEditingController ctrl,
+      IconData icon, bool isDark,
+      {int maxLines = 1, TextInputType? keyboardType}) {
+    return Padding(
+      padding: const EdgeInsets.only(bottom: 16),
+      child: TextFormField(
+        controller: ctrl,
+        maxLines: maxLines,
+        keyboardType: keyboardType,
+        style: TextStyle(color: AppColors.text(isDark)),
+        decoration: InputDecoration(
+          labelText: label,
+          labelStyle: TextStyle(color: AppColors.textSecondary(isDark)),
+          prefixIcon: Icon(icon, color: AppColors.primaryCyan, size: 20),
+          filled: true, fillColor: AppColors.inputFill(isDark),
+          border: OutlineInputBorder(
+              borderRadius: BorderRadius.circular(14), borderSide: BorderSide.none),
+          enabledBorder: OutlineInputBorder(
+              borderRadius: BorderRadius.circular(14),
+              borderSide: BorderSide(color: AppColors.border(isDark))),
+          focusedBorder: OutlineInputBorder(
+              borderRadius: BorderRadius.circular(14),
+              borderSide: const BorderSide(
+                  color: AppColors.primaryCyan, width: 2)),
+        ),
       ),
     );
   }
+}
+
+class _SaveButton extends StatefulWidget {
+  final String label; final VoidCallback onTap; final bool isLoading;
+  const _SaveButton({required this.label, required this.onTap,
+      required this.isLoading});
+  @override State<_SaveButton> createState() => _SaveButtonState();
+}
+class _SaveButtonState extends State<_SaveButton>
+    with SingleTickerProviderStateMixin {
+  late AnimationController _c;
+  late Animation<double> _s;
+  @override void initState() {
+    super.initState();
+    _c = AnimationController(vsync: this,
+        duration: const Duration(milliseconds: 100));
+    _s = Tween<double>(begin: 1.0, end: 0.97)
+        .animate(CurvedAnimation(parent: _c, curve: Curves.easeOut));
+  }
+  @override void dispose() { _c.dispose(); super.dispose(); }
+  @override
+  Widget build(BuildContext context) => GestureDetector(
+    onTapDown: (_) { if (!widget.isLoading) _c.forward(); },
+    onTapUp:   (_) { _c.reverse(); if (!widget.isLoading) widget.onTap(); },
+    onTapCancel: () => _c.reverse(),
+    child: ScaleTransition(scale: _s,
+      child: Container(
+        width: double.infinity, height: 54,
+        decoration: BoxDecoration(
+          gradient: const LinearGradient(
+            colors: [AppColors.primaryCyan, Color(0xFF0097A7)],
+            begin: Alignment.topLeft, end: Alignment.bottomRight),
+          borderRadius: BorderRadius.circular(16),
+          boxShadow: [BoxShadow(
+            color: AppColors.primaryCyan.withOpacity(0.4),
+            blurRadius: 20, offset: const Offset(0, 6))]),
+        child: Center(child: widget.isLoading
+            ? const SizedBox(width: 22, height: 22,
+                child: CircularProgressIndicator(
+                    strokeWidth: 2.5, color: Colors.black))
+            : Row(mainAxisSize: MainAxisSize.min, children: [
+                const Icon(Icons.save_outlined, color: Colors.black, size: 18),
+                const SizedBox(width: 8),
+                Text(widget.label.toUpperCase(), style: const TextStyle(
+                  color: Colors.black, fontSize: 15,
+                  fontWeight: FontWeight.w800, letterSpacing: 1)),
+              ])),
+      ),
+    ),
+  );
 }

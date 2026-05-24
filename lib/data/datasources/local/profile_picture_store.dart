@@ -1,45 +1,38 @@
 // data/datasources/local/profile_picture_store.dart
-// Stores profile picture locally using shared_preferences (base64).
-// Fallback when Cloudinary upload fails or image URL is unreachable.
+// Stores profile picture locally as base64 in SharedPreferences.
+// This is the FIX for "profile picture disappears after registration".
+// Priority: local storage → Cloudinary URL → initials fallback
+
 import 'dart:convert';
 import 'dart:io';
 import 'package:flutter/material.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 class ProfilePictureStore {
-  static const String _key = 'local_profile_picture';
+  static const _key = 'local_profile_picture_v2';
 
-  /// Save image file as base64 locally
-  static Future<void> save(File imageFile) async {
-    final bytes = await imageFile.readAsBytes();
-    final base64 = base64Encode(bytes);
-    final prefs = await SharedPreferences.getInstance();
-    await prefs.setString(_key, base64);
+  /// Save a File locally
+  static Future<void> saveFile(File file) async {
+    final bytes  = await file.readAsBytes();
+    final b64    = base64Encode(bytes);
+    final prefs  = await SharedPreferences.getInstance();
+    await prefs.setString(_key, b64);
   }
 
   /// Save raw bytes locally
   static Future<void> saveBytes(List<int> bytes) async {
-    final base64 = base64Encode(bytes);
     final prefs = await SharedPreferences.getInstance();
-    await prefs.setString(_key, base64);
+    await prefs.setString(_key, base64Encode(bytes));
   }
 
-  /// Get local picture as ImageProvider (null if none saved)
-  static Future<ImageProvider?> get() async {
+  /// Get as ImageProvider (null if not saved)
+  static Future<ImageProvider?> getLocal() async {
     final prefs = await SharedPreferences.getInstance();
-    final base64 = prefs.getString(_key);
-    if (base64 == null || base64.isEmpty) return null;
+    final b64   = prefs.getString(_key);
+    if (b64 == null || b64.isEmpty) return null;
     try {
-      return MemoryImage(base64Decode(base64));
-    } catch (_) {
-      return null;
-    }
-  }
-
-  /// Get as base64 string
-  static Future<String?> getBase64() async {
-    final prefs = await SharedPreferences.getInstance();
-    return prefs.getString(_key);
+      return MemoryImage(base64Decode(b64));
+    } catch (_) { return null; }
   }
 
   /// Clear local picture
@@ -48,22 +41,26 @@ class ProfilePictureStore {
     await prefs.remove(_key);
   }
 
-  /// Widget that shows local picture, falls back to URL, then initials
+  /// Smart avatar widget:
+  /// 1. Shows local picture if saved
+  /// 2. Falls back to remote Cloudinary URL
+  /// 3. Falls back to initials
   static Widget avatar({
     required String? remoteUrl,
     required String? name,
-    double radius = 40,
-    Color backgroundColor = const Color(0xFF00B8D4),
+    double radius       = 40,
+    double fontSize     = 0,
+    Color bgColor       = const Color(0xFF00B8D4),
   }) {
+    final fSize = fontSize > 0 ? fontSize : radius * 0.5;
     return FutureBuilder<ImageProvider?>(
-      future: get(),
-      builder: (context, snap) {
+      future: getLocal(),
+      builder: (_, snap) {
         ImageProvider? provider;
-
-        // Priority: local > remote URL
         if (snap.hasData && snap.data != null) {
           provider = snap.data;
-        } else if (remoteUrl != null && remoteUrl.isNotEmpty) {
+        } else if (remoteUrl != null && remoteUrl.isNotEmpty &&
+            (remoteUrl.startsWith('http'))) {
           provider = NetworkImage(remoteUrl);
         }
 
@@ -71,20 +68,20 @@ class ProfilePictureStore {
           return CircleAvatar(
             radius: radius,
             backgroundImage: provider,
-            backgroundColor: backgroundColor,
+            backgroundColor: bgColor.withOpacity(0.15),
+            onBackgroundImageError: (_, __) {},
           );
         }
 
-        // Fallback: initials
-        final initials = _initials(name);
+        // Initials fallback
         return CircleAvatar(
           radius: radius,
-          backgroundColor: backgroundColor.withValues(alpha: 0.2),
+          backgroundColor: bgColor.withOpacity(0.18),
           child: Text(
-            initials,
+            _initials(name),
             style: TextStyle(
-              color: backgroundColor,
-              fontSize: radius * 0.6,
+              color: bgColor,
+              fontSize: fSize,
               fontWeight: FontWeight.bold,
             ),
           ),
@@ -95,7 +92,7 @@ class ProfilePictureStore {
 
   static String _initials(String? name) {
     if (name == null || name.trim().isEmpty) return '?';
-    final parts = name.trim().split(' ');
+    final parts = name.trim().split(RegExp(r'\s+'));
     if (parts.length >= 2) {
       return '${parts.first[0]}${parts.last[0]}'.toUpperCase();
     }

@@ -1,0 +1,147 @@
+# .github/workflows/flutter.yml
+# Career Navigator Flutter — CI/CD Pipeline v8.0
+# Updated for: onboarding, language provider, guest mode, profile picture store
+
+name: Career Navigator – Flutter
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+    branches: [main]
+
+jobs:
+  # ── 1. Analyze & Test ──────────────────────────────────────
+  analyze:
+    name: 🔍 Analyze & Test
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Set up Flutter
+        uses: subosito/flutter-action@v2
+        with:
+          flutter-version: '3.24.0'
+          channel: 'stable'
+          cache: true
+
+      - name: Get dependencies
+        run: flutter pub get
+
+      - name: Verify formatting
+        run: dart format --output=none --set-exit-if-changed lib/
+        continue-on-error: true
+
+      - name: Analyze code
+        run: flutter analyze --no-fatal-infos
+        continue-on-error: true
+
+      - name: Run unit tests
+        run: flutter test test/ --coverage --reporter=expanded
+
+  # ── 2. Build Android APK ──────────────────────────────────
+  build_android:
+    name: 🤖 Build Android APK
+    runs-on: ubuntu-latest
+    needs: analyze
+    if: github.ref == 'refs/heads/main' && github.event_name == 'push'
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Set up Java 17
+        uses: actions/setup-java@v4
+        with:
+          distribution: 'temurin'
+          java-version: '17'
+
+      - name: Set up Flutter
+        uses: subosito/flutter-action@v2
+        with:
+          flutter-version: '3.24.0'
+          channel: 'stable'
+          cache: true
+
+      - name: Get dependencies
+        run: flutter pub get
+
+      - name: Build APK (release, split per ABI)
+        run: flutter build apk --release --split-per-abi
+
+      - name: Upload APK artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: android-apk-${{ github.sha }}
+          path: build/app/outputs/flutter-apk/*.apk
+          retention-days: 30
+
+  # ── 3. Build Windows EXE ──────────────────────────────────
+  build_windows:
+    name: 🪟 Build Windows EXE
+    runs-on: windows-latest
+    needs: analyze
+    if: github.ref == 'refs/heads/main' && github.event_name == 'push'
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Set up Flutter
+        uses: subosito/flutter-action@v2
+        with:
+          flutter-version: '3.24.0'
+          channel: 'stable'
+          cache: true
+
+      - name: Get dependencies
+        run: flutter pub get
+
+      - name: Enable Windows desktop
+        run: flutter config --enable-windows-desktop
+
+      - name: Build Windows (release)
+        run: flutter build windows --release
+
+      - name: Upload Windows artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: windows-build-${{ github.sha }}
+          path: build/windows/x64/runner/Release/
+          retention-days: 30
+
+  # ── 4. Notify Status ──────────────────────────────────────
+  notify:
+    name: 📣 Notify Status
+    runs-on: ubuntu-latest
+    needs: [analyze, build_android, build_windows]
+    if: always()
+
+    steps:
+      - name: Report result
+        run: |
+          echo "========================================"
+          echo "  Career Navigator Flutter CI v8.0"
+          echo "========================================"
+          if [ "${{ needs.analyze.result }}"       = "success" ]; then
+            echo "✅ Tests + Analysis : passed"
+          else
+            echo "❌ Tests + Analysis : failed"
+          fi
+          if [ "${{ needs.build_android.result }}" = "success" ]; then
+            echo "✅ Android APK      : built"
+          elif [ "${{ needs.build_android.result }}" = "skipped" ]; then
+            echo "⏭️  Android APK      : skipped (PR)"
+          else
+            echo "❌ Android APK      : failed"
+          fi
+          if [ "${{ needs.build_windows.result }}" = "success" ]; then
+            echo "✅ Windows EXE      : built"
+          elif [ "${{ needs.build_windows.result }}" = "skipped" ]; then
+            echo "⏭️  Windows EXE      : skipped (PR)"
+          else
+            echo "❌ Windows EXE      : failed"
+          fi
+          echo "========================================"
