@@ -68,15 +68,15 @@ class ProfilePictureStore {
           return CircleAvatar(
             radius: radius,
             backgroundImage: provider,
-            backgroundColor: bgColor.withValues(alpha: 0.15),
-            onBackgroundImageError: (_, _) {},
+            backgroundColor: bgColor.withOpacity(0.15),
+            onBackgroundImageError: (_, __) {},
           );
         }
 
         // Initials fallback
         return CircleAvatar(
           radius: radius,
-          backgroundColor: bgColor.withValues(alpha: 0.18),
+          backgroundColor: bgColor.withOpacity(0.18),
           child: Text(
             _initials(name),
             style: TextStyle(

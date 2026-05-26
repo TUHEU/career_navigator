@@ -158,7 +158,7 @@ class _Tile extends StatelessWidget {
   final VoidCallback onTap; final bool isDark;
   final Color? iconColor;
   const _Tile({required this.icon, required this.label,
-      required this.onTap, required this.isDark}) : iconColor = null;
+      required this.onTap, required this.isDark, this.iconColor});
   @override
   Widget build(BuildContext context) => Container(
     margin: const EdgeInsets.only(bottom: 8),
@@ -197,7 +197,7 @@ class _SwitchTile extends StatelessWidget {
       title: Text(label, style: TextStyle(
           color: AppColors.text(isDark), fontWeight: FontWeight.w500)),
       value: value, onChanged: onChanged,
-      activeThumbColor: AppColors.primaryCyan,
+      activeColor: AppColors.primaryCyan,
       shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(14)),
     ),
   );
@@ -239,7 +239,7 @@ class _LangTile extends StatelessWidget {
                       horizontal: 20, vertical: 14),
                   decoration: BoxDecoration(
                     color: lang.language == opt.$1
-                        ? AppColors.primaryCyan.withValues(alpha: 0.12)
+                        ? AppColors.primaryCyan.withOpacity(0.12)
                         : AppColors.card(isDark),
                     borderRadius: BorderRadius.circular(14),
                     border: Border.all(
@@ -282,9 +282,9 @@ class _LangTile extends StatelessWidget {
         child: Container(
           padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
           decoration: BoxDecoration(
-            color: AppColors.primaryCyan.withValues(alpha: 0.12),
+            color: AppColors.primaryCyan.withOpacity(0.12),
             borderRadius: BorderRadius.circular(20),
-            border: Border.all(color: AppColors.primaryCyan.withValues(alpha: 0.4))),
+            border: Border.all(color: AppColors.primaryCyan.withOpacity(0.4))),
           child: Text(lang.languageLabel, style: const TextStyle(
               color: AppColors.primaryCyan,
               fontWeight: FontWeight.bold, fontSize: 13)),
@@ -303,9 +303,9 @@ class _GuestBanner extends StatelessWidget {
   Widget build(BuildContext context) => Container(
     padding: const EdgeInsets.all(16),
     decoration: BoxDecoration(
-      color: AppColors.warning.withValues(alpha: 0.08),
+      color: AppColors.warning.withOpacity(0.08),
       borderRadius: BorderRadius.circular(14),
-      border: Border.all(color: AppColors.warning.withValues(alpha: 0.3))),
+      border: Border.all(color: AppColors.warning.withOpacity(0.3))),
     child: Row(children: [
       Icon(Icons.info_outline_rounded, color: AppColors.warning, size: 20),
       const SizedBox(width: 12),
@@ -326,9 +326,9 @@ class _AuthButton extends StatelessWidget {
     child: Container(
       height: 52,
       decoration: BoxDecoration(
-        color: color.withValues(alpha: 0.08),
+        color: color.withOpacity(0.08),
         borderRadius: BorderRadius.circular(14),
-        border: Border.all(color: color.withValues(alpha: 0.3))),
+        border: Border.all(color: color.withOpacity(0.3))),
       child: Row(mainAxisAlignment: MainAxisAlignment.center, children: [
         Icon(icon, color: color, size: 20),
         const SizedBox(width: 10),
@@ -423,7 +423,7 @@ class _ChangePasswordPageState extends State<_ChangePasswordPage> {
                     colors: [AppColors.primaryCyan, Color(0xFF0097A7)]),
                 borderRadius: BorderRadius.circular(14),
                 boxShadow: [BoxShadow(
-                    color: AppColors.primaryCyan.withValues(alpha: 0.4),
+                    color: AppColors.primaryCyan.withOpacity(0.4),
                     blurRadius: 16, offset: const Offset(0, 4))]),
               child: Center(child: _loading
                   ? const CircularProgressIndicator(color: Colors.black)

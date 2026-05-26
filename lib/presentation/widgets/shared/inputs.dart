@@ -45,13 +45,13 @@ class CustomTextField extends StatelessWidget {
         prefixIcon: Icon(icon, color: AppColors.primaryCyan, size: 20),
         labelText: label,
         labelStyle: TextStyle(
-          color: isDark ? Colors.white.withValues(alpha: 0.6) : Colors.grey.shade600,
+          color: isDark ? Colors.white.withOpacity(0.6) : Colors.grey.shade600,
           fontSize: 14,
         ),
         suffixIcon: suffixIcon,
         filled: true,
         fillColor: isDark
-            ? Colors.white.withValues(alpha: 0.05)
+            ? Colors.white.withOpacity(0.05)
             : Colors.grey.shade100,
         border: OutlineInputBorder(
           borderRadius: BorderRadius.circular(15),
@@ -61,7 +61,7 @@ class CustomTextField extends StatelessWidget {
           borderRadius: BorderRadius.circular(15),
           borderSide: BorderSide(
             color: isDark
-                ? Colors.white.withValues(alpha: 0.15)
+                ? Colors.white.withOpacity(0.15)
                 : Colors.grey.shade300,
           ),
         ),
@@ -115,7 +115,7 @@ class SearchField extends StatelessWidget {
       decoration: InputDecoration(
         hintText: hintText,
         hintStyle: TextStyle(
-          color: isDark ? Colors.white.withValues(alpha: 0.35) : Colors.grey.shade500,
+          color: isDark ? Colors.white.withOpacity(0.35) : Colors.grey.shade500,
         ),
         prefixIcon: const Icon(Icons.search, color: AppColors.primaryCyan),
         suffixIcon: controller.text.isNotEmpty && onClear != null
@@ -123,7 +123,7 @@ class SearchField extends StatelessWidget {
                 icon: Icon(
                   Icons.clear,
                   color: isDark
-                      ? Colors.white.withValues(alpha: 0.5)
+                      ? Colors.white.withOpacity(0.5)
                       : Colors.grey.shade500,
                 ),
                 onPressed: onClear,
@@ -131,7 +131,7 @@ class SearchField extends StatelessWidget {
             : null,
         filled: true,
         fillColor: isDark
-            ? Colors.white.withValues(alpha: 0.06)
+            ? Colors.white.withOpacity(0.06)
             : Colors.grey.shade100,
         border: OutlineInputBorder(
           borderRadius: BorderRadius.circular(16),

@@ -1,17 +1,19 @@
+// presentation/widgets/shared/bottom_nav.dart
+// Updated: accepts dynamic labels for language support
 import 'package:flutter/material.dart';
 import '../../../core/themes/app_theme.dart';
 
 class NavItem {
   final IconData outlinedIcon;
   final IconData filledIcon;
-  final String label;
+  final String   label;
   const NavItem(this.outlinedIcon, this.filledIcon, this.label);
 }
 
 class AppBottomNav extends StatelessWidget {
-  final int currentIndex;
-  final ValueChanged<int> onTap;
-  final List<NavItem> items;
+  final int                 currentIndex;
+  final ValueChanged<int>   onTap;
+  final List<NavItem>       items;
 
   const AppBottomNav({
     super.key,
@@ -27,20 +29,13 @@ class AppBottomNav extends StatelessWidget {
     return Container(
       decoration: BoxDecoration(
         color: isDark ? AppColors.darkSurface : Colors.white,
-        border: Border(
-          top: BorderSide(
-            color: isDark
-                ? Colors.white.withValues(alpha: 0.08)
-                : Colors.grey.shade200,
-          ),
-        ),
-        boxShadow: [
-          BoxShadow(
-            color: Colors.black.withValues(alpha: 0.1),
-            blurRadius: 20,
-            offset: const Offset(0, -4),
-          ),
-        ],
+        border: Border(top: BorderSide(
+          color: isDark
+              ? Colors.white.withValues(alpha: 0.08)
+              : Colors.grey.shade200)),
+        boxShadow: [BoxShadow(
+          color: Colors.black.withValues(alpha: 0.1),
+          blurRadius: 20, offset: const Offset(0, -4))],
       ),
       child: SafeArea(
         top: false,
@@ -50,21 +45,18 @@ class AppBottomNav extends StatelessWidget {
             mainAxisAlignment: MainAxisAlignment.spaceAround,
             children: List.generate(items.length, (i) {
               final item = items[i];
-              final sel = i == currentIndex;
+              final sel  = i == currentIndex;
               return GestureDetector(
                 onTap: () => onTap(i),
                 child: AnimatedContainer(
                   duration: const Duration(milliseconds: 200),
                   padding: const EdgeInsets.symmetric(
-                    horizontal: 16,
-                    vertical: 8,
-                  ),
+                      horizontal: 16, vertical: 8),
                   decoration: BoxDecoration(
                     color: sel
                         ? AppColors.primaryCyan.withValues(alpha: 0.12)
                         : Colors.transparent,
-                    borderRadius: BorderRadius.circular(14),
-                  ),
+                    borderRadius: BorderRadius.circular(14)),
                   child: Column(
                     mainAxisSize: MainAxisSize.min,
                     children: [
@@ -73,20 +65,16 @@ class AppBottomNav extends StatelessWidget {
                         color: sel
                             ? AppColors.primaryCyan
                             : (isDark ? Colors.white38 : Colors.grey.shade500),
-                        size: 22,
-                      ),
+                        size: 22),
                       const SizedBox(height: 4),
                       Text(
                         item.label,
                         style: TextStyle(
                           color: sel
                               ? AppColors.primaryCyan
-                              : (isDark
-                                    ? Colors.white38
-                                    : Colors.grey.shade500),
+                              : (isDark ? Colors.white38 : Colors.grey.shade500),
                           fontSize: 10,
-                          fontWeight: sel ? FontWeight.bold : FontWeight.normal,
-                        ),
+                          fontWeight: sel ? FontWeight.bold : FontWeight.normal),
                       ),
                     ],
                   ),

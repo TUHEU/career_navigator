@@ -30,12 +30,8 @@ class _EmailVerificationPageState extends State<EmailVerificationPage> {
 
   @override
   void dispose() {
-    for (final c in _ctrls) {
-      c.dispose();
-    }
-    for (final n in _nodes) {
-      n.dispose();
-    }
+    for (final c in _ctrls) c.dispose();
+    for (final n in _nodes) n.dispose();
     super.dispose();
   }
 
@@ -69,9 +65,7 @@ class _EmailVerificationPageState extends State<EmailVerificationPage> {
           MaterialPageRoute(builder: (_) => const ProfileSetupPage()));
     } else {
       Helpers.showSnackBar(context, auth.error ?? 'Invalid code', isError: true);
-      for (final c in _ctrls) {
-        c.clear();
-      }
+      for (final c in _ctrls) c.clear();
       _nodes[0].requestFocus();
       _autoTriggered = false;
     }
@@ -86,9 +80,7 @@ class _EmailVerificationPageState extends State<EmailVerificationPage> {
     setState(() => _resending = false);
     if (success) {
       Helpers.showSnackBar(context, 'New code sent!');
-      for (final c in _ctrls) {
-        c.clear();
-      }
+      for (final c in _ctrls) c.clear();
       _nodes[0].requestFocus();
       _autoTriggered = false;
     } else {
@@ -111,12 +103,12 @@ class _EmailVerificationPageState extends State<EmailVerificationPage> {
           Container(
             width: 82, height: 82,
             decoration: BoxDecoration(shape: BoxShape.circle, boxShadow: [
-              BoxShadow(color: AppColors.primaryCyan.withValues(alpha: 0.35),
+              BoxShadow(color: AppColors.primaryCyan.withOpacity(0.35),
                   blurRadius: 24)]),
             child: ClipOval(child: Image.asset('assets/logo/logo.png',
               fit: BoxFit.cover,
-              errorBuilder: (_, _, _) => Container(
-                color: AppColors.primaryCyan.withValues(alpha: 0.2),
+              errorBuilder: (_, __, ___) => Container(
+                color: AppColors.primaryCyan.withOpacity(0.2),
                 child: const Icon(Icons.compass_calibration_outlined,
                     color: AppColors.primaryCyan, size: 38)))),
           ),
@@ -126,9 +118,9 @@ class _EmailVerificationPageState extends State<EmailVerificationPage> {
           Container(
             padding: const EdgeInsets.all(18),
             decoration: BoxDecoration(shape: BoxShape.circle,
-              color: AppColors.primaryCyan.withValues(alpha: 0.1),
+              color: AppColors.primaryCyan.withOpacity(0.1),
               border: Border.all(
-                  color: AppColors.primaryCyan.withValues(alpha: 0.3), width: 1.5)),
+                  color: AppColors.primaryCyan.withOpacity(0.3), width: 1.5)),
             child: const Icon(Icons.mark_email_read_outlined,
                 color: AppColors.primaryCyan, size: 48),
           ),
@@ -158,7 +150,7 @@ class _EmailVerificationPageState extends State<EmailVerificationPage> {
                 decoration: BoxDecoration(
                   // FIX: solid visible background in both modes
                   color: isDark
-                      ? Colors.white.withValues(alpha: 0.08)
+                      ? Colors.white.withOpacity(0.08)
                       : const Color(0xFFEEF2F8),
                   borderRadius: BorderRadius.circular(12),
                   border: Border.all(
@@ -202,7 +194,7 @@ class _EmailVerificationPageState extends State<EmailVerificationPage> {
 
           // Resend row
           Row(mainAxisAlignment: MainAxisAlignment.center, children: [
-            Text('${lang.t(S.didntReceive)} ',
+            Text(lang.t(S.didntReceive) + ' ',
                 style: TextStyle(color: AppColors.textSecondary(isDark))),
             _resending
                 ? const SizedBox(width: 16, height: 16,
@@ -257,7 +249,7 @@ class _VerifyButtonState extends State<_VerifyButton>
             begin: Alignment.topLeft, end: Alignment.bottomRight),
           borderRadius: BorderRadius.circular(16),
           boxShadow: [BoxShadow(
-            color: AppColors.primaryCyan.withValues(alpha: 0.4),
+            color: AppColors.primaryCyan.withOpacity(0.4),
             blurRadius: 20, offset: const Offset(0, 6))]),
         child: Center(child: widget.isLoading
             ? const SizedBox(width: 22, height: 22,

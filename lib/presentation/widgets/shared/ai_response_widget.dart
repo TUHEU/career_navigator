@@ -57,7 +57,7 @@ class _AIResponseWidgetState extends State<AIResponseWidget>
         borderRadius: BorderRadius.circular(14),
         border: Border.all(
           color: widget.isStreaming
-              ? widget.accentColor.withValues(alpha: 0.4)
+              ? widget.accentColor.withOpacity(0.4)
               : AppColors.border(isDark),
           width: widget.isStreaming ? 1.5 : 1,
         ),
@@ -116,7 +116,7 @@ class _AIResponseWidgetState extends State<AIResponseWidget>
             ClipRRect(
               borderRadius: BorderRadius.circular(2),
               child: LinearProgressIndicator(
-                backgroundColor: widget.accentColor.withValues(alpha: 0.1),
+                backgroundColor: widget.accentColor.withOpacity(0.1),
                 valueColor: AlwaysStoppedAnimation(widget.accentColor),
               ),
             ),
@@ -139,7 +139,7 @@ class _AIResponseWidgetState extends State<AIResponseWidget>
                   WidgetSpan(
                     child: AnimatedBuilder(
                       animation: _cursorAnim,
-                      builder: (_, _) => Opacity(
+                      builder: (_, __) => Opacity(
                         opacity: _cursorAnim.value,
                         child: Text(
                           '▋',

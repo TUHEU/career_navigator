@@ -122,8 +122,8 @@ class _RegistrationPageState extends State<RegistrationPage> {
           ),
           Container(
             color: isDark
-                ? Colors.black.withValues(alpha: 0.50)
-                : Colors.white.withValues(alpha: 0.92),
+                ? Colors.black.withOpacity(0.50)
+                : Colors.white.withOpacity(0.92),
           ),
           SafeArea(
             child: Center(
@@ -158,7 +158,7 @@ class _RegistrationPageState extends State<RegistrationPage> {
           shape: BoxShape.circle,
           boxShadow: [
             BoxShadow(
-              color: AppColors.primaryCyan.withValues(alpha: 0.35),
+              color: AppColors.primaryCyan.withOpacity(0.35),
               blurRadius: 20,
             ),
           ],
@@ -167,8 +167,8 @@ class _RegistrationPageState extends State<RegistrationPage> {
           child: Image.asset(
             'assets/logo/logo.png',
             fit: BoxFit.cover,
-            errorBuilder: (_, _, _) => Container(
-              color: AppColors.primaryCyan.withValues(alpha: 0.2),
+            errorBuilder: (_, __, ___) => Container(
+              color: AppColors.primaryCyan.withOpacity(0.2),
               child: const Icon(
                 Icons.school,
                 color: AppColors.primaryCyan,
@@ -193,7 +193,7 @@ class _RegistrationPageState extends State<RegistrationPage> {
         'Join Career Navigator today',
         style: TextStyle(
           color: isDark
-              ? Colors.white.withValues(alpha: 0.55)
+              ? Colors.white.withOpacity(0.55)
               : AppColors.lightTextSecondary,
           fontSize: 14,
         ),
@@ -208,11 +208,11 @@ class _RegistrationPageState extends State<RegistrationPage> {
       child: Container(
         padding: const EdgeInsets.all(24),
         decoration: BoxDecoration(
-          color: isDark ? Colors.white.withValues(alpha: 0.07) : Colors.white,
+          color: isDark ? Colors.white.withOpacity(0.07) : Colors.white,
           borderRadius: BorderRadius.circular(28),
           border: Border.all(
             color: isDark
-                ? Colors.white.withValues(alpha: 0.13)
+                ? Colors.white.withOpacity(0.13)
                 : Colors.grey.shade200,
           ),
         ),
@@ -290,7 +290,7 @@ class _RegistrationPageState extends State<RegistrationPage> {
           child: LinearProgressIndicator(
             value: _passwordStrength / 4,
             backgroundColor: isDark
-                ? Colors.white.withValues(alpha: 0.1)
+                ? Colors.white.withOpacity(0.1)
                 : Colors.grey.shade200,
             valueColor: AlwaysStoppedAnimation<Color>(color),
             minHeight: 6,
@@ -335,10 +335,10 @@ class _RegistrationPageState extends State<RegistrationPage> {
     return Container(
       padding: const EdgeInsets.all(12),
       decoration: BoxDecoration(
-        color: isDark ? Colors.white.withValues(alpha: 0.04) : Colors.grey.shade100,
+        color: isDark ? Colors.white.withOpacity(0.04) : Colors.grey.shade100,
         borderRadius: BorderRadius.circular(12),
         border: Border.all(
-          color: isDark ? Colors.white.withValues(alpha: 0.08) : Colors.grey.shade300,
+          color: isDark ? Colors.white.withOpacity(0.08) : Colors.grey.shade300,
         ),
       ),
       child: Column(
@@ -361,7 +361,7 @@ class _RegistrationPageState extends State<RegistrationPage> {
                     color: ok
                         ? Colors.greenAccent
                         : (isDark
-                              ? Colors.white.withValues(alpha: 0.45)
+                              ? Colors.white.withOpacity(0.45)
                               : Colors.grey.shade500),
                   ),
                 ),
@@ -393,11 +393,11 @@ class _RegistrationPageState extends State<RegistrationPage> {
         ),
         labelText: label,
         labelStyle: TextStyle(
-          color: isDark ? Colors.white.withValues(alpha: 0.6) : Colors.grey.shade600,
+          color: isDark ? Colors.white.withOpacity(0.6) : Colors.grey.shade600,
         ),
         filled: true,
         fillColor: isDark
-            ? Colors.white.withValues(alpha: 0.05)
+            ? Colors.white.withOpacity(0.05)
             : Colors.grey.shade100,
         border: OutlineInputBorder(
           borderRadius: BorderRadius.circular(15),
@@ -407,7 +407,7 @@ class _RegistrationPageState extends State<RegistrationPage> {
           borderRadius: BorderRadius.circular(15),
           borderSide: BorderSide(
             color: isDark
-                ? Colors.white.withValues(alpha: 0.15)
+                ? Colors.white.withOpacity(0.15)
                 : Colors.grey.shade300,
           ),
         ),
@@ -441,7 +441,7 @@ class _RegistrationPageState extends State<RegistrationPage> {
         'Already have an account? ',
         style: TextStyle(
           color: isDark
-              ? Colors.white.withValues(alpha: 0.65)
+              ? Colors.white.withOpacity(0.65)
               : AppColors.lightTextSecondary,
         ),
       ),

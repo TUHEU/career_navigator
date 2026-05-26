@@ -1,8 +1,13 @@
+// presentation/screens/dashboard/mentor_dashboard.dart
+// FIXED: local profile picture + full language support
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 
 import '../../../core/themes/app_theme.dart';
 import '../../../core/utils/helpers.dart';
+import '../../../data/datasources/local/profile_picture_store.dart';
+import '../../../l10n/app_strings.dart';
+import '../../../l10n/language_provider.dart';
 import '../../../providers/auth_provider.dart';
 import '../../../providers/theme_provider.dart';
 import '../../widgets/shared/bottom_nav.dart';
@@ -16,7 +21,6 @@ import '../settings/settings_page.dart';
 
 class MentorDashboard extends StatefulWidget {
   const MentorDashboard({super.key});
-
   @override
   State<MentorDashboard> createState() => _MentorDashboardState();
 }
@@ -24,51 +28,43 @@ class MentorDashboard extends StatefulWidget {
 class _MentorDashboardState extends State<MentorDashboard> {
   int _currentIndex = 0;
 
-  final List<Widget> _pages = [
-    const _HomePage(),
-    const JobListingsPage(),
-    const ConversationsPage(),
-    const SearchPage(),
-    const SettingsPage(),
+  final List<Widget> _pages = const [
+    _HomePage(),
+    JobListingsPage(),
+    ConversationsPage(),
+    SearchPage(),
+    SettingsPage(),
   ];
 
   @override
   Widget build(BuildContext context) {
     final themeProvider = context.watch<ThemeProvider>();
-    final isDark = themeProvider.isDarkMode;
+    final isDark        = themeProvider.isDarkMode;
+    final lang          = context.watch<LanguageProvider>();
 
     return Scaffold(
       body: Stack(
         children: [
           Container(
             decoration: BoxDecoration(
-              color: isDark
-                  ? AppColors.darkBackground
-                  : AppColors.lightBackground,
+              color: isDark ? AppColors.darkBackground : AppColors.lightBackground,
               image: DecorationImage(
                 image: AssetImage(themeProvider.backgroundPath),
-                fit: BoxFit.cover,
-                opacity: 0.18,
-              ),
+                fit: BoxFit.cover, opacity: 0.3),
             ),
-          ),
-          Container(
-            color: isDark
-                ? AppColors.darkBackground.withValues(alpha: 0.80)
-                : Colors.white.withValues(alpha: 0.92),
           ),
           SafeArea(child: _pages[_currentIndex]),
         ],
       ),
       bottomNavigationBar: AppBottomNav(
         currentIndex: _currentIndex,
-        onTap: (index) => setState(() => _currentIndex = index),
-        items: const [
-          NavItem(Icons.home_outlined, Icons.home, 'Home'),
-          NavItem(Icons.work_outline, Icons.work, 'Jobs'),
-          NavItem(Icons.chat_bubble_outline, Icons.chat_bubble, 'Chat'),
-          NavItem(Icons.search_outlined, Icons.search, 'Search'),
-          NavItem(Icons.settings_outlined, Icons.settings, 'Settings'),
+        onTap: (i) => setState(() => _currentIndex = i),
+        items: [
+          NavItem(Icons.home_outlined,      Icons.home,        lang.t(S.home)),
+          NavItem(Icons.work_outline,        Icons.work,        lang.t(S.jobs)),
+          NavItem(Icons.chat_bubble_outline, Icons.chat_bubble, lang.t(S.chat)),
+          NavItem(Icons.search_outlined,     Icons.search,      lang.t(S.search)),
+          NavItem(Icons.settings_outlined,   Icons.settings,    lang.t(S.settings)),
         ],
       ),
     );
@@ -81,9 +77,10 @@ class _HomePage extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final themeProvider = context.watch<ThemeProvider>();
-    final authProvider = context.watch<AuthProvider>();
-    final isDark = themeProvider.isDarkMode;
-    final user = authProvider.currentUser;
+    final authProvider  = context.watch<AuthProvider>();
+    final lang          = context.watch<LanguageProvider>();
+    final isDark        = themeProvider.isDarkMode;
+    final user          = authProvider.currentUser;
 
     return RefreshIndicator(
       onRefresh: () => authProvider.loadUserProfile(),
@@ -91,46 +88,31 @@ class _HomePage extends StatelessWidget {
       child: ListView(
         padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 16),
         children: [
+
           Row(
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: [
-              Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Text(
-                    'CAREER NAVIGATOR',
-                    style: TextStyle(
-                      color: AppColors.primaryCyan,
-                      fontSize: 11,
-                      letterSpacing: 2,
-                      fontWeight: FontWeight.bold,
-                    ),
-                  ),
-                  const SizedBox(height: 2),
-                  Text(
-                    'Mentor Dashboard',
-                    style: TextStyle(
-                      color: isDark
-                          ? Colors.white.withValues(alpha: 0.5)
-                          : AppColors.lightTextSecondary,
-                      fontSize: 12,
-                    ),
-                  ),
-                ],
-              ),
+              Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
+                Text('CAREER NAVIGATOR', style: TextStyle(
+                  color: AppColors.primaryCyan, fontSize: 11,
+                  letterSpacing: 2, fontWeight: FontWeight.bold)),
+                const SizedBox(height: 2),
+                Text(lang.t(S.mentor), style: TextStyle(
+                  color: isDark
+                      ? Colors.white.withValues(alpha: 0.5)
+                      : AppColors.lightTextSecondary,
+                  fontSize: 12)),
+              ]),
               IconButton(
-                icon: Icon(
-                  Icons.search,
-                  color: isDark ? Colors.white70 : Colors.grey.shade600,
-                ),
-                onPressed: () => Navigator.push(
-                  context,
-                  MaterialPageRoute(builder: (_) => const SearchPage()),
-                ),
+                icon: Icon(Icons.search,
+                    color: isDark ? Colors.white70 : Colors.grey.shade600),
+                onPressed: () => Navigator.push(context,
+                    MaterialPageRoute(builder: (_) => const SearchPage())),
               ),
             ],
           ),
           const SizedBox(height: 16),
+
           Container(
             padding: const EdgeInsets.all(20),
             decoration: BoxDecoration(
@@ -139,98 +121,64 @@ class _HomePage extends StatelessWidget {
                   : Colors.grey.shade100,
               borderRadius: BorderRadius.circular(22),
               border: Border.all(
-                color: AppColors.primaryCyan.withValues(alpha: 0.25),
+                  color: AppColors.primaryCyan.withValues(alpha: 0.25)),
+            ),
+            child: Row(children: [
+
+              // PROFILE PICTURE FIX
+              ProfilePictureStore.avatar(
+                remoteUrl: user?.profilePictureUrl,
+                name:      user?.displayName ?? 'User',
+                radius:    36,
+                bgColor:   AppColors.primaryCyan,
               ),
-            ),
-            child: Row(
-              children: [
-                CircleAvatar(
-                  radius: 36,
-                  backgroundColor: AppColors.primaryCyan.withValues(alpha: 0.2),
-                  backgroundImage: user?.profilePictureUrl != null
-                      ? NetworkImage(user!.profilePictureUrl!)
-                      : null,
-                  child: user?.profilePictureUrl == null
-                      ? Text(
-                          Helpers.getInitials(user?.displayName ?? 'User'),
-                          style: const TextStyle(
-                            color: AppColors.primaryCyan,
-                            fontWeight: FontWeight.bold,
-                            fontSize: 28,
-                          ),
-                        )
-                      : null,
-                ),
-                const SizedBox(width: 14),
-                Expanded(
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      Text(
-                        user?.displayName ?? 'User',
-                        style: TextStyle(
-                          color: isDark ? Colors.white : AppColors.lightText,
-                          fontSize: 17,
-                          fontWeight: FontWeight.bold,
-                        ),
-                      ),
-                      const SizedBox(height: 6),
-                      Container(
-                        padding: const EdgeInsets.symmetric(
-                          horizontal: 10,
-                          vertical: 4,
-                        ),
-                        decoration: BoxDecoration(
-                          color: AppColors.primaryCyan.withValues(alpha: 0.12),
-                          borderRadius: BorderRadius.circular(20),
-                          border: Border.all(
-                            color: AppColors.primaryCyan.withValues(alpha: 0.3),
-                          ),
-                        ),
-                        child: Row(
-                          mainAxisSize: MainAxisSize.min,
-                          children: const [
-                            Icon(
-                              Icons.school_outlined,
-                              color: AppColors.primaryCyan,
-                              size: 12,
-                            ),
-                            SizedBox(width: 5),
-                            Text(
-                              'Mentor',
-                              style: TextStyle(
-                                color: AppColors.primaryCyan,
-                                fontSize: 11,
-                                fontWeight: FontWeight.w600,
-                              ),
-                            ),
-                          ],
-                        ),
-                      ),
-                    ],
+
+              const SizedBox(width: 14),
+              Expanded(child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text(user?.displayName ?? 'User', style: TextStyle(
+                    color: isDark ? Colors.white : AppColors.lightText,
+                    fontSize: 17, fontWeight: FontWeight.bold)),
+                  const SizedBox(height: 6),
+                  Container(
+                    padding: const EdgeInsets.symmetric(
+                        horizontal: 10, vertical: 4),
+                    decoration: BoxDecoration(
+                      color: AppColors.primaryCyan.withValues(alpha: 0.12),
+                      borderRadius: BorderRadius.circular(20),
+                      border: Border.all(
+                          color: AppColors.primaryCyan.withValues(alpha: 0.3)),
+                    ),
+                    child: Row(mainAxisSize: MainAxisSize.min, children: [
+                      const Icon(Icons.star_rounded,
+                          color: AppColors.primaryCyan, size: 12),
+                      const SizedBox(width: 5),
+                      Text(lang.t(S.mentor), style: const TextStyle(
+                        color: AppColors.primaryCyan,
+                        fontSize: 11, fontWeight: FontWeight.w600)),
+                    ]),
                   ),
-                ),
-              ],
-            ),
+                ],
+              )),
+            ]),
           ),
           const SizedBox(height: 20),
+
           SecondaryButton(
-            text: 'Edit Mentor Profile',
-            onPressed: () => Navigator.push(
-              context,
-              MaterialPageRoute(
-                builder: (_) => const MentorProfilePage(profile: {}),
-              ),
-            ).then((_) => authProvider.loadUserProfile()),
+            text: '${lang.t(S.editProfile)} (Mentor)',
+            onPressed: () => Navigator.push(context,
+                MaterialPageRoute(
+                    builder: (_) => const MentorProfilePage(profile: {})))
+                .then((_) => authProvider.loadUserProfile()),
             icon: Icons.edit_outlined,
           ),
           const SizedBox(height: 10),
           SecondaryButton(
-            text: 'Edit Personal Info',
-            onPressed: () => Navigator.push(
-              context,
-              MaterialPageRoute(builder: (_) => const EditProfilePage()),
-            ).then((_) => authProvider.loadUserProfile()),
+            text: '${lang.t(S.editProfile)} (Personal)',
+            onPressed: () => Navigator.push(context,
+                MaterialPageRoute(builder: (_) => const EditProfilePage()))
+                .then((_) => authProvider.loadUserProfile()),
             icon: Icons.person_outline,
           ),
         ],

@@ -33,7 +33,7 @@ class GuestGuard extends StatelessWidget {
       child,
       Positioned.fill(child: Container(
         decoration: BoxDecoration(
-          color: AppColors.background(isDark).withValues(alpha: 0.92),
+          color: AppColors.background(isDark).withOpacity(0.92),
           borderRadius: BorderRadius.circular(16),
         ),
         child: Column(mainAxisAlignment: MainAxisAlignment.center, children: [
@@ -41,9 +41,9 @@ class GuestGuard extends StatelessWidget {
             padding: const EdgeInsets.all(18),
             decoration: BoxDecoration(
               shape: BoxShape.circle,
-              color: AppColors.primaryCyan.withValues(alpha: 0.1),
+              color: AppColors.primaryCyan.withOpacity(0.1),
               border: Border.all(
-                  color: AppColors.primaryCyan.withValues(alpha: 0.3), width: 1.5)),
+                  color: AppColors.primaryCyan.withOpacity(0.3), width: 1.5)),
             child: const Icon(Icons.lock_outline_rounded,
                 color: AppColors.primaryCyan, size: 36),
           ),
@@ -107,7 +107,7 @@ class _SignInBtnState extends State<_SignInBtn>
             begin: Alignment.topLeft, end: Alignment.bottomRight),
           borderRadius: BorderRadius.circular(14),
           boxShadow: [BoxShadow(
-            color: AppColors.primaryCyan.withValues(alpha: 0.4),
+            color: AppColors.primaryCyan.withOpacity(0.4),
             blurRadius: 16, offset: const Offset(0, 4))]),
         child: Center(child: Text(
           widget.lang.t(S.signIn).toUpperCase(),
