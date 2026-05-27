@@ -1,17 +1,18 @@
 // presentation/screens/dashboard/job_seeker_dashboard.dart
-// FIXED: local profile picture + full language support on all strings
+// Fixed: guest restrictions on Chat, AI, Search tabs
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 
 import '../../../core/themes/app_theme.dart';
-import '../../../core/utils/helpers.dart';
 import '../../../data/datasources/local/profile_picture_store.dart';
 import '../../../l10n/app_strings.dart';
 import '../../../l10n/language_provider.dart';
 import '../../../providers/auth_provider.dart';
+import '../../../providers/guest_provider.dart';
 import '../../../providers/theme_provider.dart';
 import '../../widgets/shared/bottom_nav.dart';
 import '../../widgets/shared/buttons.dart';
+import '../../widgets/shared/guest_guard.dart';
 import '../profile/edit_profile_page.dart';
 import '../jobs/job_listings_page.dart';
 import '../chat/chat_page.dart';
@@ -28,43 +29,45 @@ class JobSeekerDashboard extends StatefulWidget {
 class _JobSeekerDashboardState extends State<JobSeekerDashboard> {
   int _currentIndex = 0;
 
-  final List<Widget> _pages = const [
-    _HomePage(),
-    JobListingsPage(),
-    ConversationsPage(),
-    SearchPage(),
-    SettingsPage(),
-  ];
-
   @override
   Widget build(BuildContext context) {
     final themeProvider = context.watch<ThemeProvider>();
     final isDark        = themeProvider.isDarkMode;
     final lang          = context.watch<LanguageProvider>();
+    final guest         = context.watch<GuestProvider>();
+
+    // Pages — locked for guests where needed
+    final pages = [
+      const _HomePage(),
+      const JobListingsPage(),                                   // guests CAN browse
+      guest.canAccess(GuestFeature.chat)
+          ? const ConversationsPage()
+          : const GuestLockedPage(feature: GuestFeature.chat),   // guests CANNOT chat
+      guest.canAccess(GuestFeature.aiTools)
+          ? const AIHubPage()
+          : const GuestLockedPage(feature: GuestFeature.aiTools),// guests CANNOT use AI
+      const SettingsPage(),
+    ];
 
     return Scaffold(
-      body: Stack(
-        children: [
-          Container(
-            decoration: BoxDecoration(
-              color: isDark ? AppColors.darkBackground : AppColors.lightBackground,
-              image: DecorationImage(
-                image: AssetImage(themeProvider.backgroundPath),
-                fit: BoxFit.cover, opacity: 0.3),
-            ),
-          ),
-          SafeArea(child: _pages[_currentIndex]),
-        ],
-      ),
+      body: Stack(children: [
+        Container(decoration: BoxDecoration(
+          color: isDark ? AppColors.darkBackground : AppColors.lightBackground,
+          image: DecorationImage(
+            image: AssetImage(themeProvider.backgroundPath),
+            fit: BoxFit.cover, opacity: 0.3),
+        )),
+        SafeArea(child: pages[_currentIndex]),
+      ]),
       bottomNavigationBar: AppBottomNav(
         currentIndex: _currentIndex,
         onTap: (i) => setState(() => _currentIndex = i),
         items: [
-          NavItem(Icons.home_outlined,        Icons.home,         lang.t(S.home)),
-          NavItem(Icons.work_outline,          Icons.work,         lang.t(S.jobs)),
-          NavItem(Icons.chat_bubble_outline,   Icons.chat_bubble,  lang.t(S.chat)),
-          NavItem(Icons.search_outlined,       Icons.search,       lang.t(S.search)),
-          NavItem(Icons.settings_outlined,     Icons.settings,     lang.t(S.settings)),
+          NavItem(Icons.home_outlined,      Icons.home,        lang.t(S.home)),
+          NavItem(Icons.work_outline,        Icons.work,        lang.t(S.jobs)),
+          NavItem(Icons.chat_bubble_outline, Icons.chat_bubble, lang.t(S.chat)),
+          NavItem(Icons.auto_awesome_outlined, Icons.auto_awesome, lang.t(S.aiHub)),
+          NavItem(Icons.settings_outlined,   Icons.settings,    lang.t(S.settings)),
         ],
       ),
     );
@@ -79,6 +82,7 @@ class _HomePage extends StatelessWidget {
     final themeProvider = context.watch<ThemeProvider>();
     final authProvider  = context.watch<AuthProvider>();
     final lang          = context.watch<LanguageProvider>();
+    final guest         = context.watch<GuestProvider>();
     final isDark        = themeProvider.isDarkMode;
     final user          = authProvider.currentUser;
 
@@ -89,32 +93,50 @@ class _HomePage extends StatelessWidget {
         padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 16),
         children: [
 
-          // ── Top header ─────────────────────────────────────
-          Row(
-            mainAxisAlignment: MainAxisAlignment.spaceBetween,
-            children: [
-              Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
-                Text('CAREER NAVIGATOR', style: TextStyle(
-                  color: AppColors.primaryCyan, fontSize: 11,
-                  letterSpacing: 2, fontWeight: FontWeight.bold)),
-                const SizedBox(height: 2),
-                Text(lang.t(S.jobSeeker), style: TextStyle(
-                  color: isDark
-                      ? Colors.white.withValues(alpha: 0.5)
-                      : AppColors.lightTextSecondary,
-                  fontSize: 12)),
-              ]),
-              IconButton(
-                icon: Icon(Icons.search,
-                    color: isDark ? Colors.white70 : Colors.grey.shade600),
-                onPressed: () => Navigator.push(context,
-                    MaterialPageRoute(builder: (_) => const SearchPage())),
-              ),
-            ],
-          ),
+          // Header
+          Row(mainAxisAlignment: MainAxisAlignment.spaceBetween, children: [
+            Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
+              Text('CAREER NAVIGATOR', style: TextStyle(
+                color: AppColors.primaryCyan, fontSize: 11,
+                letterSpacing: 2, fontWeight: FontWeight.bold)),
+              const SizedBox(height: 2),
+              Text(lang.t(S.jobSeeker), style: TextStyle(
+                color: isDark
+                    ? Colors.white.withValues(alpha: 0.5)
+                    : AppColors.lightTextSecondary,
+                fontSize: 12)),
+            ]),
+            IconButton(
+              icon: Icon(Icons.search,
+                  color: isDark ? Colors.white70 : Colors.grey.shade600),
+              onPressed: () => Navigator.push(context,
+                  MaterialPageRoute(builder: (_) => const SearchPage())),
+            ),
+          ]),
           const SizedBox(height: 16),
 
-          // ── Profile card ──────────────────────────────────
+          // Guest banner
+          if (guest.isGuest) ...[
+            Container(
+              padding: const EdgeInsets.all(14),
+              margin: const EdgeInsets.only(bottom: 16),
+              decoration: BoxDecoration(
+                color: AppColors.warning.withValues(alpha: 0.08),
+                borderRadius: BorderRadius.circular(14),
+                border: Border.all(
+                    color: AppColors.warning.withValues(alpha: 0.3))),
+              child: Row(children: [
+                Icon(Icons.info_outline_rounded,
+                    color: AppColors.warning, size: 18),
+                const SizedBox(width: 10),
+                Expanded(child: Text(lang.t(S.guestWarning),
+                  style: TextStyle(
+                      color: AppColors.warning, fontSize: 12))),
+              ]),
+            ),
+          ],
+
+          // Profile card
           Container(
             padding: const EdgeInsets.all(20),
             decoration: BoxDecoration(
@@ -123,27 +145,24 @@ class _HomePage extends StatelessWidget {
                   : Colors.grey.shade100,
               borderRadius: BorderRadius.circular(22),
               border: Border.all(
-                  color: AppColors.primaryCyan.withValues(alpha: 0.25)),
-            ),
+                  color: AppColors.primaryCyan.withValues(alpha: 0.25))),
             child: Row(children: [
-
-              // ── PROFILE PICTURE FIX ───────────────────────
-              // Shows local saved picture first, falls back to
-              // Cloudinary URL, then initials. Never blank.
               ProfilePictureStore.avatar(
                 remoteUrl: user?.profilePictureUrl,
-                name:      user?.displayName ?? 'User',
+                name:      guest.isGuest ? 'Guest' : (user?.displayName ?? 'User'),
                 radius:    36,
                 bgColor:   AppColors.primaryCyan,
               ),
-
               const SizedBox(width: 14),
               Expanded(child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  Text(user?.displayName ?? 'User', style: TextStyle(
-                    color: isDark ? Colors.white : AppColors.lightText,
-                    fontSize: 17, fontWeight: FontWeight.bold)),
+                  Text(
+                    guest.isGuest ? lang.t(S.guestMode)
+                        : (user?.displayName ?? 'User'),
+                    style: TextStyle(
+                      color: isDark ? Colors.white : AppColors.lightText,
+                      fontSize: 17, fontWeight: FontWeight.bold)),
                   const SizedBox(height: 6),
                   Container(
                     padding: const EdgeInsets.symmetric(
@@ -152,8 +171,7 @@ class _HomePage extends StatelessWidget {
                       color: AppColors.primaryCyan.withValues(alpha: 0.12),
                       borderRadius: BorderRadius.circular(20),
                       border: Border.all(
-                          color: AppColors.primaryCyan.withValues(alpha: 0.3)),
-                    ),
+                          color: AppColors.primaryCyan.withValues(alpha: 0.3))),
                     child: Row(mainAxisSize: MainAxisSize.min, children: [
                       const Icon(Icons.search_rounded,
                           color: AppColors.primaryCyan, size: 12),
@@ -169,20 +187,31 @@ class _HomePage extends StatelessWidget {
           ),
           const SizedBox(height: 20),
 
-          // ── Edit profile ──────────────────────────────────
-          PrimaryButton(
-            text: lang.t(S.editProfile),
-            onPressed: () => Navigator.push(context,
-                MaterialPageRoute(builder: (_) => const EditProfilePage()))
-                .then((_) => authProvider.loadUserProfile()),
-            icon: Icons.edit_outlined,
-          ),
+          // Edit profile — only for authenticated users
+          if (!guest.isGuest)
+            PrimaryButton(
+              text: lang.t(S.editProfile),
+              onPressed: () => Navigator.push(context,
+                  MaterialPageRoute(builder: (_) => const EditProfilePage()))
+                  .then((_) => authProvider.loadUserProfile()),
+              icon: Icons.edit_outlined,
+            ),
+
           const SizedBox(height: 12),
 
-          // ── AI Tools card ─────────────────────────────────
+          // AI Tools card
           GestureDetector(
-            onTap: () => Navigator.push(context,
-                MaterialPageRoute(builder: (_) => const AIHubPage())),
+            onTap: () {
+              if (guest.isGuest) {
+                ScaffoldMessenger.of(context).showSnackBar(SnackBar(
+                  content: Text(lang.t(S.signInToAccess)),
+                  backgroundColor: AppColors.primaryCyan,
+                  behavior: SnackBarBehavior.floating));
+              } else {
+                Navigator.push(context,
+                    MaterialPageRoute(builder: (_) => const AIHubPage()));
+              }
+            },
             child: Container(
               width: double.infinity,
               padding: const EdgeInsets.all(16),
@@ -193,8 +222,7 @@ class _HomePage extends StatelessWidget {
                 ]),
                 borderRadius: BorderRadius.circular(14),
                 border: Border.all(
-                    color: AppColors.primaryCyan.withValues(alpha: 0.3)),
-              ),
+                    color: AppColors.primaryCyan.withValues(alpha: 0.3))),
               child: Row(children: [
                 Container(
                   padding: const EdgeInsets.all(8),
@@ -211,27 +239,31 @@ class _HomePage extends StatelessWidget {
                     Text(lang.t(S.aiCareerTools), style: TextStyle(
                       color: isDark ? Colors.white : AppColors.lightText,
                       fontWeight: FontWeight.bold, fontSize: 14)),
-                    Text(lang.t(S.aiCareerSub), style: TextStyle(
-                      color: AppColors.primaryCyan.withValues(alpha: 0.8),
-                      fontSize: 11)),
+                    Text(
+                      guest.isGuest
+                          ? lang.t(S.signInToAccess)
+                          : lang.t(S.aiCareerSub),
+                      style: TextStyle(
+                        color: AppColors.primaryCyan.withValues(alpha: 0.8),
+                        fontSize: 11)),
                   ],
                 )),
-                const Icon(Icons.arrow_forward_ios,
-                    size: 14, color: AppColors.primaryCyan),
+                Icon(
+                  guest.isGuest ? Icons.lock_outline : Icons.arrow_forward_ios,
+                  size: 14, color: AppColors.primaryCyan),
               ]),
             ),
           ),
           const SizedBox(height: 20),
 
-          // ── Coming soon card ──────────────────────────────
+          // Coming soon card
           Container(
             padding: const EdgeInsets.all(16),
             decoration: BoxDecoration(
               color: AppColors.primaryCyan.withValues(alpha: 0.06),
               borderRadius: BorderRadius.circular(14),
               border: Border.all(
-                  color: AppColors.primaryCyan.withValues(alpha: 0.15)),
-            ),
+                  color: AppColors.primaryCyan.withValues(alpha: 0.15))),
             child: Row(children: [
               const Icon(Icons.rocket_launch_outlined,
                   color: AppColors.primaryCyan, size: 20),
