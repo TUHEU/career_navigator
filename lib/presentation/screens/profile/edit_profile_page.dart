@@ -16,6 +16,8 @@ import '../../../l10n/language_provider.dart';
 import '../../../providers/auth_provider.dart';
 import '../../../providers/theme_provider.dart';
 import '../../../providers/user_provider.dart';
+import '../../widgets/shared/buttons.dart';
+import '../../widgets/shared/inputs.dart';
 
 class EditProfilePage extends StatefulWidget {
   const EditProfilePage({super.key});
@@ -75,14 +77,23 @@ class _EditProfilePageState extends State<EditProfilePage> {
     setState(() => _isLoading = false);
   }
 
+  bool _picking = false;
+
   Future<void> _pickImage() async {
-    final picked = await ImagePicker().pickImage(
-        source: ImageSource.gallery, imageQuality: 75);
-    if (picked != null) {
-      final file = File(picked.path);
-      // Save locally immediately so it shows everywhere
-      await ProfilePictureStore.saveFile(file);
-      setState(() => _imageFile = file);
+    if (_picking) return;           // prevent double-tap crash
+    setState(() => _picking = true);
+    try {
+      final picked = await ImagePicker().pickImage(
+          source: ImageSource.gallery, imageQuality: 75);
+      if (picked != null && mounted) {
+        final file = File(picked.path);
+        await ProfilePictureStore.saveFile(file);
+        setState(() => _imageFile = file);
+      }
+    } catch (e) {
+      // already_active — silently ignore
+    } finally {
+      if (mounted) setState(() => _picking = false);
     }
   }
 
@@ -172,7 +183,7 @@ class _EditProfilePageState extends State<EditProfilePage> {
                               radius: 58,
                               backgroundImage: FileImage(_imageFile!),
                               backgroundColor:
-                                  AppColors.primaryCyan.withValues(alpha: 0.2))
+                                  AppColors.primaryCyan.withOpacity(0.2))
                           : ProfilePictureStore.avatar(
                               remoteUrl: _remoteUrl,
                               name: _nameCtrl.text,
@@ -286,7 +297,7 @@ class _SaveButtonState extends State<_SaveButton>
             begin: Alignment.topLeft, end: Alignment.bottomRight),
           borderRadius: BorderRadius.circular(16),
           boxShadow: [BoxShadow(
-            color: AppColors.primaryCyan.withValues(alpha: 0.4),
+            color: AppColors.primaryCyan.withOpacity(0.4),
             blurRadius: 20, offset: const Offset(0, 6))]),
         child: Center(child: widget.isLoading
             ? const SizedBox(width: 22, height: 22,

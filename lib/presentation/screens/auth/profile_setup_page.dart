@@ -25,10 +25,24 @@ class _ProfileSetupPageState extends State<ProfileSetupPage> {
   DateTime? _selectedDate;
   String _selectedRole = 'job_seeker';
   final TextEditingController _nameController = TextEditingController();
+  bool _picking = false; // guard against double-tap
 
   Future<void> _pickImage() async {
-    final picked = await _picker.pickImage(source: ImageSource.gallery);
-    if (picked != null) setState(() => _image = File(picked.path));
+    if (_picking) return;           // prevent double-tap crash
+    setState(() => _picking = true);
+    try {
+      final picked = await _picker.pickImage(
+        source: ImageSource.gallery,
+        imageQuality: 75,
+      );
+      if (picked != null && mounted) {
+        setState(() => _image = File(picked.path));
+      }
+    } catch (e) {
+      // already_active or permission denied — silently ignore
+    } finally {
+      if (mounted) setState(() => _picking = false);
+    }
   }
 
   Future<void> _pickDate() async {
@@ -113,7 +127,7 @@ class _ProfileSetupPageState extends State<ProfileSetupPage> {
                   children: [
                     CircleAvatar(
                       radius: 62,
-                      backgroundColor: AppColors.primaryCyan.withValues(alpha: 0.2),
+                      backgroundColor: AppColors.primaryCyan.withOpacity(0.2),
                       backgroundImage: _image != null
                           ? FileImage(_image!)
                           : null,
@@ -151,7 +165,7 @@ class _ProfileSetupPageState extends State<ProfileSetupPage> {
                 'Tap to upload profile picture',
                 style: TextStyle(
                   color: isDark
-                      ? Colors.white.withValues(alpha: 0.5)
+                      ? Colors.white.withOpacity(0.5)
                       : AppColors.lightTextSecondary,
                 ),
               ),
@@ -173,12 +187,12 @@ class _ProfileSetupPageState extends State<ProfileSetupPage> {
                 ),
                 decoration: BoxDecoration(
                   color: isDark
-                      ? Colors.white.withValues(alpha: 0.05)
+                      ? Colors.white.withOpacity(0.05)
                       : Colors.grey.shade100,
                   borderRadius: BorderRadius.circular(15),
                   border: Border.all(
                     color: isDark
-                        ? Colors.white.withValues(alpha: 0.15)
+                        ? Colors.white.withOpacity(0.15)
                         : Colors.grey.shade300,
                   ),
                 ),
@@ -197,7 +211,7 @@ class _ProfileSetupPageState extends State<ProfileSetupPage> {
                         color: _selectedDate != null
                             ? (isDark ? Colors.white : AppColors.lightText)
                             : (isDark
-                                  ? Colors.white.withValues(alpha: 0.5)
+                                  ? Colors.white.withOpacity(0.5)
                                   : Colors.grey.shade500),
                       ),
                     ),
@@ -210,7 +224,7 @@ class _ProfileSetupPageState extends State<ProfileSetupPage> {
               'I am a...',
               style: TextStyle(
                 color: isDark
-                    ? Colors.white.withValues(alpha: 0.75)
+                    ? Colors.white.withOpacity(0.75)
                     : AppColors.lightText,
                 fontSize: 15,
                 fontWeight: FontWeight.w600,
@@ -278,14 +292,14 @@ class _RoleCard extends StatelessWidget {
       padding: const EdgeInsets.symmetric(vertical: 18, horizontal: 14),
       decoration: BoxDecoration(
         color: selected
-            ? AppColors.primaryCyan.withValues(alpha: 0.12)
-            : (isDark ? Colors.white.withValues(alpha: 0.05) : Colors.grey.shade100),
+            ? AppColors.primaryCyan.withOpacity(0.12)
+            : (isDark ? Colors.white.withOpacity(0.05) : Colors.grey.shade100),
         borderRadius: BorderRadius.circular(18),
         border: Border.all(
           color: selected
               ? AppColors.primaryCyan
               : (isDark
-                    ? Colors.white.withValues(alpha: 0.12)
+                    ? Colors.white.withOpacity(0.12)
                     : Colors.grey.shade300),
           width: selected ? 2 : 1,
         ),
@@ -297,7 +311,7 @@ class _RoleCard extends StatelessWidget {
             color: selected
                 ? AppColors.primaryCyan
                 : (isDark
-                      ? Colors.white.withValues(alpha: 0.5)
+                      ? Colors.white.withOpacity(0.5)
                       : Colors.grey.shade500),
             size: 32,
           ),
@@ -308,7 +322,7 @@ class _RoleCard extends StatelessWidget {
               color: selected
                   ? (isDark ? Colors.white : AppColors.lightText)
                   : (isDark
-                        ? Colors.white.withValues(alpha: 0.65)
+                        ? Colors.white.withOpacity(0.65)
                         : AppColors.lightTextSecondary),
               fontWeight: FontWeight.bold,
               fontSize: 14,
@@ -320,7 +334,7 @@ class _RoleCard extends StatelessWidget {
             textAlign: TextAlign.center,
             style: TextStyle(
               color: isDark
-                  ? Colors.white.withValues(alpha: 0.4)
+                  ? Colors.white.withOpacity(0.4)
                   : Colors.grey.shade500,
               fontSize: 11,
             ),

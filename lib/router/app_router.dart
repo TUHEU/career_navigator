@@ -1,6 +1,4 @@
 // router/app_router.dart
-// Centralized named routes with smooth page transitions.
-// Usage: Navigator.pushNamed(context, AppRoutes.xxx, arguments: {...})
 import 'package:flutter/material.dart';
 import '../presentation/screens/auth/splash_screen.dart';
 import '../presentation/screens/auth/sign_in_page.dart';
@@ -54,11 +52,12 @@ Route<dynamic> generateRoute(RouteSettings settings) {
     case AppRoutes.signIn:          return _slide(const SignInPage());
     case AppRoutes.register:        return _slide(const RegistrationPage());
     case AppRoutes.verifyEmail:
-      return _slide(EmailVerificationPage(email: args['email'] as String? ?? ''));
+      return _slide(EmailVerificationPage(
+          email: args['email'] as String? ?? ''));
     case AppRoutes.profileSetup:    return _slide(const ProfileSetupPage());
     case AppRoutes.resetPassword:
-      // ResetPasswordPage requires email — read from navigation arguments
-      return _slide(ResetPasswordPage(email: args['email'] as String? ?? ''));
+      return _slide(ResetPasswordPage(
+          email: args['email'] as String? ?? ''));
     case AppRoutes.questionnaire:   return _slide(const QuestionnaireScreen());
     case AppRoutes.dashboardSeeker: return _fade(const JobSeekerDashboard());
     case AppRoutes.dashboardMentor: return _fade(const MentorDashboard());
@@ -66,7 +65,6 @@ Route<dynamic> generateRoute(RouteSettings settings) {
     case AppRoutes.aiHub:           return _slide(const AIHubPage());
     case AppRoutes.jobs:            return _slide(const JobListingsPage());
     case AppRoutes.chat:
-      // ChatPage requires conversationId, recipientId, recipientName
       return _slide(ChatPage(
         conversationId: args['conversationId'] as int? ?? 0,
         recipientId:    args['recipientId']    as int? ?? 0,
@@ -84,16 +82,16 @@ Route<dynamic> generateRoute(RouteSettings settings) {
 }
 
 PageRouteBuilder _fade(Widget page) => PageRouteBuilder(
-  pageBuilder:        (_, _, _) => page,
+  pageBuilder:        (_, __, ___) => page,
   transitionDuration: const Duration(milliseconds: 250),
-  transitionsBuilder: (_, anim, _, child) =>
+  transitionsBuilder: (_, anim, __, child) =>
       FadeTransition(opacity: anim, child: child),
 );
 
 PageRouteBuilder _slide(Widget page) => PageRouteBuilder(
-  pageBuilder:        (_, _, _) => page,
+  pageBuilder:        (_, __, ___) => page,
   transitionDuration: const Duration(milliseconds: 280),
-  transitionsBuilder: (_, anim, _, child) => SlideTransition(
+  transitionsBuilder: (_, anim, __, child) => SlideTransition(
     position: Tween<Offset>(begin: const Offset(1, 0), end: Offset.zero)
         .animate(CurvedAnimation(parent: anim, curve: Curves.easeInOut)),
     child: child,

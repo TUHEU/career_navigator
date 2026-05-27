@@ -1,7 +1,11 @@
+// presentation/screens/notifications/notifications_page.dart
+// FIXED: language support
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 
 import '../../../core/themes/app_theme.dart';
+import '../../../l10n/app_strings.dart';
+import '../../../l10n/language_provider.dart';
 import '../../../data/models/notification_model.dart';
 import '../../../providers/notification_provider.dart';
 import '../../../providers/theme_provider.dart';
@@ -9,7 +13,6 @@ import '../../widgets/shared/loading_widgets.dart';
 
 class NotificationsPage extends StatefulWidget {
   const NotificationsPage({super.key});
-
   @override
   State<NotificationsPage> createState() => _NotificationsPageState();
 }
@@ -18,162 +21,101 @@ class _NotificationsPageState extends State<NotificationsPage> {
   @override
   void initState() {
     super.initState();
-    _loadNotifications();
-  }
-
-  Future<void> _loadNotifications() async {
-    final provider = context.read<NotificationProvider>();
-    await provider.loadNotifications();
-    await provider.markAllAsRead();
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      final provider = context.read<NotificationProvider>();
+      provider.loadNotifications().then((_) => provider.markAllAsRead());
+    });
   }
 
   @override
   Widget build(BuildContext context) {
-    final themeProvider = context.watch<ThemeProvider>();
-    final notificationProvider = context.watch<NotificationProvider>();
-    final isDark = themeProvider.isDarkMode;
-    final notifications = notificationProvider.notifications;
+    final isDark     = context.watch<ThemeProvider>().isDarkMode;
+    final notifProv  = context.watch<NotificationProvider>();
+    final lang       = context.watch<LanguageProvider>();
+    final notifs     = notifProv.notifications;
 
     return Scaffold(
       backgroundColor: isDark
-          ? AppColors.darkBackground
-          : AppColors.lightBackground,
-      appBar: AppBar(title: const Text('Notifications')),
-      body: notificationProvider.isLoading
+          ? AppColors.darkBackground : AppColors.lightBackground,
+      appBar: AppBar(
+        title: Text(lang.t(S.notifications),
+            style: TextStyle(color: AppColors.text(isDark))),
+        backgroundColor: AppColors.surface(isDark),
+        elevation: 0,
+        iconTheme: IconThemeData(color: AppColors.text(isDark)),
+      ),
+      body: notifProv.isLoading
           ? const LoadingIndicator()
-          : notifications.isEmpty
-          ? Center(
-              child: Column(
-                mainAxisSize: MainAxisSize.min,
-                children: [
-                  Icon(
-                    Icons.notifications_none,
-                    size: 64,
-                    color: isDark ? Colors.white24 : Colors.grey.shade400,
-                  ),
-                  const SizedBox(height: 14),
-                  Text(
-                    'No notifications yet',
-                    style: TextStyle(
-                      color: isDark
-                          ? Colors.white.withValues(alpha: 0.3)
-                          : Colors.grey.shade500,
-                      fontSize: 15,
-                    ),
-                  ),
-                  const SizedBox(height: 8),
-                  Text(
-                    'When you receive notifications, they will appear here.',
-                    style: TextStyle(
-                      color: isDark
-                          ? Colors.white.withValues(alpha: 0.2)
-                          : Colors.grey.shade400,
-                      fontSize: 12,
-                    ),
-                  ),
-                ],
-              ),
-            )
-          : RefreshIndicator(
-              onRefresh: _loadNotifications,
-              color: AppColors.primaryCyan,
-              child: ListView.builder(
-                padding: const EdgeInsets.symmetric(
-                  horizontal: 16,
-                  vertical: 12,
-                ),
-                itemCount: notifications.length,
-                itemBuilder: (_, index) =>
-                    _buildNotificationCard(notifications[index], isDark),
-              ),
-            ),
+          : notifs.isEmpty
+              ? Center(child: Column(
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    Icon(Icons.notifications_none,
+                        size: 64,
+                        color: AppColors.textMuted(isDark)),
+                    const SizedBox(height: 12),
+                    Text(lang.t(S.noData), style: TextStyle(
+                        color: AppColors.textMuted(isDark))),
+                  ],
+                ))
+              : ListView.builder(
+                  padding: const EdgeInsets.all(16),
+                  itemCount: notifs.length,
+                  itemBuilder: (_, i) => _NotifTile(
+                      notif: notifs[i], isDark: isDark)),
     );
   }
+}
 
-  Widget _buildNotificationCard(NotificationModel notification, bool isDark) {
-    return Container(
-      margin: const EdgeInsets.only(bottom: 10),
-      padding: const EdgeInsets.all(14),
-      decoration: BoxDecoration(
-        color: notification.isRead
-            ? (isDark ? Colors.white.withValues(alpha: 0.03) : Colors.grey.shade50)
-            : AppColors.primaryCyan.withValues(alpha: 0.06),
-        borderRadius: BorderRadius.circular(14),
-        border: Border.all(
-          color: notification.isRead
-              ? (isDark ? Colors.white.withValues(alpha: 0.06) : Colors.grey.shade200)
-              : AppColors.primaryCyan.withValues(alpha: 0.2),
-        ),
+class _NotifTile extends StatelessWidget {
+  final NotificationModel notif;
+  final bool isDark;
+  const _NotifTile({required this.notif, required this.isDark});
+
+  @override
+  Widget build(BuildContext context) => Container(
+    margin: const EdgeInsets.only(bottom: 10),
+    padding: const EdgeInsets.all(14),
+    decoration: BoxDecoration(
+      color: notif.isRead
+          ? AppColors.card(isDark)
+          : AppColors.primaryCyan.withValues(alpha: 0.08),
+      borderRadius: BorderRadius.circular(14),
+      border: Border.all(color: notif.isRead
+          ? AppColors.border(isDark)
+          : AppColors.primaryCyan.withValues(alpha: 0.3)),
+    ),
+    child: Row(crossAxisAlignment: CrossAxisAlignment.start, children: [
+      Container(
+        padding: const EdgeInsets.all(8),
+        decoration: BoxDecoration(
+          color: AppColors.primaryCyan.withValues(alpha: 0.12),
+          shape: BoxShape.circle),
+        child: const Icon(Icons.notifications_outlined,
+            color: AppColors.primaryCyan, size: 18),
       ),
-      child: Row(
+      const SizedBox(width: 12),
+      Expanded(child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          Container(
-            padding: const EdgeInsets.all(8),
-            decoration: BoxDecoration(
-              color: notification.iconColor.withValues(alpha: 0.12),
-              borderRadius: BorderRadius.circular(10),
-            ),
-            child: Icon(
-              notification.icon,
-              color: notification.iconColor,
-              size: 20,
-            ),
-          ),
-          const SizedBox(width: 12),
-          Expanded(
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Text(
-                  notification.title,
-                  style: TextStyle(
-                    color: isDark ? Colors.white : AppColors.lightText,
-                    fontWeight: notification.isRead
-                        ? FontWeight.normal
-                        : FontWeight.bold,
-                    fontSize: 14,
-                  ),
-                ),
-                if (notification.body != null &&
-                    notification.body!.isNotEmpty) ...[
-                  const SizedBox(height: 3),
-                  Text(
-                    notification.body!,
-                    maxLines: 2,
-                    overflow: TextOverflow.ellipsis,
-                    style: TextStyle(
-                      color: isDark
-                          ? Colors.white.withValues(alpha: 0.55)
-                          : AppColors.lightTextSecondary,
-                      fontSize: 12,
-                    ),
-                  ),
-                ],
-                const SizedBox(height: 5),
-                Text(
-                  notification.formattedTime,
-                  style: TextStyle(
-                    color: isDark
-                        ? Colors.white.withValues(alpha: 0.3)
-                        : Colors.grey.shade500,
-                    fontSize: 10,
-                  ),
-                ),
-              ],
-            ),
-          ),
-          if (!notification.isRead)
-            Container(
-              width: 8,
-              height: 8,
-              decoration: const BoxDecoration(
-                color: AppColors.primaryCyan,
-                shape: BoxShape.circle,
-              ),
-            ),
+          Text(notif.title, style: TextStyle(
+            color: AppColors.text(isDark),
+            fontWeight: FontWeight.w600, fontSize: 14)),
+          if (notif.body != null && notif.body!.isNotEmpty) ...[
+            const SizedBox(height: 4),
+            Text(notif.body!, style: TextStyle(
+              color: AppColors.textSecondary(isDark), fontSize: 13)),
+          ],
+          const SizedBox(height: 4),
+          Text(notif.createdAt.toString().substring(0, 16),
+            style: TextStyle(
+              color: AppColors.textMuted(isDark), fontSize: 11)),
         ],
-      ),
-    );
-  }
+      )),
+      if (!notif.isRead)
+        Container(width: 8, height: 8,
+          decoration: const BoxDecoration(
+            color: AppColors.primaryCyan, shape: BoxShape.circle)),
+    ]),
+  );
 }

@@ -50,8 +50,8 @@ class _AdminDashboardState extends State<AdminDashboard> {
           ),
           Container(
             color: isDark
-                ? AppColors.darkBackground.withValues(alpha: 0.82)
-                : Colors.white.withValues(alpha: 0.97),
+                ? AppColors.darkBackground.withOpacity(0.82)
+                : Colors.white.withOpacity(0.97),
           ),
           SafeArea(child: pages[_currentIndex]),
         ],
@@ -158,7 +158,7 @@ Widget _appBar(
             ],
           ),
         ),
-        ...?actions,
+        if (actions != null) ...actions,
       ],
     ),
   );
@@ -184,7 +184,7 @@ Widget _statCard(
         Container(
           padding: const EdgeInsets.all(8),
           decoration: BoxDecoration(
-            color: color.withValues(alpha: 0.15),
+            color: color.withOpacity(0.15),
             borderRadius: BorderRadius.circular(10),
           ),
           child: Icon(icon, color: color, size: 20),
@@ -244,12 +244,11 @@ class _StatsPageState extends State<_StatsPage> {
         });
       }
     } catch (e) {
-      if (mounted) {
+      if (mounted)
         setState(() {
           _loading = false;
           _error = e.toString();
         });
-      }
     }
   }
 
@@ -276,14 +275,14 @@ class _StatsPageState extends State<_StatsPage> {
                 color: AppColors.card(isDark),
                 borderRadius: BorderRadius.circular(22),
                 border: Border.all(
-                  color: AppColors.cyan(isDark).withValues(alpha: 0.3),
+                  color: AppColors.cyan(isDark).withOpacity(0.3),
                 ),
               ),
               child: Row(
                 children: [
                   CircleAvatar(
                     radius: 34,
-                    backgroundColor: AppColors.cyan(isDark).withValues(alpha: 0.2),
+                    backgroundColor: AppColors.cyan(isDark).withOpacity(0.2),
                     backgroundImage: user?.profilePictureUrl != null
                         ? NetworkImage(user!.profilePictureUrl!)
                         : null,
@@ -326,10 +325,10 @@ class _StatsPageState extends State<_StatsPage> {
                             vertical: 4,
                           ),
                           decoration: BoxDecoration(
-                            color: AppColors.cyan(isDark).withValues(alpha: 0.12),
+                            color: AppColors.cyan(isDark).withOpacity(0.12),
                             borderRadius: BorderRadius.circular(20),
                             border: Border.all(
-                              color: AppColors.cyan(isDark).withValues(alpha: 0.3),
+                              color: AppColors.cyan(isDark).withOpacity(0.3),
                             ),
                           ),
                           child: Row(
@@ -576,7 +575,7 @@ class _UsersPageState extends State<_UsersPage> {
                               radius: 22,
                               backgroundColor: _roleColor(
                                 role,
-                              ).withValues(alpha: 0.15),
+                              ).withOpacity(0.15),
                               backgroundImage: u['profile_picture_url'] != null
                                   ? NetworkImage(u['profile_picture_url'])
                                   : null,
@@ -618,7 +617,7 @@ class _UsersPageState extends State<_UsersPage> {
                                         decoration: BoxDecoration(
                                           color: _roleColor(
                                             role,
-                                          ).withValues(alpha: 0.12),
+                                          ).withOpacity(0.12),
                                           borderRadius: BorderRadius.circular(
                                             10,
                                           ),
@@ -696,7 +695,7 @@ class _UsersPageState extends State<_UsersPage> {
                               Switch(
                                 value: active,
                                 onChanged: (_) => _toggleStatus(u, active),
-                                activeThumbColor: AppColors.cyan(isDark),
+                                activeColor: AppColors.cyan(isDark),
                               ),
                           ],
                         ),
@@ -713,6 +712,10 @@ class _UsersPageState extends State<_UsersPage> {
 // ─────────────────────────────────────────────────────────────
 // PAGE 3 — JOB MANAGEMENT
 // ─────────────────────────────────────────────────────────────
+// ─────────────────────────────────────────────────────────────
+// PAGE 3 — JOB MANAGEMENT
+// Admin can: view full details, create, delete
+// ─────────────────────────────────────────────────────────────
 class _JobsPage extends StatefulWidget {
   const _JobsPage();
   @override
@@ -720,361 +723,481 @@ class _JobsPage extends StatefulWidget {
 }
 
 class _JobsPageState extends State<_JobsPage> {
-  List<dynamic> _jobs = [];
-  bool _loading = true;
+  List<dynamic> _jobs    = [];
+  bool          _loading = true;
 
   @override
-  void initState() {
-    super.initState();
-    _load();
-  }
+  void initState() { super.initState(); _load(); }
 
   Future<void> _load() async {
     setState(() => _loading = true);
     try {
-      // FIX: await getAccessToken()
       final token = (await context.read<AuthProvider>().getAccessToken()) ?? '';
-      final res = await _adminGet('/admin/jobs', token);
-      final data = res['data'];
-      if (mounted) {
-        setState(() {
-          _jobs = data is List ? data : [];
-          _loading = false;
-        });
-      }
-    } catch (e) {
+      final res   = await _adminGet('/admin/jobs', token);
+      final data  = res['data'];
+      if (mounted) setState(() {
+        _jobs    = data is List ? data : [];
+        _loading = false;
+      });
+    } catch (_) {
       if (mounted) setState(() => _loading = false);
     }
   }
 
-  Future<void> _deleteJob(int id) async {
+  Future<void> _deleteJob(int id, String title) async {
     final confirm = await showDialog<bool>(
       context: context,
-      builder: (_) => AlertDialog(
-        title: const Text('Deactivate Job'),
-        content: const Text(
-          'This job will be hidden from all users. Continue?',
-        ),
-        actions: [
-          TextButton(
-            onPressed: () => Navigator.pop(context, false),
-            child: const Text('Cancel'),
-          ),
-          TextButton(
-            onPressed: () => Navigator.pop(context, true),
-            child: const Text(
-              'Deactivate',
-              style: TextStyle(color: Colors.red),
-            ),
-          ),
-        ],
-      ),
-    );
-    if (confirm != true) return;
-    try {
-      // FIX: await getAccessToken()
-      final token = (await context.read<AuthProvider>().getAccessToken()) ?? '';
-      await _adminDelete('/admin/jobs/$id', token);
-      _load();
-      if (mounted) Helpers.showSnackBar(context, 'Job deactivated');
-    } catch (_) {}
-  }
-
-  Future<void> _showCreateJobDialog() async {
-    final titleCtrl = TextEditingController();
-    final companyCtrl = TextEditingController();
-    final locCtrl = TextEditingController();
-    final descCtrl = TextEditingController();
-    final reqCtrl = TextEditingController();
-    final respCtrl = TextEditingController();
-    String locType = 'onsite';
-    String empType = 'full_time';
-
-    await showModalBottomSheet(
-      context: context,
-      isScrollControlled: true,
-      shape: const RoundedRectangleBorder(
-        borderRadius: BorderRadius.vertical(top: Radius.circular(24)),
-      ),
-      builder: (ctx) {
+      builder: (_) {
         final isDark = context.read<ThemeProvider>().isDarkMode;
-        return StatefulBuilder(
-          builder: (ctx, setS) => Padding(
-            padding: EdgeInsets.only(
-              left: 20,
-              right: 20,
-              top: 24,
-              bottom: MediaQuery.of(ctx).viewInsets.bottom + 24,
-            ),
-            child: SingleChildScrollView(
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Text(
-                    'Create Job Listing',
-                    style: TextStyle(
-                      color: AppColors.text(isDark),
-                      fontSize: 18,
-                      fontWeight: FontWeight.bold,
-                    ),
-                  ),
-                  const SizedBox(height: 16),
-                  _tf(titleCtrl, 'Job Title *', isDark),
-                  const SizedBox(height: 10),
-                  _tf(companyCtrl, 'Company *', isDark),
-                  const SizedBox(height: 10),
-                  _tf(locCtrl, 'Location *', isDark),
-                  const SizedBox(height: 10),
-                  DropdownButtonFormField<String>(
-                    initialValue: locType,
-                    decoration: const InputDecoration(
-                      labelText: 'Location Type',
-                    ),
-                    items: ['onsite', 'remote', 'hybrid']
-                        .map((e) => DropdownMenuItem(value: e, child: Text(e)))
-                        .toList(),
-                    onChanged: (v) => setS(() => locType = v!),
-                  ),
-                  const SizedBox(height: 10),
-                  DropdownButtonFormField<String>(
-                    initialValue: empType,
-                    decoration: const InputDecoration(
-                      labelText: 'Employment Type',
-                    ),
-                    items:
-                        [
-                              'full_time',
-                              'part_time',
-                              'contract',
-                              'internship',
-                              'freelance',
-                            ]
-                            .map(
-                              (e) => DropdownMenuItem(value: e, child: Text(e)),
-                            )
-                            .toList(),
-                    onChanged: (v) => setS(() => empType = v!),
-                  ),
-                  const SizedBox(height: 10),
-                  _tf(descCtrl, 'Description *', isDark, lines: 3),
-                  const SizedBox(height: 10),
-                  _tf(reqCtrl, 'Requirements *', isDark, lines: 3),
-                  const SizedBox(height: 10),
-                  _tf(respCtrl, 'Responsibilities *', isDark, lines: 3),
-                  const SizedBox(height: 20),
-                  SizedBox(
-                    width: double.infinity,
-                    child: ElevatedButton(
-                      onPressed: () async {
-                        if ([
-                          titleCtrl,
-                          companyCtrl,
-                          locCtrl,
-                          descCtrl,
-                          reqCtrl,
-                          respCtrl,
-                        ].any((c) => c.text.isEmpty)) {
-                          return;
-                        }
-                        // FIX: await getAccessToken()
-                        final token =
-                            (await context
-                                .read<AuthProvider>()
-                                .getAccessToken()) ??
-                            '';
-                        await _adminPost('/admin/jobs', token, {
-                          'title': titleCtrl.text,
-                          'company': companyCtrl.text,
-                          'location': locCtrl.text,
-                          'location_type': locType,
-                          'employment_type': empType,
-                          'description': descCtrl.text,
-                          'requirements': reqCtrl.text,
-                          'responsibilities': respCtrl.text,
-                        });
-                        if (context.mounted) Navigator.pop(ctx);
-                        _load();
-                        if (mounted) {
-                          Helpers.showSnackBar(context, 'Job created!');
-                        }
-                      },
-                      child: const Text('CREATE JOB'),
-                    ),
-                  ),
-                ],
-              ),
-            ),
-          ),
+        return AlertDialog(
+          backgroundColor: AppColors.surface(isDark),
+          title: Text('Delete Job',
+              style: TextStyle(color: AppColors.text(isDark))),
+          content: Text('Delete "$title"?\nThis will hide it from all users.',
+              style: TextStyle(color: AppColors.textSecondary(isDark))),
+          actions: [
+            TextButton(
+              onPressed: () => Navigator.pop(context, false),
+              child: Text('Cancel',
+                  style: TextStyle(color: AppColors.textMuted(isDark)))),
+            TextButton(
+              onPressed: () => Navigator.pop(context, true),
+              child: const Text('Delete',
+                  style: TextStyle(color: Colors.red,
+                      fontWeight: FontWeight.bold))),
+          ],
         );
       },
     );
+    if (confirm != true) return;
+    try {
+      final token = (await context.read<AuthProvider>().getAccessToken()) ?? '';
+      await _adminDelete('/admin/jobs/$id', token);
+      _load();
+      if (mounted) Helpers.showSnackBar(context, 'Job deleted');
+    } catch (_) {}
   }
 
-  Widget _tf(
-    TextEditingController c,
-    String label,
-    bool isDark, {
-    int lines = 1,
-  }) {
-    return TextField(
-      controller: c,
-      maxLines: lines,
-      style: TextStyle(color: AppColors.text(isDark)),
-      decoration: InputDecoration(labelText: label),
+  void _viewJob(Map<dynamic, dynamic> job) {
+    final isDark = context.read<ThemeProvider>().isDarkMode;
+    showModalBottomSheet(
+      context: context,
+      backgroundColor: AppColors.surface(isDark),
+      isScrollControlled: true,
+      shape: const RoundedRectangleBorder(
+          borderRadius: BorderRadius.vertical(top: Radius.circular(24))),
+      builder: (_) => DraggableScrollableSheet(
+        expand: false,
+        initialChildSize: 0.75,
+        maxChildSize: 0.95,
+        minChildSize: 0.4,
+        builder: (_, ctrl) => ListView(
+          controller: ctrl,
+          padding: const EdgeInsets.all(24),
+          children: [
+            Center(child: Container(
+              width: 40, height: 4,
+              decoration: BoxDecoration(
+                color: AppColors.border(isDark),
+                borderRadius: BorderRadius.circular(2)))),
+            const SizedBox(height: 20),
+            Row(children: [
+              Container(
+                padding: const EdgeInsets.all(12),
+                decoration: BoxDecoration(
+                  color: AppColors.primaryCyan.withValues(alpha: 0.12),
+                  borderRadius: BorderRadius.circular(14)),
+                child: const Icon(Icons.work_outline_rounded,
+                    color: AppColors.primaryCyan, size: 26)),
+              const SizedBox(width: 14),
+              Expanded(child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text(job['title']?.toString() ?? '', style: TextStyle(
+                    color: AppColors.text(isDark),
+                    fontSize: 18, fontWeight: FontWeight.bold)),
+                  Text(job['company']?.toString() ?? '',
+                    style: const TextStyle(color: AppColors.primaryCyan,
+                        fontSize: 14, fontWeight: FontWeight.w500)),
+                ],
+              )),
+              IconButton(
+                onPressed: () {
+                  Navigator.pop(context);
+                  final id = job['id'];
+                  if (id != null) {
+                    _deleteJob(id is int ? id : int.parse(id.toString()),
+                        job['title']?.toString() ?? '');
+                  }
+                },
+                icon: Container(
+                  padding: const EdgeInsets.all(8),
+                  decoration: BoxDecoration(
+                    color: Colors.red.withValues(alpha: 0.1),
+                    shape: BoxShape.circle,
+                    border: Border.all(
+                        color: Colors.red.withValues(alpha: 0.3))),
+                  child: const Icon(Icons.delete_outline,
+                      color: Colors.red, size: 18))),
+            ]),
+            const SizedBox(height: 20),
+            Wrap(spacing: 8, runSpacing: 8, children: [
+              _statusChip(
+                (job['is_active'] == 1 || job['is_active'] == true)
+                    ? 'Active' : 'Inactive',
+                (job['is_active'] == 1 || job['is_active'] == true)
+                    ? Colors.green : Colors.red),
+              _statusChip(
+                (job['location_type'] ?? 'onsite').toString()
+                    .replaceAll('_', ' '), Colors.teal),
+              _statusChip(
+                (job['employment_type'] ?? 'full_time').toString()
+                    .replaceAll('_', ' '), Colors.blue),
+            ]),
+            const SizedBox(height: 16),
+            Row(children: [
+              _statBox('👁️ Views',
+                  '${job['views_count'] ?? 0}', isDark),
+              const SizedBox(width: 12),
+              _statBox('📋 Applied',
+                  '${job['applications_count'] ?? 0}', isDark),
+            ]),
+            const SizedBox(height: 20),
+            _detailRow(Icons.location_on_outlined,
+                job['location']?.toString() ?? 'N/A', isDark),
+            if (job['contact_email'] != null) ...[
+              const SizedBox(height: 8),
+              _detailRow(Icons.email_outlined,
+                  job['contact_email'].toString(), isDark),
+            ],
+            if (job['contact_phone'] != null) ...[
+              const SizedBox(height: 8),
+              _detailRow(Icons.phone_outlined,
+                  job['contact_phone'].toString(), isDark),
+            ],
+            if (job['latitude'] != null) ...[
+              const SizedBox(height: 8),
+              _detailRow(Icons.map_outlined,
+                  '${job['latitude']}, ${job['longitude']}', isDark),
+            ],
+            const SizedBox(height: 20),
+            if (job['description'] != null) ...[
+              _sectionLabel('Description', isDark),
+              const SizedBox(height: 8),
+              Text(job['description'].toString(), style: TextStyle(
+                color: AppColors.text(isDark),
+                fontSize: 14, height: 1.6)),
+              const SizedBox(height: 16),
+            ],
+            if (job['requirements'] != null) ...[
+              _sectionLabel('Requirements', isDark),
+              const SizedBox(height: 8),
+              Text(job['requirements'].toString(), style: TextStyle(
+                color: AppColors.textSecondary(isDark),
+                fontSize: 14, height: 1.6)),
+              const SizedBox(height: 16),
+            ],
+            if (job['responsibilities'] != null) ...[
+              _sectionLabel('Responsibilities', isDark),
+              const SizedBox(height: 8),
+              Text(job['responsibilities'].toString(), style: TextStyle(
+                color: AppColors.textSecondary(isDark),
+                fontSize: 14, height: 1.6)),
+              const SizedBox(height: 16),
+            ],
+            Text('Posted: ${job['created_at'] ?? ''}',
+              style: TextStyle(
+                color: AppColors.textMuted(isDark), fontSize: 12)),
+            const SizedBox(height: 32),
+          ],
+        ),
+      ),
     );
   }
+
+  Widget _statusChip(String label, Color color) => Container(
+    padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 5),
+    decoration: BoxDecoration(
+      color: color.withValues(alpha: 0.1),
+      borderRadius: BorderRadius.circular(20),
+      border: Border.all(color: color.withValues(alpha: 0.35))),
+    child: Text(label, style: TextStyle(
+      color: color, fontSize: 12, fontWeight: FontWeight.w600)),
+  );
+
+  Widget _statBox(String label, String value, bool isDark) => Expanded(
+    child: Container(
+      padding: const EdgeInsets.all(12),
+      decoration: BoxDecoration(
+        color: AppColors.card(isDark),
+        borderRadius: BorderRadius.circular(12),
+        border: Border.all(color: AppColors.border(isDark))),
+      child: Column(children: [
+        Text(value, style: TextStyle(
+          color: AppColors.text(isDark),
+          fontSize: 20, fontWeight: FontWeight.bold)),
+        Text(label, style: TextStyle(
+          color: AppColors.textMuted(isDark), fontSize: 11)),
+      ]),
+    ),
+  );
+
+  Widget _detailRow(IconData icon, String text, bool isDark) =>
+    Row(children: [
+      Icon(icon, color: AppColors.primaryCyan, size: 16),
+      const SizedBox(width: 8),
+      Expanded(child: Text(text, style: TextStyle(
+        color: AppColors.textSecondary(isDark), fontSize: 13))),
+    ]);
+
+  Widget _sectionLabel(String text, bool isDark) => Text(text,
+    style: TextStyle(color: AppColors.text(isDark),
+        fontSize: 15, fontWeight: FontWeight.bold));
 
   Widget _chip(String label, Color color) => Container(
     padding: const EdgeInsets.symmetric(horizontal: 7, vertical: 2),
     decoration: BoxDecoration(
       color: color.withValues(alpha: 0.12),
-      borderRadius: BorderRadius.circular(8),
-    ),
-    child: Text(
-      label.replaceAll('_', ' '),
-      style: TextStyle(color: color, fontSize: 10, fontWeight: FontWeight.w600),
-    ),
+      borderRadius: BorderRadius.circular(8)),
+    child: Text(label.replaceAll('_', ' '),
+      style: TextStyle(color: color,
+          fontSize: 10, fontWeight: FontWeight.w600)),
   );
+
+  Future<void> _showCreateJobDialog() async {
+    final titleCtrl   = TextEditingController();
+    final companyCtrl = TextEditingController();
+    final locCtrl     = TextEditingController();
+    final descCtrl    = TextEditingController();
+    final reqCtrl     = TextEditingController();
+    final respCtrl    = TextEditingController();
+    String locType    = 'onsite';
+    String empType    = 'full_time';
+
+    await showModalBottomSheet(
+      context: context,
+      isScrollControlled: true,
+      shape: const RoundedRectangleBorder(
+          borderRadius: BorderRadius.vertical(top: Radius.circular(24))),
+      builder: (ctx) {
+        final isDark = context.read<ThemeProvider>().isDarkMode;
+        return StatefulBuilder(builder: (ctx, setS) => Padding(
+          padding: EdgeInsets.only(
+            left: 20, right: 20, top: 24,
+            bottom: MediaQuery.of(ctx).viewInsets.bottom + 24),
+          child: SingleChildScrollView(child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Text('Create Job Listing', style: TextStyle(
+                color: AppColors.text(isDark),
+                fontSize: 18, fontWeight: FontWeight.bold)),
+              const SizedBox(height: 16),
+              _tf(titleCtrl,   'Job Title *',       isDark),
+              const SizedBox(height: 10),
+              _tf(companyCtrl, 'Company *',          isDark),
+              const SizedBox(height: 10),
+              _tf(locCtrl,     'Location *',         isDark),
+              const SizedBox(height: 10),
+              DropdownButtonFormField<String>(
+                value: locType,
+                dropdownColor: AppColors.surface(isDark),
+                style: TextStyle(color: AppColors.text(isDark)),
+                decoration: InputDecoration(
+                  labelText: 'Location Type',
+                  labelStyle: TextStyle(
+                      color: AppColors.textSecondary(isDark))),
+                items: ['onsite','remote','hybrid'].map((e) =>
+                    DropdownMenuItem(value: e, child: Text(e))).toList(),
+                onChanged: (v) => setS(() => locType = v!),
+              ),
+              const SizedBox(height: 10),
+              DropdownButtonFormField<String>(
+                value: empType,
+                dropdownColor: AppColors.surface(isDark),
+                style: TextStyle(color: AppColors.text(isDark)),
+                decoration: InputDecoration(
+                  labelText: 'Employment Type',
+                  labelStyle: TextStyle(
+                      color: AppColors.textSecondary(isDark))),
+                items: ['full_time','part_time','contract',
+                    'internship','freelance'].map((e) =>
+                    DropdownMenuItem(value: e, child: Text(e))).toList(),
+                onChanged: (v) => setS(() => empType = v!),
+              ),
+              const SizedBox(height: 10),
+              _tf(descCtrl, 'Description *',      isDark, lines: 3),
+              const SizedBox(height: 10),
+              _tf(reqCtrl,  'Requirements *',     isDark, lines: 3),
+              const SizedBox(height: 10),
+              _tf(respCtrl, 'Responsibilities *', isDark, lines: 3),
+              const SizedBox(height: 20),
+              GestureDetector(
+                onTap: () async {
+                  if ([titleCtrl, companyCtrl, locCtrl,
+                       descCtrl, reqCtrl, respCtrl]
+                      .any((c) => c.text.trim().isEmpty)) return;
+                  final token = (await context
+                      .read<AuthProvider>().getAccessToken()) ?? '';
+                  final res = await _adminPost('/admin/jobs', token, {
+                    'title':            titleCtrl.text.trim(),
+                    'company':          companyCtrl.text.trim(),
+                    'location':         locCtrl.text.trim(),
+                    'location_type':    locType,
+                    'employment_type':  empType,
+                    'description':      descCtrl.text.trim(),
+                    'requirements':     reqCtrl.text.trim(),
+                    'responsibilities': respCtrl.text.trim(),
+                  });
+                  if (context.mounted) Navigator.pop(ctx);
+                  _load();
+                  if (mounted) Helpers.showSnackBar(context,
+                    res['success'] == true ? 'Job created!' : 'Failed');
+                },
+                child: Container(
+                  width: double.infinity, height: 52,
+                  decoration: BoxDecoration(
+                    gradient: const LinearGradient(
+                      colors: [AppColors.primaryCyan, Color(0xFF0097A7)]),
+                    borderRadius: BorderRadius.circular(14),
+                    boxShadow: [BoxShadow(
+                      color: AppColors.primaryCyan.withValues(alpha: 0.4),
+                      blurRadius: 16, offset: const Offset(0, 4))]),
+                  child: const Center(child: Text('CREATE JOB',
+                    style: TextStyle(color: Colors.black,
+                        fontWeight: FontWeight.w800, letterSpacing: 1))),
+                ),
+              ),
+            ],
+          )),
+        ));
+      },
+    );
+  }
+
+  Widget _tf(TextEditingController c, String label, bool isDark,
+      {int lines = 1}) =>
+    TextField(
+      controller: c, maxLines: lines,
+      style: TextStyle(color: AppColors.text(isDark)),
+      decoration: InputDecoration(
+        labelText: label,
+        labelStyle: TextStyle(color: AppColors.textSecondary(isDark)),
+        filled: true, fillColor: AppColors.inputFill(isDark),
+        border: OutlineInputBorder(
+            borderRadius: BorderRadius.circular(12),
+            borderSide: BorderSide.none),
+        enabledBorder: OutlineInputBorder(
+            borderRadius: BorderRadius.circular(12),
+            borderSide: BorderSide(color: AppColors.border(isDark))),
+        focusedBorder: OutlineInputBorder(
+            borderRadius: BorderRadius.circular(12),
+            borderSide: const BorderSide(
+                color: AppColors.primaryCyan, width: 2))),
+    );
 
   @override
   Widget build(BuildContext context) {
     final isDark = context.watch<ThemeProvider>().isDarkMode;
-
-    return Column(
-      children: [
-        _appBar(
-          context,
-          'Job Management',
-          isDark,
-          actions: [
-            IconButton(
-              icon: Icon(
-                Icons.add_circle_outline,
-                color: AppColors.cyan(isDark),
-              ),
-              tooltip: 'Create Job',
-              onPressed: _showCreateJobDialog,
-            ),
-          ],
-        ),
-        const SizedBox(height: 14),
-        Expanded(
-          child: _loading
-              ? const Center(child: CircularProgressIndicator())
-              : RefreshIndicator(
-                  onRefresh: _load,
-                  child: _jobs.isEmpty
-                      ? Center(
-                          child: Text(
-                            'No jobs found',
+    return Column(children: [
+      _appBar(context, 'Job Management', isDark, actions: [
+        IconButton(
+          icon: Icon(Icons.add_circle_outline,
+              color: AppColors.cyan(isDark)),
+          tooltip: 'Create Job',
+          onPressed: _showCreateJobDialog),
+      ]),
+      const SizedBox(height: 14),
+      Expanded(child: _loading
+          ? const Center(child: CircularProgressIndicator(
+              color: AppColors.primaryCyan))
+          : RefreshIndicator(
+              onRefresh: _load,
+              color: AppColors.primaryCyan,
+              child: _jobs.isEmpty
+                  ? Center(child: Column(
+                      mainAxisSize: MainAxisSize.min,
+                      children: [
+                        Icon(Icons.work_off_outlined, size: 48,
+                            color: AppColors.textMuted(isDark)),
+                        const SizedBox(height: 12),
+                        Text('No jobs found',
                             style: TextStyle(
-                              color: AppColors.textMuted(isDark),
-                            ),
-                          ),
-                        )
-                      : ListView.builder(
-                          padding: const EdgeInsets.symmetric(horizontal: 20),
-                          itemCount: _jobs.length,
-                          itemBuilder: (_, i) {
-                            final j = _jobs[i] as Map;
-                            final active = (j['is_active'] ?? 1) == 1;
-                            return Container(
-                              margin: const EdgeInsets.only(bottom: 10),
-                              padding: const EdgeInsets.all(14),
-                              decoration: BoxDecoration(
-                                color: AppColors.card(isDark),
-                                borderRadius: BorderRadius.circular(14),
-                                border: Border.all(
-                                  color: active
-                                      ? AppColors.border(isDark)
-                                      : Colors.red.withValues(alpha: 0.3),
-                                ),
-                              ),
-                              child: Row(
+                                color: AppColors.textMuted(isDark))),
+                        const SizedBox(height: 16),
+                        TextButton.icon(
+                          onPressed: _showCreateJobDialog,
+                          icon: const Icon(Icons.add,
+                              color: AppColors.primaryCyan),
+                          label: const Text('Create first job',
+                              style: TextStyle(
+                                  color: AppColors.primaryCyan))),
+                      ]))
+                  : ListView.builder(
+                      padding: const EdgeInsets.symmetric(horizontal: 20),
+                      itemCount: _jobs.length,
+                      itemBuilder: (_, i) {
+                        final j      = _jobs[i] as Map;
+                        final active = j['is_active'] == 1 ||
+                                       j['is_active'] == true;
+                        return GestureDetector(
+                          onTap: () => _viewJob(j),
+                          child: Container(
+                            margin: const EdgeInsets.only(bottom: 10),
+                            padding: const EdgeInsets.all(14),
+                            decoration: BoxDecoration(
+                              color: AppColors.card(isDark),
+                              borderRadius: BorderRadius.circular(14),
+                              border: Border.all(color: active
+                                  ? AppColors.border(isDark)
+                                  : Colors.red.withValues(alpha: 0.3))),
+                            child: Row(children: [
+                              Container(
+                                padding: const EdgeInsets.all(10),
+                                decoration: BoxDecoration(
+                                  color: AppColors.primaryCyan
+                                      .withValues(alpha: 0.12),
+                                  borderRadius: BorderRadius.circular(12)),
+                                child: Icon(Icons.work_outline_rounded,
+                                    color: AppColors.primaryCyan,
+                                    size: 22)),
+                              const SizedBox(width: 12),
+                              Expanded(child: Column(
+                                crossAxisAlignment: CrossAxisAlignment.start,
                                 children: [
-                                  Container(
-                                    padding: const EdgeInsets.all(10),
-                                    decoration: BoxDecoration(
-                                      color: AppColors.cyan(
-                                        isDark,
-                                      ).withValues(alpha: 0.12),
-                                      borderRadius: BorderRadius.circular(12),
-                                    ),
-                                    child: Icon(
-                                      Icons.work,
-                                      color: AppColors.cyan(isDark),
-                                      size: 22,
-                                    ),
-                                  ),
-                                  const SizedBox(width: 12),
-                                  Expanded(
-                                    child: Column(
-                                      crossAxisAlignment:
-                                          CrossAxisAlignment.start,
-                                      children: [
-                                        Text(
-                                          j['title'] ?? '',
-                                          style: TextStyle(
-                                            color: AppColors.text(isDark),
-                                            fontWeight: FontWeight.w600,
-                                            fontSize: 14,
-                                          ),
-                                        ),
-                                        const SizedBox(height: 3),
-                                        Text(
-                                          '${j['company']} · ${j['location']}',
-                                          style: TextStyle(
-                                            color: AppColors.textSecondary(
-                                              isDark,
-                                            ),
-                                            fontSize: 12,
-                                          ),
-                                        ),
-                                        const SizedBox(height: 4),
-                                        Row(
-                                          children: [
-                                            _chip(
-                                              j['employment_type'] ?? '',
-                                              Colors.blue,
-                                            ),
-                                            const SizedBox(width: 6),
-                                            _chip(
-                                              j['location_type'] ?? '',
-                                              Colors.teal,
-                                            ),
-                                            if (!active) ...[
-                                              const SizedBox(width: 6),
-                                              _chip('Inactive', Colors.red),
-                                            ],
-                                          ],
-                                        ),
-                                      ],
-                                    ),
-                                  ),
-                                  if (active)
-                                    IconButton(
-                                      icon: const Icon(
-                                        Icons.delete_outline,
-                                        color: Colors.red,
-                                        size: 20,
-                                      ),
-                                      onPressed: () => _deleteJob(j['id']),
-                                    ),
+                                  Text(j['title']?.toString() ?? '',
+                                    style: TextStyle(
+                                      color: AppColors.text(isDark),
+                                      fontWeight: FontWeight.w600,
+                                      fontSize: 14)),
+                                  const SizedBox(height: 3),
+                                  Text(
+                                    '${j['company']} · ${j['location']}',
+                                    style: TextStyle(
+                                      color: AppColors.textSecondary(isDark),
+                                      fontSize: 12)),
+                                  const SizedBox(height: 4),
+                                  Wrap(spacing: 6, children: [
+                                    _chip(j['employment_type']?.toString()
+                                        ?? '', Colors.blue),
+                                    _chip(j['location_type']?.toString()
+                                        ?? '', Colors.teal),
+                                    if (!active)
+                                      _chip('Inactive', Colors.red),
+                                  ]),
                                 ],
-                              ),
-                            );
-                          },
-                        ),
-                ),
-        ),
-      ],
-    );
+                              )),
+                              Icon(Icons.chevron_right_rounded,
+                                  color: AppColors.textMuted(isDark),
+                                  size: 20),
+                            ]),
+                          ),
+                        );
+                      }),
+            )),
+    ]);
   }
 }
 
-// ─────────────────────────────────────────────────────────────
-// PAGE 4 — FEEDBACK MANAGEMENT
-// ─────────────────────────────────────────────────────────────
 class _FeedbackPage extends StatefulWidget {
   const _FeedbackPage();
   @override
@@ -1253,7 +1376,7 @@ class _FeedbackPageState extends State<_FeedbackPage> {
                     label: Text(f[0].toUpperCase() + f.substring(1)),
                     selected: sel,
                     onSelected: (_) => _applyFilter(f),
-                    selectedColor: AppColors.cyan(isDark).withValues(alpha: 0.2),
+                    selectedColor: AppColors.cyan(isDark).withOpacity(0.2),
                     checkmarkColor: AppColors.cyan(isDark),
                   ),
                 );
@@ -1316,7 +1439,7 @@ class _FeedbackPageState extends State<_FeedbackPage> {
                                       decoration: BoxDecoration(
                                         color: _statusColor(
                                           status,
-                                        ).withValues(alpha: 0.12),
+                                        ).withOpacity(0.12),
                                         borderRadius: BorderRadius.circular(10),
                                       ),
                                       child: Icon(
@@ -1379,7 +1502,7 @@ class _FeedbackPageState extends State<_FeedbackPage> {
                                           decoration: BoxDecoration(
                                             color: _statusColor(
                                               status,
-                                            ).withValues(alpha: 0.12),
+                                            ).withOpacity(0.12),
                                             borderRadius: BorderRadius.circular(
                                               8,
                                             ),

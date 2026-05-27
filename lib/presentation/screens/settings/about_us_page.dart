@@ -147,7 +147,7 @@ class AboutUsPage extends StatelessWidget {
               'The passionate developers behind Career Navigator',
               style: TextStyle(
                 color: isDark
-                    ? Colors.white.withValues(alpha: 0.45)
+                    ? Colors.white.withOpacity(0.45)
                     : AppColors.lightTextSecondary,
                 fontSize: 13,
               ),
@@ -169,8 +169,8 @@ class AboutUsPage extends StatelessWidget {
               '© 2026 Career Navigator. All rights reserved.',
               style: TextStyle(
                 color: isDark
-                    ? Colors.white.withValues(alpha: 0.25)
-                    : AppColors.lightTextSecondary.withValues(alpha: 0.5),
+                    ? Colors.white.withOpacity(0.25)
+                    : AppColors.lightTextSecondary.withOpacity(0.5),
                 fontSize: 11,
               ),
             ),
@@ -187,12 +187,12 @@ class AboutUsPage extends StatelessWidget {
       decoration: BoxDecoration(
         gradient: LinearGradient(
           colors: [
-            AppColors.primaryCyan.withValues(alpha: 0.15),
-            isDark ? AppColors.darkCard.withValues(alpha: 0.8) : Colors.grey.shade100,
+            AppColors.primaryCyan.withOpacity(0.15),
+            isDark ? AppColors.darkCard.withOpacity(0.8) : Colors.grey.shade100,
           ],
         ),
         borderRadius: BorderRadius.circular(24),
-        border: Border.all(color: AppColors.primaryCyan.withValues(alpha: 0.25)),
+        border: Border.all(color: AppColors.primaryCyan.withOpacity(0.25)),
       ),
       child: Column(
         children: [
@@ -203,7 +203,7 @@ class AboutUsPage extends StatelessWidget {
               shape: BoxShape.circle,
               boxShadow: [
                 BoxShadow(
-                  color: AppColors.primaryCyan.withValues(alpha: 0.3),
+                  color: AppColors.primaryCyan.withOpacity(0.3),
                   blurRadius: 20,
                   spreadRadius: 4,
                 ),
@@ -213,8 +213,8 @@ class AboutUsPage extends StatelessWidget {
               child: Image.asset(
                 'assets/logo/logo.png',
                 fit: BoxFit.cover,
-                errorBuilder: (_, _, _) => Container(
-                  color: AppColors.primaryCyan.withValues(alpha: 0.2),
+                errorBuilder: (_, __, ___) => Container(
+                  color: AppColors.primaryCyan.withOpacity(0.2),
                   child: const Icon(
                     Icons.school,
                     color: AppColors.primaryCyan,
@@ -238,7 +238,7 @@ class AboutUsPage extends StatelessWidget {
           Container(
             padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 4),
             decoration: BoxDecoration(
-              color: AppColors.primaryCyan.withValues(alpha: 0.15),
+              color: AppColors.primaryCyan.withOpacity(0.15),
               borderRadius: BorderRadius.circular(20),
             ),
             child: const Text(
@@ -256,7 +256,7 @@ class AboutUsPage extends StatelessWidget {
             textAlign: TextAlign.center,
             style: TextStyle(
               color: isDark
-                  ? Colors.white.withValues(alpha: 0.65)
+                  ? Colors.white.withOpacity(0.65)
                   : AppColors.lightTextSecondary,
               fontSize: 14,
               height: 1.6,
@@ -271,10 +271,10 @@ class AboutUsPage extends StatelessWidget {
     return Container(
       padding: const EdgeInsets.all(20),
       decoration: BoxDecoration(
-        color: isDark ? Colors.white.withValues(alpha: 0.04) : Colors.grey.shade100,
+        color: isDark ? Colors.white.withOpacity(0.04) : Colors.grey.shade100,
         borderRadius: BorderRadius.circular(20),
         border: Border.all(
-          color: isDark ? Colors.white.withValues(alpha: 0.08) : Colors.grey.shade300,
+          color: isDark ? Colors.white.withOpacity(0.08) : Colors.grey.shade300,
         ),
       ),
       child: Column(
@@ -285,7 +285,7 @@ class AboutUsPage extends StatelessWidget {
               Container(
                 padding: const EdgeInsets.all(8),
                 decoration: BoxDecoration(
-                  color: AppColors.primaryCyan.withValues(alpha: 0.1),
+                  color: AppColors.primaryCyan.withOpacity(0.1),
                   borderRadius: BorderRadius.circular(12),
                 ),
                 child: const Icon(
@@ -330,10 +330,10 @@ class AboutUsPage extends StatelessWidget {
                           vertical: 8,
                         ),
                         decoration: BoxDecoration(
-                          color: AppColors.primaryCyan.withValues(alpha: 0.08),
+                          color: AppColors.primaryCyan.withOpacity(0.08),
                           borderRadius: BorderRadius.circular(30),
                           border: Border.all(
-                            color: AppColors.primaryCyan.withValues(alpha: 0.25),
+                            color: AppColors.primaryCyan.withOpacity(0.25),
                           ),
                         ),
                         child: Text(
@@ -351,7 +351,7 @@ class AboutUsPage extends StatelessWidget {
           const SizedBox(height: 16),
           Divider(
             color: isDark
-                ? Colors.white.withValues(alpha: 0.08)
+                ? Colors.white.withOpacity(0.08)
                 : Colors.grey.shade300,
           ),
           const SizedBox(height: 12),
@@ -397,10 +397,10 @@ class _DeveloperCard extends StatelessWidget {
       margin: const EdgeInsets.only(bottom: 16),
       padding: const EdgeInsets.all(16),
       decoration: BoxDecoration(
-        color: isDark ? Colors.white.withValues(alpha: 0.04) : Colors.grey.shade100,
+        color: isDark ? Colors.white.withOpacity(0.04) : Colors.grey.shade100,
         borderRadius: BorderRadius.circular(20),
         border: Border.all(
-          color: isDark ? Colors.white.withValues(alpha: 0.08) : Colors.grey.shade300,
+          color: isDark ? Colors.white.withOpacity(0.08) : Colors.grey.shade300,
         ),
       ),
       child: Row(
@@ -427,7 +427,7 @@ class _DeveloperCard extends StatelessWidget {
                     vertical: 2,
                   ),
                   decoration: BoxDecoration(
-                    color: AppColors.primaryCyan.withValues(alpha: 0.12),
+                    color: AppColors.primaryCyan.withOpacity(0.12),
                     borderRadius: BorderRadius.circular(12),
                   ),
                   child: Text(
@@ -444,7 +444,7 @@ class _DeveloperCard extends StatelessWidget {
                   dev.description,
                   style: TextStyle(
                     color: isDark
-                        ? Colors.white.withValues(alpha: 0.55)
+                        ? Colors.white.withOpacity(0.55)
                         : AppColors.lightTextSecondary,
                     fontSize: 12,
                     height: 1.5,
@@ -499,7 +499,7 @@ class _DeveloperCard extends StatelessWidget {
             if (loadingProgress == null) return child;
             return _initialsCircle();
           },
-          errorBuilder: (_, _, _) => _localAssetOrInitials(),
+          errorBuilder: (_, __, ___) => _localAssetOrInitials(),
         ),
       );
     }
@@ -514,7 +514,7 @@ class _DeveloperCard extends StatelessWidget {
         width: 70,
         height: 70,
         fit: BoxFit.cover,
-        errorBuilder: (_, _, _) => _initialsCircle(),
+        errorBuilder: (_, __, ___) => _initialsCircle(),
       ),
     );
   }
@@ -525,7 +525,7 @@ class _DeveloperCard extends StatelessWidget {
       height: 70,
       decoration: BoxDecoration(
         shape: BoxShape.circle,
-        color: AppColors.primaryCyan.withValues(alpha: 0.2),
+        color: AppColors.primaryCyan.withOpacity(0.2),
       ),
       alignment: Alignment.center,
       child: Text(
@@ -550,9 +550,9 @@ class _DeveloperCard extends StatelessWidget {
       child: Container(
         padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
         decoration: BoxDecoration(
-          color: color.withValues(alpha: 0.1),
+          color: color.withOpacity(0.1),
           borderRadius: BorderRadius.circular(20),
-          border: Border.all(color: color.withValues(alpha: 0.3)),
+          border: Border.all(color: color.withOpacity(0.3)),
         ),
         child: Row(
           mainAxisSize: MainAxisSize.min,

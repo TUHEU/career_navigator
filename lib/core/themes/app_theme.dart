@@ -55,10 +55,10 @@ class AppColors {
   static Color card(bool isDark) => isDark ? darkCard : lightCard;
 
   static Color inputFill(bool isDark) =>
-      isDark ? Colors.white.withValues(alpha: 0.07) : lightInputFill;
+      isDark ? Colors.white.withOpacity(0.07) : lightInputFill;
 
   static Color border(bool isDark) =>
-      isDark ? Colors.white.withValues(alpha: 0.15) : lightBorder;
+      isDark ? Colors.white.withOpacity(0.15) : lightBorder;
 
   static Color cyan(bool isDark) => isDark ? primaryCyanLight : primaryCyan;
 }

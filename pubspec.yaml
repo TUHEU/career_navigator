@@ -1,24 +1,40 @@
 name: career_navigator
-description: "A new Flutter project."
+description: "Career Navigator — Job seeker and mentor platform."
 publish_to: "none"
 
 version: 1.0.0+1
 
 environment:
-  sdk: ^3.11.0
+  sdk: ^3.7.0
 
 dependencies:
   flutter:
     sdk: flutter
+
+  # UI
   cupertino_icons: ^1.0.8
+
+  # Networking
   http: ^1.2.0
-  image_picker: ^1.1.2
-  flutter_native_splash: ^2.4.1
-  shared_preferences: ^2.3.2
+
+  # State management
   provider: ^6.1.5+1
-  url_launcher: ^6.3.1
+
+  # Storage
+  shared_preferences: ^2.5.5
+
+  # Media
+  image_picker: ^1.2.2
+
+  # Device features
+  url_launcher: ^6.3.2
   permission_handler: ^12.0.1
+
+  # Config
   flutter_dotenv: ^6.0.1
+
+  # Splash screen
+  flutter_native_splash: ^2.4.1
 
 dev_dependencies:
   flutter_test:
@@ -26,6 +42,7 @@ dev_dependencies:
   flutter_lints: ^6.0.0
   flutter_launcher_icons: ^0.14.1
 
+# ── App icon ──────────────────────────────────────────────────
 flutter_launcher_icons:
   android: true
   ios: true
@@ -34,6 +51,7 @@ flutter_launcher_icons:
   adaptive_icon_background: "#0A192F"
   adaptive_icon_foreground: "assets/logo/logo.png"
 
+# ── Splash screen ─────────────────────────────────────────────
 flutter_native_splash:
   color: "#0A192F"
   image: assets/logo/logo.png
@@ -41,6 +59,7 @@ flutter_native_splash:
   ios: true
   fullscreen: true
 
+# ── Flutter ───────────────────────────────────────────────────
 flutter:
   uses-material-design: true
 

@@ -1,6 +1,6 @@
 # .github/workflows/deploy.yml
-# Career Navigator Backend — CI/CD Pipeline v8.0
-# Updated: runs real pytest tests, deploys to Contabo VPS via SSH
+# Career Navigator Backend — CI/CD Pipeline v8.1
+# Fix: install only test dependencies in CI, not full requirements
 
 name: Career Navigator – Deploy to VPS
 
@@ -26,8 +26,23 @@ jobs:
           python-version: '3.11'
           cache: 'pip'
 
-      - name: Install dependencies
-        run: pip install -r requirements.txt
+      - name: Install test dependencies only
+        run: |
+          pip install \
+            flask \
+            flask-cors \
+            flask-bcrypt \
+            flask-jwt-extended \
+            flask-socketio \
+            pymysql \
+            python-dotenv \
+            requests \
+            cloudinary \
+            sib-api-v3-sdk \
+            pytest \
+            pytest-mock \
+            werkzeug \
+            eventlet
 
       - name: Check app.py syntax
         run: |
@@ -103,19 +118,19 @@ jobs:
       - name: Report result
         run: |
           echo "════════════════════════════════════════"
-          echo "  Career Navigator Backend CI v8.0"
+          echo "  Career Navigator Backend CI v8.1"
           echo "════════════════════════════════════════"
           if [ "${{ needs.test.result }}" = "success" ]; then
-            echo "✅ Tests      : passed"
+            echo "✅ Tests  : passed"
           else
-            echo "❌ Tests      : FAILED — deploy was blocked"
+            echo "❌ Tests  : FAILED"
           fi
           if [ "${{ needs.deploy.result }}" = "success" ]; then
-            echo "✅ Deploy     : succeeded"
+            echo "✅ Deploy : succeeded"
           elif [ "${{ needs.deploy.result }}" = "skipped" ]; then
-            echo "⏭️  Deploy     : skipped (PR — not a push)"
+            echo "⏭️  Deploy : skipped (PR)"
           else
-            echo "❌ Deploy     : FAILED"
+            echo "❌ Deploy : FAILED"
           fi
           echo "Branch : ${{ github.ref_name }}"
           echo "Commit : ${{ github.sha }}"

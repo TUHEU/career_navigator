@@ -81,9 +81,9 @@ class _SplashScreenState extends State<SplashScreen>
   void _go(Widget page) {
     if (!mounted) return;
     Navigator.pushReplacement(context, PageRouteBuilder(
-      pageBuilder: (_, _, _) => page,
+      pageBuilder: (_, __, ___) => page,
       transitionDuration: const Duration(milliseconds: 600),
-      transitionsBuilder: (_, a, _, child) =>
+      transitionsBuilder: (_, a, __, child) =>
           FadeTransition(opacity: a, child: child),
     ));
   }
@@ -106,7 +106,7 @@ class _SplashScreenState extends State<SplashScreen>
         // Rotating rings (inspired by ApexSpeech)
         Center(child: AnimatedBuilder(
           animation: _ringCtrl,
-          builder: (_, _) => Stack(
+          builder: (_, __) => Stack(
             alignment: Alignment.center,
             children: List.generate(5, (i) {
               final sz  = 80.0 + i * 72;
@@ -119,7 +119,7 @@ class _SplashScreenState extends State<SplashScreen>
                   decoration: BoxDecoration(
                     shape: BoxShape.circle,
                     border: Border.all(
-                      color: AppColors.primaryCyan.withValues(alpha: op), width: 1),
+                      color: AppColors.primaryCyan.withOpacity(op), width: 1),
                   ),
                 ),
               );
@@ -138,17 +138,17 @@ class _SplashScreenState extends State<SplashScreen>
                 width: 100, height: 100,
                 decoration: BoxDecoration(
                   shape: BoxShape.circle,
-                  color: AppColors.primaryCyan.withValues(alpha: 0.08),
+                  color: AppColors.primaryCyan.withOpacity(0.08),
                   border: Border.all(
-                    color: AppColors.primaryCyan.withValues(alpha: 0.4), width: 1.5),
+                    color: AppColors.primaryCyan.withOpacity(0.4), width: 1.5),
                   boxShadow: [BoxShadow(
-                    color: AppColors.primaryCyan.withValues(alpha: 0.3),
+                    color: AppColors.primaryCyan.withOpacity(0.3),
                     blurRadius: 50, spreadRadius: 10,
                   )],
                 ),
                 child: ClipOval(child: Image.asset(
                   'assets/logo/logo.png', fit: BoxFit.cover,
-                  errorBuilder: (_, _, _) => Icon(
+                  errorBuilder: (_, __, ___) => Icon(
                     Icons.compass_calibration_outlined,
                     color: AppColors.primaryCyan, size: 46),
                 )),
@@ -158,7 +158,7 @@ class _SplashScreenState extends State<SplashScreen>
               ShaderMask(
                 shaderCallback: (b) => LinearGradient(
                   colors: [AppColors.primaryCyan,
-                           AppColors.primaryCyan.withValues(alpha: 0.6)],
+                           AppColors.primaryCyan.withOpacity(0.6)],
                 ).createShader(b),
                 blendMode: BlendMode.srcIn,
                 child: const Text('CAREER NAVIGATOR', style: TextStyle(
@@ -169,7 +169,7 @@ class _SplashScreenState extends State<SplashScreen>
               const SizedBox(height: 8),
               Text('YOUR FUTURE STARTS HERE', style: TextStyle(
                 fontSize: 10, letterSpacing: 3, fontWeight: FontWeight.w500,
-                color: Colors.white.withValues(alpha: 0.3),
+                color: Colors.white.withOpacity(0.3),
               )),
               const SizedBox(height: 60),
               _PulsingDots(),
@@ -203,21 +203,19 @@ class _PulsingDotsState extends State<_PulsingDots>
     }
   }
 
-  @override void dispose() { for (final c in _cs) {
-    c.dispose();
-  } super.dispose(); }
+  @override void dispose() { for (final c in _cs) c.dispose(); super.dispose(); }
 
   @override
   Widget build(BuildContext context) => Row(
     mainAxisSize: MainAxisSize.min,
     children: List.generate(3, (i) => AnimatedBuilder(
       animation: _as[i],
-      builder: (_, _) => Container(
+      builder: (_, __) => Container(
         width: 6, height: 6,
         margin: const EdgeInsets.symmetric(horizontal: 3),
         decoration: BoxDecoration(
           shape: BoxShape.circle,
-          color: AppColors.primaryCyan.withValues(alpha: _as[i].value),
+          color: AppColors.primaryCyan.withOpacity(_as[i].value),
         ),
       ),
     )),

@@ -27,15 +27,15 @@ class ProfileCard extends StatelessWidget {
     return Container(
       padding: const EdgeInsets.all(20),
       decoration: BoxDecoration(
-        color: isDark ? Colors.white.withValues(alpha: 0.06) : Colors.grey.shade100,
+        color: isDark ? Colors.white.withOpacity(0.06) : Colors.grey.shade100,
         borderRadius: BorderRadius.circular(22),
-        border: Border.all(color: AppColors.primaryCyan.withValues(alpha: 0.25)),
+        border: Border.all(color: AppColors.primaryCyan.withOpacity(0.25)),
       ),
       child: Row(
         children: [
           CircleAvatar(
             radius: 38,
-            backgroundColor: AppColors.primaryCyan.withValues(alpha: 0.2),
+            backgroundColor: AppColors.primaryCyan.withOpacity(0.2),
             backgroundImage: pictureUrl != null
                 ? NetworkImage(pictureUrl!)
                 : null,
@@ -76,7 +76,7 @@ class ProfileCard extends StatelessWidget {
                   email,
                   style: TextStyle(
                     color: isDark
-                        ? Colors.white.withValues(alpha: 0.4)
+                        ? Colors.white.withOpacity(0.4)
                         : AppColors.lightTextSecondary,
                     fontSize: 12,
                   ),
@@ -88,10 +88,10 @@ class ProfileCard extends StatelessWidget {
                     vertical: 4,
                   ),
                   decoration: BoxDecoration(
-                    color: AppColors.primaryCyan.withValues(alpha: 0.12),
+                    color: AppColors.primaryCyan.withOpacity(0.12),
                     borderRadius: BorderRadius.circular(20),
                     border: Border.all(
-                      color: AppColors.primaryCyan.withValues(alpha: 0.3),
+                      color: AppColors.primaryCyan.withOpacity(0.3),
                     ),
                   ),
                   child: Row(
@@ -152,10 +152,10 @@ class JobCard extends StatelessWidget {
       margin: const EdgeInsets.only(bottom: 12),
       padding: const EdgeInsets.all(16),
       decoration: BoxDecoration(
-        color: isDark ? Colors.white.withValues(alpha: 0.04) : Colors.grey.shade100,
+        color: isDark ? Colors.white.withOpacity(0.04) : Colors.grey.shade100,
         borderRadius: BorderRadius.circular(16),
         border: Border.all(
-          color: isDark ? Colors.white.withValues(alpha: 0.07) : Colors.grey.shade300,
+          color: isDark ? Colors.white.withOpacity(0.07) : Colors.grey.shade300,
         ),
       ),
       child: Column(
@@ -167,7 +167,7 @@ class JobCard extends StatelessWidget {
                 width: 48,
                 height: 48,
                 decoration: BoxDecoration(
-                  color: AppColors.primaryCyan.withValues(alpha: 0.1),
+                  color: AppColors.primaryCyan.withOpacity(0.1),
                   borderRadius: BorderRadius.circular(12),
                 ),
                 child: const Icon(
@@ -203,7 +203,7 @@ class JobCard extends StatelessWidget {
               Container(
                 padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
                 decoration: BoxDecoration(
-                  color: AppColors.primaryCyan.withValues(alpha: 0.1),
+                  color: AppColors.primaryCyan.withOpacity(0.1),
                   borderRadius: BorderRadius.circular(12),
                 ),
                 child: Text(
@@ -223,7 +223,7 @@ class JobCard extends StatelessWidget {
               Icon(
                 Icons.location_on_outlined,
                 color: isDark
-                    ? Colors.white.withValues(alpha: 0.4)
+                    ? Colors.white.withOpacity(0.4)
                     : Colors.grey.shade500,
                 size: 14,
               ),
@@ -232,7 +232,7 @@ class JobCard extends StatelessWidget {
                 location,
                 style: TextStyle(
                   color: isDark
-                      ? Colors.white.withValues(alpha: 0.5)
+                      ? Colors.white.withOpacity(0.5)
                       : Colors.grey.shade600,
                   fontSize: 12,
                 ),

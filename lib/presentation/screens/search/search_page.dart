@@ -197,7 +197,7 @@ class _SearchPageState extends State<SearchPage>
           // Avatar
           CircleAvatar(
             radius: 26,
-            backgroundColor: AppColors.primaryCyan.withValues(alpha: 0.2),
+            backgroundColor: AppColors.primaryCyan.withOpacity(0.2),
             backgroundImage: picture != null ? NetworkImage(picture) : null,
             child: picture == null
                 ? Text(
@@ -239,14 +239,14 @@ class _SearchPageState extends State<SearchPage>
                             (role == 'mentor'
                                     ? AppColors.primaryCyan
                                     : Colors.purple)
-                                .withValues(alpha: 0.12),
+                                .withOpacity(0.12),
                         borderRadius: BorderRadius.circular(8),
                         border: Border.all(
                           color:
                               (role == 'mentor'
                                       ? AppColors.primaryCyan
                                       : Colors.purple)
-                                  .withValues(alpha: 0.4),
+                                  .withOpacity(0.4),
                         ),
                       ),
                       child: Text(
@@ -308,9 +308,9 @@ class _SearchPageState extends State<SearchPage>
                       vertical: 6,
                     ),
                     decoration: BoxDecoration(
-                      color: Colors.green.withValues(alpha: 0.12),
+                      color: Colors.green.withOpacity(0.12),
                       borderRadius: BorderRadius.circular(8),
-                      border: Border.all(color: Colors.green.withValues(alpha: 0.4)),
+                      border: Border.all(color: Colors.green.withOpacity(0.4)),
                     ),
                     child: const Text(
                       'Connected',
@@ -367,7 +367,7 @@ class _SearchPageState extends State<SearchPage>
           Icon(
             Icons.people_outline,
             size: 56,
-            color: AppColors.textMuted(isDark).withValues(alpha: 0.4),
+            color: AppColors.textMuted(isDark).withOpacity(0.4),
           ),
           const SizedBox(height: 12),
           Text(
@@ -441,7 +441,7 @@ class _SearchPageState extends State<SearchPage>
                   icon: const Icon(Icons.search),
                   color: AppColors.primaryCyan,
                   style: IconButton.styleFrom(
-                    backgroundColor: AppColors.primaryCyan.withValues(alpha: 0.12),
+                    backgroundColor: AppColors.primaryCyan.withOpacity(0.12),
                     shape: RoundedRectangleBorder(
                       borderRadius: BorderRadius.circular(12),
                     ),
@@ -460,7 +460,7 @@ class _SearchPageState extends State<SearchPage>
                   Icon(
                     Icons.info_outline,
                     size: 14,
-                    color: AppColors.primaryCyan.withValues(alpha: 0.8),
+                    color: AppColors.primaryCyan.withOpacity(0.8),
                   ),
                   const SizedBox(width: 6),
                   Text(
