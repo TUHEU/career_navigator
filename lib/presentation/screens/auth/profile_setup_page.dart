@@ -25,10 +25,24 @@ class _ProfileSetupPageState extends State<ProfileSetupPage> {
   DateTime? _selectedDate;
   String _selectedRole = 'job_seeker';
   final TextEditingController _nameController = TextEditingController();
+  bool _picking = false; // guard against double-tap
 
   Future<void> _pickImage() async {
-    final picked = await _picker.pickImage(source: ImageSource.gallery);
-    if (picked != null) setState(() => _image = File(picked.path));
+    if (_picking) return; // prevent double-tap crash
+    setState(() => _picking = true);
+    try {
+      final picked = await _picker.pickImage(
+        source: ImageSource.gallery,
+        imageQuality: 75,
+      );
+      if (picked != null && mounted) {
+        setState(() => _image = File(picked.path));
+      }
+    } catch (e) {
+      // already_active or permission denied — silently ignore
+    } finally {
+      if (mounted) setState(() => _picking = false);
+    }
   }
 
   Future<void> _pickDate() async {
@@ -52,9 +66,10 @@ class _ProfileSetupPageState extends State<ProfileSetupPage> {
     }
 
     final authProvider = context.read<AuthProvider>();
-    final dob = _selectedDate != null
-        ? '${_selectedDate!.year}-${_selectedDate!.month.toString().padLeft(2, '0')}-${_selectedDate!.day.toString().padLeft(2, '0')}'
-        : '';
+    final dob =
+        _selectedDate != null
+            ? '${_selectedDate!.year}-${_selectedDate!.month.toString().padLeft(2, '0')}-${_selectedDate!.day.toString().padLeft(2, '0')}'
+            : '';
 
     final success = await authProvider.setupProfile(
       fullName: _nameController.text.trim(),
@@ -92,9 +107,8 @@ class _ProfileSetupPageState extends State<ProfileSetupPage> {
     final isDark = themeProvider.isDarkMode;
 
     return Scaffold(
-      backgroundColor: isDark
-          ? AppColors.darkBackground
-          : AppColors.lightBackground,
+      backgroundColor:
+          isDark ? AppColors.darkBackground : AppColors.lightBackground,
       appBar: AppBar(title: const Text('Profile Setup')),
       body: SingleChildScrollView(
         padding: const EdgeInsets.all(24),
@@ -114,16 +128,16 @@ class _ProfileSetupPageState extends State<ProfileSetupPage> {
                     CircleAvatar(
                       radius: 62,
                       backgroundColor: AppColors.primaryCyan.withOpacity(0.2),
-                      backgroundImage: _image != null
-                          ? FileImage(_image!)
-                          : null,
-                      child: _image == null
-                          ? const Icon(
-                              Icons.person,
-                              color: AppColors.primaryCyan,
-                              size: 50,
-                            )
-                          : null,
+                      backgroundImage:
+                          _image != null ? FileImage(_image!) : null,
+                      child:
+                          _image == null
+                              ? const Icon(
+                                Icons.person,
+                                color: AppColors.primaryCyan,
+                                size: 50,
+                              )
+                              : null,
                     ),
                     Positioned(
                       bottom: 4,
@@ -150,9 +164,10 @@ class _ProfileSetupPageState extends State<ProfileSetupPage> {
               child: Text(
                 'Tap to upload profile picture',
                 style: TextStyle(
-                  color: isDark
-                      ? Colors.white.withOpacity(0.5)
-                      : AppColors.lightTextSecondary,
+                  color:
+                      isDark
+                          ? Colors.white.withOpacity(0.5)
+                          : AppColors.lightTextSecondary,
                 ),
               ),
             ),
@@ -172,14 +187,16 @@ class _ProfileSetupPageState extends State<ProfileSetupPage> {
                   vertical: 16,
                 ),
                 decoration: BoxDecoration(
-                  color: isDark
-                      ? Colors.white.withOpacity(0.05)
-                      : Colors.grey.shade100,
+                  color:
+                      isDark
+                          ? Colors.white.withOpacity(0.05)
+                          : Colors.grey.shade100,
                   borderRadius: BorderRadius.circular(15),
                   border: Border.all(
-                    color: isDark
-                        ? Colors.white.withOpacity(0.15)
-                        : Colors.grey.shade300,
+                    color:
+                        isDark
+                            ? Colors.white.withOpacity(0.15)
+                            : Colors.grey.shade300,
                   ),
                 ),
                 child: Row(
@@ -194,11 +211,12 @@ class _ProfileSetupPageState extends State<ProfileSetupPage> {
                           ? '${_selectedDate!.day}/${_selectedDate!.month}/${_selectedDate!.year}'
                           : 'Date of Birth',
                       style: TextStyle(
-                        color: _selectedDate != null
-                            ? (isDark ? Colors.white : AppColors.lightText)
-                            : (isDark
-                                  ? Colors.white.withOpacity(0.5)
-                                  : Colors.grey.shade500),
+                        color:
+                            _selectedDate != null
+                                ? (isDark ? Colors.white : AppColors.lightText)
+                                : (isDark
+                                    ? Colors.white.withOpacity(0.5)
+                                    : Colors.grey.shade500),
                       ),
                     ),
                   ],
@@ -209,9 +227,10 @@ class _ProfileSetupPageState extends State<ProfileSetupPage> {
             Text(
               'I am a...',
               style: TextStyle(
-                color: isDark
-                    ? Colors.white.withOpacity(0.75)
-                    : AppColors.lightText,
+                color:
+                    isDark
+                        ? Colors.white.withOpacity(0.75)
+                        : AppColors.lightText,
                 fontSize: 15,
                 fontWeight: FontWeight.w600,
               ),
@@ -277,16 +296,20 @@ class _RoleCard extends StatelessWidget {
       duration: const Duration(milliseconds: 200),
       padding: const EdgeInsets.symmetric(vertical: 18, horizontal: 14),
       decoration: BoxDecoration(
-        color: selected
-            ? AppColors.primaryCyan.withOpacity(0.12)
-            : (isDark ? Colors.white.withOpacity(0.05) : Colors.grey.shade100),
+        color:
+            selected
+                ? AppColors.primaryCyan.withOpacity(0.12)
+                : (isDark
+                    ? Colors.white.withOpacity(0.05)
+                    : Colors.grey.shade100),
         borderRadius: BorderRadius.circular(18),
         border: Border.all(
-          color: selected
-              ? AppColors.primaryCyan
-              : (isDark
-                    ? Colors.white.withOpacity(0.12)
-                    : Colors.grey.shade300),
+          color:
+              selected
+                  ? AppColors.primaryCyan
+                  : (isDark
+                      ? Colors.white.withOpacity(0.12)
+                      : Colors.grey.shade300),
           width: selected ? 2 : 1,
         ),
       ),
@@ -294,22 +317,24 @@ class _RoleCard extends StatelessWidget {
         children: [
           Icon(
             icon,
-            color: selected
-                ? AppColors.primaryCyan
-                : (isDark
-                      ? Colors.white.withOpacity(0.5)
-                      : Colors.grey.shade500),
+            color:
+                selected
+                    ? AppColors.primaryCyan
+                    : (isDark
+                        ? Colors.white.withOpacity(0.5)
+                        : Colors.grey.shade500),
             size: 32,
           ),
           const SizedBox(height: 10),
           Text(
             title,
             style: TextStyle(
-              color: selected
-                  ? (isDark ? Colors.white : AppColors.lightText)
-                  : (isDark
-                        ? Colors.white.withOpacity(0.65)
-                        : AppColors.lightTextSecondary),
+              color:
+                  selected
+                      ? (isDark ? Colors.white : AppColors.lightText)
+                      : (isDark
+                          ? Colors.white.withOpacity(0.65)
+                          : AppColors.lightTextSecondary),
               fontWeight: FontWeight.bold,
               fontSize: 14,
             ),
@@ -319,9 +344,8 @@ class _RoleCard extends StatelessWidget {
             subtitle,
             textAlign: TextAlign.center,
             style: TextStyle(
-              color: isDark
-                  ? Colors.white.withOpacity(0.4)
-                  : Colors.grey.shade500,
+              color:
+                  isDark ? Colors.white.withOpacity(0.4) : Colors.grey.shade500,
               fontSize: 11,
             ),
           ),
