@@ -4,11 +4,13 @@ class AppConstants {
   static const String appName = 'Career Navigator';
   static const String appVersion = '2.0.0';
 
-  // ── API URL — update this before building for production ──
+  // ── API URL ─────────────────────────────────────────────
+  // ✅ VPS production server
   static const String baseUrl = 'http://38.242.246.126:5000';
-  // static const String baseUrl = 'http://10.0.2.2:5000';    // Android emulator
-  // static const String baseUrl = 'http://localhost:5000';    // iOS simulator
-  // static const String baseUrl = 'http://YOUR_VPS_IP:5000'; // Production
+
+  // Uncomment one of these for local dev:
+  // static const String baseUrl = 'http://10.0.2.2:5000';   // Android emulator
+  // static const String baseUrl = 'http://localhost:5000';   // iOS simulator
 
   static const int defaultPageSize = 20;
   static const int maxPageSize = 50;
@@ -17,8 +19,9 @@ class AppConstants {
   static const String accessTokenKey = 'access_token';
   static const String refreshTokenKey = 'refresh_token';
 
-  static const Duration connectionTimeout = Duration(seconds: 30);
-  static const Duration receiveTimeout = Duration(seconds: 30);
+  // Reduced timeout — fails fast instead of freezing 30s
+  static const Duration connectionTimeout = Duration(seconds: 10);
+  static const Duration receiveTimeout = Duration(seconds: 10);
 
   static const int otpLength = 6;
   static const int minPasswordLength = 8;
@@ -66,7 +69,7 @@ class ApiEndpoints {
   static const String conversations = '/chat/conversations';
   static const String messages = '/chat/messages';
 
-  // AI — proxy through backend (key stays server-side, never in app)
+  // AI
   static const String aiStream = '/ai/stream';
 
   // Feedback & Reviews
