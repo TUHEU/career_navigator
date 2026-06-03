@@ -37,29 +37,20 @@
       border: none; background: transparent;
       font-family: 'DM Sans', sans-serif;
     }
-    .auth-tab.active {
-      background: var(--cyan); color: #fff;
-    }
+    .auth-tab.active { background: var(--cyan); color: #fff; }
     .auth-title {
       font-family: 'Syne', sans-serif;
-      font-size: 24px; font-weight: 700;
-      margin-bottom: 6px;
+      font-size: 24px; font-weight: 700; margin-bottom: 6px;
     }
     .auth-sub { font-size: 14px; color: var(--text2); margin-bottom: 28px; }
-    .role-select {
-      display: grid; grid-template-columns: 1fr 1fr;
-      gap: 12px; margin-bottom: 20px;
-    }
+    .role-select { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; margin-bottom: 20px; }
     .role-btn {
       background: var(--bg3); border: 1px solid var(--border);
       border-radius: 10px; padding: 14px;
       text-align: center; cursor: pointer;
       transition: all 0.2s; color: var(--text2);
     }
-    .role-btn.selected {
-      border-color: var(--cyan); background: var(--cyan-dim);
-      color: var(--cyan);
-    }
+    .role-btn.selected { border-color: var(--cyan); background: var(--cyan-dim); color: var(--cyan); }
     .role-btn i { font-size: 24px; display: block; margin-bottom: 6px; }
     .role-btn span { font-size: 13px; font-weight: 500; }
     .submit-btn {
@@ -71,19 +62,10 @@
     }
     .submit-btn:hover { opacity: 0.88; }
     .submit-btn:disabled { opacity: 0.5; cursor: not-allowed; }
-    .divider {
-      display: flex; align-items: center; gap: 12px;
-      margin: 20px 0; color: var(--text2); font-size: 13px;
-    }
-    .divider::before, .divider::after {
-      content: ''; flex: 1;
-      height: 0.5px; background: var(--border);
-    }
-    .switch-text {
-      text-align: center; font-size: 13px;
-      color: var(--text2); margin-top: 20px;
-    }
+    .switch-text { text-align: center; font-size: 13px; color: var(--text2); margin-top: 20px; }
     .switch-text a { color: var(--cyan); cursor: pointer; text-decoration: none; }
+    .forgot-link { text-align: right; margin-top: -12px; margin-bottom: 16px; }
+    .forgot-link a { font-size: 12px; color: var(--cyan); cursor: pointer; text-decoration: none; }
     .error-msg {
       display: none; background: rgba(255,80,80,0.1);
       border: 1px solid rgba(255,80,80,0.3);
@@ -106,13 +88,27 @@
     }
     .form-panel { display: none; }
     .form-panel.active { display: block; }
+
+    /* VERIFY EMAIL PANEL */
+    .verify-icon { font-size: 48px; color: var(--cyan); text-align: center; margin-bottom: 16px; }
+    .code-inputs { display: flex; gap: 10px; justify-content: center; margin-bottom: 20px; }
+    .code-inputs input {
+      width: 48px; height: 52px; text-align: center;
+      font-size: 20px; font-weight: 700;
+      background: var(--bg3); border: 0.5px solid var(--border);
+      border-radius: 10px; color: var(--text); outline: none;
+    }
+    .code-inputs input:focus { border-color: var(--cyan); }
+    .resend-text { text-align: center; font-size: 13px; color: var(--text2); margin-top: 12px; }
+    .resend-text a { color: var(--cyan); cursor: pointer; }
   </style>
+  <script src="api.js"></script>
 </head>
 <body>
 <nav>
-  <a class="logo" href="index.html"><span class="dot"></span> CareerNavigator</a>
+  <a class="logo" href="HomePage.html"><span class="dot"></span> CareerNavigator</a>
   <div class="nav-links">
-    <a href="index.html">Home</a>
+    <a href="HomePage.html">Home</a>
     <a href="features.html">Features</a>
     <a href="about.html">About</a>
     <a href="download.html">Download</a>
@@ -128,7 +124,7 @@
     <div class="auth-logo"><span class="dot"></span> CareerNavigator</div>
 
     <!-- TABS -->
-    <div class="auth-tabs">
+    <div class="auth-tabs" id="authTabs">
       <button class="auth-tab active" onclick="switchTab('signin')">Sign in</button>
       <button class="auth-tab" onclick="switchTab('signup')">Sign up</button>
     </div>
@@ -137,7 +133,7 @@
     <div class="error-msg" id="errorMsg"></div>
     <div class="success-msg" id="successMsg"></div>
 
-    <!-- SIGN IN FORM -->
+    <!-- SIGN IN PANEL -->
     <div class="form-panel active" id="signinPanel">
       <h2 class="auth-title">Welcome back</h2>
       <p class="auth-sub">Sign in to continue your career journey.</p>
@@ -154,6 +150,9 @@
           </button>
         </div>
       </div>
+      <div class="forgot-link">
+        <a onclick="switchTab('forgot')">Forgot password?</a>
+      </div>
       <button class="submit-btn" onclick="handleSignIn()" id="signinBtn">
         Sign in <i class="ti ti-arrow-right"></i>
       </button>
@@ -162,26 +161,21 @@
       </div>
     </div>
 
-    <!-- SIGN UP FORM -->
+    <!-- SIGN UP PANEL -->
     <div class="form-panel" id="signupPanel">
       <h2 class="auth-title">Create account</h2>
       <p class="auth-sub">Join thousands of professionals growing their careers.</p>
-
-      <!-- ROLE SELECTION -->
       <div style="margin-bottom:16px;">
         <label style="font-size:13px;color:var(--text2);display:block;margin-bottom:10px;">I am a...</label>
         <div class="role-select">
           <div class="role-btn selected" id="roleMentee" onclick="selectRole('mentee')">
-            <i class="ti ti-user"></i>
-            <span>Mentee</span>
+            <i class="ti ti-user"></i><span>Mentee</span>
           </div>
           <div class="role-btn" id="roleMentor" onclick="selectRole('mentor')">
-            <i class="ti ti-star"></i>
-            <span>Mentor</span>
+            <i class="ti ti-star"></i><span>Mentor</span>
           </div>
         </div>
       </div>
-
       <div class="form-group">
         <label>Full name</label>
         <input type="text" id="signupName" placeholder="John Doe" />
@@ -215,25 +209,84 @@
         Already have an account? <a onclick="switchTab('signin')">Sign in</a>
       </div>
     </div>
+
+    <!-- VERIFY EMAIL PANEL -->
+    <div class="form-panel" id="verifyPanel">
+      <div class="verify-icon"><i class="ti ti-mail-check"></i></div>
+      <h2 class="auth-title" style="text-align:center;">Check your email</h2>
+      <p class="auth-sub" style="text-align:center;">We sent a 6-digit code to <strong id="verifyEmailLabel"></strong></p>
+      <div class="code-inputs">
+        <input type="text" maxlength="1" class="code-digit" oninput="moveToNext(this, 0)" />
+        <input type="text" maxlength="1" class="code-digit" oninput="moveToNext(this, 1)" />
+        <input type="text" maxlength="1" class="code-digit" oninput="moveToNext(this, 2)" />
+        <input type="text" maxlength="1" class="code-digit" oninput="moveToNext(this, 3)" />
+        <input type="text" maxlength="1" class="code-digit" oninput="moveToNext(this, 4)" />
+        <input type="text" maxlength="1" class="code-digit" oninput="moveToNext(this, 5)" />
+      </div>
+      <button class="submit-btn" onclick="handleVerify()" id="verifyBtn">
+        Verify email <i class="ti ti-check"></i>
+      </button>
+      <div class="resend-text">
+        Didn't get the code? <a onclick="handleResend()">Resend</a>
+      </div>
+    </div>
+
+    <!-- FORGOT PASSWORD PANEL -->
+    <div class="form-panel" id="forgotPanel">
+      <h2 class="auth-title">Forgot password</h2>
+      <p class="auth-sub">Enter your email and we'll send you a reset code.</p>
+      <div class="form-group">
+        <label>Email address</label>
+        <input type="email" id="forgotEmail" placeholder="john@example.com" />
+      </div>
+      <button class="submit-btn" onclick="handleForgot()" id="forgotBtn">
+        Send reset code <i class="ti ti-send"></i>
+      </button>
+      <div class="switch-text">
+        <a onclick="switchTab('signin')">Back to sign in</a>
+      </div>
+    </div>
+
+    <!-- RESET PASSWORD PANEL -->
+    <div class="form-panel" id="resetPanel">
+      <h2 class="auth-title">Reset password</h2>
+      <p class="auth-sub">Enter the code we sent to your email and your new password.</p>
+      <div class="form-group">
+        <label>Reset code</label>
+        <input type="text" id="resetCode" placeholder="Enter code" />
+      </div>
+      <div class="form-group">
+        <label>New password</label>
+        <div class="password-wrap">
+          <input type="password" id="resetPassword" placeholder="Min. 6 characters" />
+          <button class="toggle-pw" onclick="togglePassword('resetPassword', this)">
+            <i class="ti ti-eye"></i>
+          </button>
+        </div>
+      </div>
+      <button class="submit-btn" onclick="handleReset()" id="resetBtn">
+        Reset password <i class="ti ti-check"></i>
+      </button>
+    </div>
+
   </div>
 </div>
 
 <footer>
   <p>© 2026 CareerNavigator. All rights reserved.</p>
   <div class="footer-links">
-    <a href="index.html">Home</a>
+    <a href="HomePage.html">Home</a>
     <a href="features.html">Features</a>
     <a href="contact.html">Contact</a>
   </div>
 </footer>
 
 <script>
-  // ── CONFIG ─────────────────────────────────────────
-  const BASE_URL = 'http://localhost:5000/api';
   let selectedRole = 'mentee';
+  let pendingEmail = '';
+  let isLight = false;
 
   // ── THEME ──────────────────────────────────────────
-  let isLight = false;
   function toggleTheme() {
     isLight = !isLight;
     document.body.classList.toggle('light-mode', isLight);
@@ -244,8 +297,17 @@
 
   // ── TABS ───────────────────────────────────────────
   function switchTab(tab) {
-    document.getElementById('signinPanel').classList.toggle('active', tab === 'signin');
-    document.getElementById('signupPanel').classList.toggle('active', tab === 'signup');
+    const panels = ['signin', 'signup', 'verify', 'forgot', 'reset'];
+    panels.forEach(p => {
+      document.getElementById(p + 'Panel').classList.remove('active');
+    });
+    document.getElementById(tab + 'Panel').classList.add('active');
+
+    // Show/hide tabs bar
+    const showTabs = ['signin', 'signup'].includes(tab);
+    document.getElementById('authTabs').style.display = showTabs ? 'flex' : 'none';
+
+    // Update active tab
     document.querySelectorAll('.auth-tab').forEach((t, i) => {
       t.classList.toggle('active', (i === 0 && tab === 'signin') || (i === 1 && tab === 'signup'));
     });
@@ -283,71 +345,153 @@
     document.getElementById('successMsg').style.display = 'none';
   }
 
+  // ── VERIFY CODE INPUT ──────────────────────────────
+  function moveToNext(input, index) {
+    const digits = document.querySelectorAll('.code-digit');
+    if (input.value && index < 5) digits[index + 1].focus();
+  }
+
+  function getVerifyCode() {
+    return Array.from(document.querySelectorAll('.code-digit'))
+      .map(i => i.value).join('');
+  }
+
   // ── SIGN IN ────────────────────────────────────────
   async function handleSignIn() {
-    const email = document.getElementById('signinEmail').value.trim();
+    const email    = document.getElementById('signinEmail').value.trim();
     const password = document.getElementById('signinPassword').value;
     if (!email || !password) { showError('Please fill in all fields.'); return; }
 
     const btn = document.getElementById('signinBtn');
-    btn.disabled = true; btn.textContent = 'Signing in...';
+    btn.disabled = true;
+    btn.innerHTML = 'Signing in... <i class="ti ti-loader"></i>';
 
-    try {
-      const res = await fetch(`${BASE_URL}/login`, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ email, password })
-      });
-      const data = await res.json();
-      if (!res.ok) { showError(data.error || 'Sign in failed.'); return; }
+    const { ok, data } = await login(email, password);
 
-      localStorage.setItem('token', data.token);
-      localStorage.setItem('user', JSON.stringify(data.user));
-      showSuccess('Signed in successfully! Redirecting...');
+    if (!ok) {
+      showError(data.error || data.message || 'Sign in failed.');
+    } else {
+      showSuccess('Signed in! Redirecting...');
       setTimeout(() => { window.location.href = 'dashboard.html'; }, 1200);
-    } catch (err) {
-      showError('Could not connect to server. Make sure Flask is running.');
-    } finally {
-      btn.disabled = false;
-      btn.innerHTML = 'Sign in <i class="ti ti-arrow-right"></i>';
     }
+
+    btn.disabled = false;
+    btn.innerHTML = 'Sign in <i class="ti ti-arrow-right"></i>';
   }
 
   // ── SIGN UP ────────────────────────────────────────
   async function handleSignUp() {
     const full_name = document.getElementById('signupName').value.trim();
-    const email = document.getElementById('signupEmail').value.trim();
-    const password = document.getElementById('signupPassword').value;
-    const confirm = document.getElementById('signupConfirm').value;
+    const email     = document.getElementById('signupEmail').value.trim();
+    const password  = document.getElementById('signupPassword').value;
+    const confirm   = document.getElementById('signupConfirm').value;
 
     if (!full_name || !email || !password || !confirm) { showError('Please fill in all fields.'); return; }
     if (password.length < 6) { showError('Password must be at least 6 characters.'); return; }
     if (password !== confirm) { showError('Passwords do not match.'); return; }
 
     const btn = document.getElementById('signupBtn');
-    btn.disabled = true; btn.textContent = 'Creating account...';
+    btn.disabled = true;
+    btn.innerHTML = 'Creating account... <i class="ti ti-loader"></i>';
 
-    try {
-      const res = await fetch(`${BASE_URL}/register`, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ full_name, email, password, role: selectedRole })
-      });
-      const data = await res.json();
-      if (!res.ok) { showError(data.error || 'Registration failed.'); return; }
+    const { ok, data } = await register(full_name, email, password, selectedRole);
 
-      showSuccess('Account created! Please sign in.');
+    if (!ok) {
+      showError(data.error || data.message || 'Registration failed.');
+    } else {
+      pendingEmail = email;
+      showSuccess('Account created! Check your email for a verification code.');
+      setTimeout(() => {
+        document.getElementById('verifyEmailLabel').textContent = email;
+        switchTab('verify');
+      }, 1500);
+    }
+
+    btn.disabled = false;
+    btn.innerHTML = 'Create account <i class="ti ti-arrow-right"></i>';
+  }
+
+  // ── VERIFY EMAIL ───────────────────────────────────
+  async function handleVerify() {
+    const code = getVerifyCode();
+    if (code.length < 6) { showError('Please enter the full 6-digit code.'); return; }
+
+    const btn = document.getElementById('verifyBtn');
+    btn.disabled = true;
+    btn.innerHTML = 'Verifying... <i class="ti ti-loader"></i>';
+
+    const { ok, data } = await verifyEmail(pendingEmail, code);
+
+    if (!ok) {
+      showError(data.error || data.message || 'Verification failed.');
+    } else {
+      showSuccess('Email verified! Please sign in.');
       setTimeout(() => switchTab('signin'), 1500);
-    } catch (err) {
-      showError('Could not connect to server. Make sure Flask is running.');
-    } finally {
-      btn.disabled = false;
-      btn.innerHTML = 'Create account <i class="ti ti-arrow-right"></i>';
+    }
+
+    btn.disabled = false;
+    btn.innerHTML = 'Verify email <i class="ti ti-check"></i>';
+  }
+
+  // ── RESEND CODE ────────────────────────────────────
+  async function handleResend() {
+    const { ok, data } = await resendCode(pendingEmail);
+    if (!ok) {
+      showError(data.error || 'Could not resend code.');
+    } else {
+      showSuccess('Code resent! Check your email.');
     }
   }
 
+  // ── FORGOT PASSWORD ────────────────────────────────
+  async function handleForgot() {
+    const email = document.getElementById('forgotEmail').value.trim();
+    if (!email) { showError('Please enter your email.'); return; }
+
+    const btn = document.getElementById('forgotBtn');
+    btn.disabled = true;
+    btn.innerHTML = 'Sending... <i class="ti ti-loader"></i>';
+
+    const { ok, data } = await forgotPassword(email);
+
+    if (!ok) {
+      showError(data.error || data.message || 'Could not send reset code.');
+    } else {
+      pendingEmail = email;
+      showSuccess('Reset code sent! Check your email.');
+      setTimeout(() => switchTab('reset'), 1500);
+    }
+
+    btn.disabled = false;
+    btn.innerHTML = 'Send reset code <i class="ti ti-send"></i>';
+  }
+
+  // ── RESET PASSWORD ─────────────────────────────────
+  async function handleReset() {
+    const code     = document.getElementById('resetCode').value.trim();
+    const password = document.getElementById('resetPassword').value;
+    if (!code || !password) { showError('Please fill in all fields.'); return; }
+    if (password.length < 6) { showError('Password must be at least 6 characters.'); return; }
+
+    const btn = document.getElementById('resetBtn');
+    btn.disabled = true;
+    btn.innerHTML = 'Resetting... <i class="ti ti-loader"></i>';
+
+    const { ok, data } = await resetPassword(pendingEmail, code, password);
+
+    if (!ok) {
+      showError(data.error || data.message || 'Reset failed.');
+    } else {
+      showSuccess('Password reset! Please sign in.');
+      setTimeout(() => switchTab('signin'), 1500);
+    }
+
+    btn.disabled = false;
+    btn.innerHTML = 'Reset password <i class="ti ti-check"></i>';
+  }
+
   // ── CHECK IF ALREADY LOGGED IN ─────────────────────
-  if (localStorage.getItem('token')) {
+  if (localStorage.getItem('access_token')) {
     window.location.href = 'dashboard.html';
   }
 </script>
