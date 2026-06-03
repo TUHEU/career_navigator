@@ -9,13 +9,14 @@
   <style>
     .page-hero { padding: 80px 48px 64px; max-width: 1140px; margin: 0 auto; text-align: center; }
     .download-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap: 20px; margin-bottom: 80px; }
-    .download-card { background: var(--bg2); border: 0.5px solid var(--border); border-radius: var(--radius-lg); padding: 36px 28px; text-align: center; transition: border-color 0.2s, transform 0.2s; cursor: pointer; }
+    .download-card { background: var(--bg2); border: 0.5px solid var(--border); border-radius: var(--radius-lg); padding: 36px 28px; text-align: center; transition: border-color 0.2s, transform 0.2s; }
     .download-card:hover { border-color: var(--cyan-border); transform: translateY(-4px); }
     .download-card .dl-icon { font-size: 52px; color: var(--cyan); margin-bottom: 20px; }
     .download-card h3 { font-family: 'Syne', sans-serif; font-size: 20px; font-weight: 700; margin-bottom: 8px; }
     .download-card p { font-size: 14px; color: var(--text2); margin-bottom: 24px; line-height: 1.6; }
     .download-card .dl-btn { display: inline-flex; align-items: center; gap: 8px; background: var(--cyan); color: #fff; border: none; padding: 12px 28px; border-radius: 10px; font-size: 14px; font-weight: 500; cursor: pointer; font-family: 'DM Sans', sans-serif; transition: opacity 0.2s; }
     .download-card .dl-btn:hover { opacity: 0.88; }
+    .download-card .dl-btn.soon { background: var(--bg3); color: var(--text2); border: 1px solid var(--border); cursor: not-allowed; }
     .requirements { background: var(--bg2); border: 0.5px solid var(--border); border-radius: var(--radius-lg); padding: 36px; max-width: 700px; margin: 0 auto 80px; }
     .requirements h3 { font-family: 'Syne', sans-serif; font-size: 20px; font-weight: 700; margin-bottom: 20px; }
     .req-list { display: flex; flex-direction: column; gap: 12px; }
@@ -36,6 +37,7 @@
   </div>
   <div class="nav-right">
     <button class="btn-theme" onclick="toggleTheme()" id="themeBtn"><i class="ti ti-sun"></i> Light</button>
+    <a href="auth.html"><button class="btn-outline">Sign in</button></a>
   </div>
 </nav>
 
@@ -43,39 +45,61 @@
   <div class="page-hero">
     <div class="badge"><i class="ti ti-download"></i> Free to download</div>
     <h1 class="section-title">Get CareerNavigator<br>on your device</h1>
-    <p class="section-sub" style="margin: 0 auto 0;">Available on Android, iOS, and Windows. Download free and start your mentorship journey today.</p>
+    <p class="section-sub" style="margin: 0 auto;">Available on Android, iOS, and Windows. Download free and start your mentorship journey today.</p>
   </div>
 
   <div class="section" style="padding-top: 40px;">
     <div class="download-grid">
+
+      <!-- ANDROID -->
       <div class="download-card">
         <div class="dl-icon"><i class="ti ti-brand-android"></i></div>
         <h3>Android</h3>
-        <p>Download from the Google Play Store for Android 8.0 and above. Free with no ads.</p>
-        <button class="dl-btn"><i class="ti ti-brand-google-play"></i> Google Play</button>
+        <p>Download the APK directly from GitHub. Works on Android 8.0 and above. Free with no ads.</p>
+        <button class="dl-btn" onclick="window.open('https://github.com/TUHEU/career_navigator/releases/download/v1.0/app-release.apk', '_blank')">
+          <i class="ti ti-download"></i> Download APK
+        </button>
       </div>
+
+      <!-- IOS -->
       <div class="download-card">
         <div class="dl-icon"><i class="ti ti-brand-apple"></i></div>
         <h3>iOS</h3>
-        <p>Download from the Apple App Store for iPhone and iPad running iOS 14 and above.</p>
-        <button class="dl-btn"><i class="ti ti-brand-apple"></i> App Store</button>
+        <p>iPhone and iPad support is coming soon. Follow our GitHub for updates on the release.</p>
+        <button class="dl-btn soon" disabled>
+          <i class="ti ti-clock"></i> Coming Soon
+        </button>
       </div>
+
+      <!-- WINDOWS -->
       <div class="download-card">
         <div class="dl-icon"><i class="ti ti-brand-windows"></i></div>
         <h3>Windows</h3>
-        <p>Download the Windows desktop app for a full-screen mentorship experience on PC.</p>
-        <button class="dl-btn"><i class="ti ti-download"></i> Download .exe</button>
+        <p>Windows desktop support is coming soon. Follow our GitHub for updates on the release.</p>
+        <button class="dl-btn soon" disabled>
+          <i class="ti ti-clock"></i> Coming Soon
+        </button>
       </div>
+
     </div>
 
+    <!-- GITHUB LINK -->
+    <div style="text-align:center; margin-bottom: 60px;">
+      <p style="color:var(--text2); font-size:14px; margin-bottom:16px;">View source code and release notes on GitHub</p>
+      <button class="btn-outline" onclick="window.open('https://github.com/TUHEU/career_navigator', '_blank')">
+        <i class="ti ti-brand-github"></i> View on GitHub
+      </button>
+    </div>
+
+    <!-- REQUIREMENTS -->
     <div class="section-label" style="text-align:center;">System requirements</div>
     <h2 class="section-title" style="text-align:center; margin-bottom:32px;">What you need</h2>
     <div class="requirements">
       <h3>Minimum requirements</h3>
       <div class="req-list">
         <div class="req-item"><i class="ti ti-brand-android"></i> Android 8.0 (Oreo) or higher</div>
-        <div class="req-item"><i class="ti ti-brand-apple"></i> iOS 14 or higher</div>
-        <div class="req-item"><i class="ti ti-brand-windows"></i> Windows 10 or higher (64-bit)</div>
+        <div class="req-item"><i class="ti ti-brand-apple"></i> iOS 14 or higher (coming soon)</div>
+        <div class="req-item"><i class="ti ti-brand-windows"></i> Windows 10 or higher — 64-bit (coming soon)</div>
         <div class="req-item"><i class="ti ti-wifi"></i> Active internet connection required</div>
         <div class="req-item"><i class="ti ti-database"></i> At least 100MB free storage space</div>
       </div>
@@ -85,14 +109,21 @@
 
 <footer>
   <p>© 2026 CareerNavigator. All rights reserved.</p>
-  <div class="footer-links"><a href="HomePage.html">Home</a><a href="features.html">Features</a><a href="contact.html">Contact</a></div>
+  <div class="footer-links">
+    <a href="HomePage.html">Home</a>
+    <a href="features.html">Features</a>
+    <a href="contact.html">Contact</a>
+  </div>
 </footer>
+
 <script>
   let isLight = false;
   function toggleTheme() {
     isLight = !isLight;
     document.body.classList.toggle('light-mode', isLight);
-    document.getElementById('themeBtn').innerHTML = isLight ? '<i class="ti ti-moon"></i> Dark' : '<i class="ti ti-sun"></i> Light';
+    document.getElementById('themeBtn').innerHTML = isLight
+      ? '<i class="ti ti-moon"></i> Dark'
+      : '<i class="ti ti-sun"></i> Light';
   }
 </script>
 </body>

@@ -1,0 +1,355 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>CareerNavigator — Sign In</title>
+  <link rel="stylesheet" href="style.css" />
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@tabler/icons-webfont@2.44.0/tabler-icons.min.css" />
+  <style>
+    body { display: flex; flex-direction: column; min-height: 100vh; }
+    .auth-wrap {
+      flex: 1; display: flex; align-items: center;
+      justify-content: center; padding: 40px 20px;
+    }
+    .auth-card {
+      background: var(--bg2); border: 0.5px solid var(--border);
+      border-radius: var(--radius-lg); padding: 44px 40px;
+      width: 100%; max-width: 460px;
+    }
+    .auth-logo {
+      font-family: 'Syne', sans-serif; font-size: 22px;
+      font-weight: 700; color: var(--cyan);
+      display: flex; align-items: center; gap: 8px;
+      margin-bottom: 28px;
+    }
+    .auth-logo .dot { width: 8px; height: 8px; background: var(--cyan); border-radius: 50%; }
+    .auth-tabs {
+      display: flex; background: var(--bg3);
+      border-radius: 10px; padding: 4px;
+      margin-bottom: 28px;
+    }
+    .auth-tab {
+      flex: 1; padding: 9px; text-align: center;
+      border-radius: 8px; cursor: pointer;
+      font-size: 14px; font-weight: 500;
+      color: var(--text2); transition: all 0.2s;
+      border: none; background: transparent;
+      font-family: 'DM Sans', sans-serif;
+    }
+    .auth-tab.active {
+      background: var(--cyan); color: #fff;
+    }
+    .auth-title {
+      font-family: 'Syne', sans-serif;
+      font-size: 24px; font-weight: 700;
+      margin-bottom: 6px;
+    }
+    .auth-sub { font-size: 14px; color: var(--text2); margin-bottom: 28px; }
+    .role-select {
+      display: grid; grid-template-columns: 1fr 1fr;
+      gap: 12px; margin-bottom: 20px;
+    }
+    .role-btn {
+      background: var(--bg3); border: 1px solid var(--border);
+      border-radius: 10px; padding: 14px;
+      text-align: center; cursor: pointer;
+      transition: all 0.2s; color: var(--text2);
+    }
+    .role-btn.selected {
+      border-color: var(--cyan); background: var(--cyan-dim);
+      color: var(--cyan);
+    }
+    .role-btn i { font-size: 24px; display: block; margin-bottom: 6px; }
+    .role-btn span { font-size: 13px; font-weight: 500; }
+    .submit-btn {
+      width: 100%; background: var(--cyan); color: #fff;
+      border: none; padding: 13px; border-radius: 12px;
+      font-size: 15px; font-weight: 500; cursor: pointer;
+      font-family: 'DM Sans', sans-serif;
+      transition: opacity 0.2s; margin-top: 4px;
+    }
+    .submit-btn:hover { opacity: 0.88; }
+    .submit-btn:disabled { opacity: 0.5; cursor: not-allowed; }
+    .divider {
+      display: flex; align-items: center; gap: 12px;
+      margin: 20px 0; color: var(--text2); font-size: 13px;
+    }
+    .divider::before, .divider::after {
+      content: ''; flex: 1;
+      height: 0.5px; background: var(--border);
+    }
+    .switch-text {
+      text-align: center; font-size: 13px;
+      color: var(--text2); margin-top: 20px;
+    }
+    .switch-text a { color: var(--cyan); cursor: pointer; text-decoration: none; }
+    .error-msg {
+      display: none; background: rgba(255,80,80,0.1);
+      border: 1px solid rgba(255,80,80,0.3);
+      color: #ff6b6b; padding: 12px 14px;
+      border-radius: 10px; font-size: 13px; margin-bottom: 16px;
+    }
+    .success-msg {
+      display: none; background: var(--cyan-dim);
+      border: 1px solid var(--cyan-border);
+      color: var(--cyan); padding: 12px 14px;
+      border-radius: 10px; font-size: 13px; margin-bottom: 16px;
+    }
+    .password-wrap { position: relative; }
+    .password-wrap input { padding-right: 44px; }
+    .toggle-pw {
+      position: absolute; right: 12px; top: 50%;
+      transform: translateY(-50%);
+      background: none; border: none;
+      color: var(--text2); cursor: pointer; font-size: 18px;
+    }
+    .form-panel { display: none; }
+    .form-panel.active { display: block; }
+  </style>
+</head>
+<body>
+<nav>
+  <a class="logo" href="index.html"><span class="dot"></span> CareerNavigator</a>
+  <div class="nav-links">
+    <a href="index.html">Home</a>
+    <a href="features.html">Features</a>
+    <a href="about.html">About</a>
+    <a href="download.html">Download</a>
+    <a href="contact.html">Contact</a>
+  </div>
+  <div class="nav-right">
+    <button class="btn-theme" onclick="toggleTheme()" id="themeBtn"><i class="ti ti-sun"></i> Light</button>
+  </div>
+</nav>
+
+<div class="auth-wrap">
+  <div class="auth-card">
+    <div class="auth-logo"><span class="dot"></span> CareerNavigator</div>
+
+    <!-- TABS -->
+    <div class="auth-tabs">
+      <button class="auth-tab active" onclick="switchTab('signin')">Sign in</button>
+      <button class="auth-tab" onclick="switchTab('signup')">Sign up</button>
+    </div>
+
+    <!-- ERROR / SUCCESS -->
+    <div class="error-msg" id="errorMsg"></div>
+    <div class="success-msg" id="successMsg"></div>
+
+    <!-- SIGN IN FORM -->
+    <div class="form-panel active" id="signinPanel">
+      <h2 class="auth-title">Welcome back</h2>
+      <p class="auth-sub">Sign in to continue your career journey.</p>
+      <div class="form-group">
+        <label>Email address</label>
+        <input type="email" id="signinEmail" placeholder="john@example.com" />
+      </div>
+      <div class="form-group">
+        <label>Password</label>
+        <div class="password-wrap">
+          <input type="password" id="signinPassword" placeholder="Your password" />
+          <button class="toggle-pw" onclick="togglePassword('signinPassword', this)">
+            <i class="ti ti-eye"></i>
+          </button>
+        </div>
+      </div>
+      <button class="submit-btn" onclick="handleSignIn()" id="signinBtn">
+        Sign in <i class="ti ti-arrow-right"></i>
+      </button>
+      <div class="switch-text">
+        Don't have an account? <a onclick="switchTab('signup')">Sign up</a>
+      </div>
+    </div>
+
+    <!-- SIGN UP FORM -->
+    <div class="form-panel" id="signupPanel">
+      <h2 class="auth-title">Create account</h2>
+      <p class="auth-sub">Join thousands of professionals growing their careers.</p>
+
+      <!-- ROLE SELECTION -->
+      <div style="margin-bottom:16px;">
+        <label style="font-size:13px;color:var(--text2);display:block;margin-bottom:10px;">I am a...</label>
+        <div class="role-select">
+          <div class="role-btn selected" id="roleMentee" onclick="selectRole('mentee')">
+            <i class="ti ti-user"></i>
+            <span>Mentee</span>
+          </div>
+          <div class="role-btn" id="roleMentor" onclick="selectRole('mentor')">
+            <i class="ti ti-star"></i>
+            <span>Mentor</span>
+          </div>
+        </div>
+      </div>
+
+      <div class="form-group">
+        <label>Full name</label>
+        <input type="text" id="signupName" placeholder="John Doe" />
+      </div>
+      <div class="form-group">
+        <label>Email address</label>
+        <input type="email" id="signupEmail" placeholder="john@example.com" />
+      </div>
+      <div class="form-group">
+        <label>Password</label>
+        <div class="password-wrap">
+          <input type="password" id="signupPassword" placeholder="Min. 6 characters" />
+          <button class="toggle-pw" onclick="togglePassword('signupPassword', this)">
+            <i class="ti ti-eye"></i>
+          </button>
+        </div>
+      </div>
+      <div class="form-group">
+        <label>Confirm password</label>
+        <div class="password-wrap">
+          <input type="password" id="signupConfirm" placeholder="Repeat your password" />
+          <button class="toggle-pw" onclick="togglePassword('signupConfirm', this)">
+            <i class="ti ti-eye"></i>
+          </button>
+        </div>
+      </div>
+      <button class="submit-btn" onclick="handleSignUp()" id="signupBtn">
+        Create account <i class="ti ti-arrow-right"></i>
+      </button>
+      <div class="switch-text">
+        Already have an account? <a onclick="switchTab('signin')">Sign in</a>
+      </div>
+    </div>
+  </div>
+</div>
+
+<footer>
+  <p>© 2026 CareerNavigator. All rights reserved.</p>
+  <div class="footer-links">
+    <a href="index.html">Home</a>
+    <a href="features.html">Features</a>
+    <a href="contact.html">Contact</a>
+  </div>
+</footer>
+
+<script>
+  // ── CONFIG ─────────────────────────────────────────
+  const BASE_URL = 'http://localhost:5000/api';
+  let selectedRole = 'mentee';
+
+  // ── THEME ──────────────────────────────────────────
+  let isLight = false;
+  function toggleTheme() {
+    isLight = !isLight;
+    document.body.classList.toggle('light-mode', isLight);
+    document.getElementById('themeBtn').innerHTML = isLight
+      ? '<i class="ti ti-moon"></i> Dark'
+      : '<i class="ti ti-sun"></i> Light';
+  }
+
+  // ── TABS ───────────────────────────────────────────
+  function switchTab(tab) {
+    document.getElementById('signinPanel').classList.toggle('active', tab === 'signin');
+    document.getElementById('signupPanel').classList.toggle('active', tab === 'signup');
+    document.querySelectorAll('.auth-tab').forEach((t, i) => {
+      t.classList.toggle('active', (i === 0 && tab === 'signin') || (i === 1 && tab === 'signup'));
+    });
+    hideMessages();
+  }
+
+  // ── ROLE ───────────────────────────────────────────
+  function selectRole(role) {
+    selectedRole = role;
+    document.getElementById('roleMentee').classList.toggle('selected', role === 'mentee');
+    document.getElementById('roleMentor').classList.toggle('selected', role === 'mentor');
+  }
+
+  // ── PASSWORD TOGGLE ────────────────────────────────
+  function togglePassword(inputId, btn) {
+    const input = document.getElementById(inputId);
+    const isHidden = input.type === 'password';
+    input.type = isHidden ? 'text' : 'password';
+    btn.innerHTML = isHidden ? '<i class="ti ti-eye-off"></i>' : '<i class="ti ti-eye"></i>';
+  }
+
+  // ── MESSAGES ───────────────────────────────────────
+  function showError(msg) {
+    const el = document.getElementById('errorMsg');
+    el.textContent = msg; el.style.display = 'block';
+    document.getElementById('successMsg').style.display = 'none';
+  }
+  function showSuccess(msg) {
+    const el = document.getElementById('successMsg');
+    el.textContent = msg; el.style.display = 'block';
+    document.getElementById('errorMsg').style.display = 'none';
+  }
+  function hideMessages() {
+    document.getElementById('errorMsg').style.display = 'none';
+    document.getElementById('successMsg').style.display = 'none';
+  }
+
+  // ── SIGN IN ────────────────────────────────────────
+  async function handleSignIn() {
+    const email = document.getElementById('signinEmail').value.trim();
+    const password = document.getElementById('signinPassword').value;
+    if (!email || !password) { showError('Please fill in all fields.'); return; }
+
+    const btn = document.getElementById('signinBtn');
+    btn.disabled = true; btn.textContent = 'Signing in...';
+
+    try {
+      const res = await fetch(`${BASE_URL}/login`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ email, password })
+      });
+      const data = await res.json();
+      if (!res.ok) { showError(data.error || 'Sign in failed.'); return; }
+
+      localStorage.setItem('token', data.token);
+      localStorage.setItem('user', JSON.stringify(data.user));
+      showSuccess('Signed in successfully! Redirecting...');
+      setTimeout(() => { window.location.href = 'dashboard.html'; }, 1200);
+    } catch (err) {
+      showError('Could not connect to server. Make sure Flask is running.');
+    } finally {
+      btn.disabled = false;
+      btn.innerHTML = 'Sign in <i class="ti ti-arrow-right"></i>';
+    }
+  }
+
+  // ── SIGN UP ────────────────────────────────────────
+  async function handleSignUp() {
+    const full_name = document.getElementById('signupName').value.trim();
+    const email = document.getElementById('signupEmail').value.trim();
+    const password = document.getElementById('signupPassword').value;
+    const confirm = document.getElementById('signupConfirm').value;
+
+    if (!full_name || !email || !password || !confirm) { showError('Please fill in all fields.'); return; }
+    if (password.length < 6) { showError('Password must be at least 6 characters.'); return; }
+    if (password !== confirm) { showError('Passwords do not match.'); return; }
+
+    const btn = document.getElementById('signupBtn');
+    btn.disabled = true; btn.textContent = 'Creating account...';
+
+    try {
+      const res = await fetch(`${BASE_URL}/register`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ full_name, email, password, role: selectedRole })
+      });
+      const data = await res.json();
+      if (!res.ok) { showError(data.error || 'Registration failed.'); return; }
+
+      showSuccess('Account created! Please sign in.');
+      setTimeout(() => switchTab('signin'), 1500);
+    } catch (err) {
+      showError('Could not connect to server. Make sure Flask is running.');
+    } finally {
+      btn.disabled = false;
+      btn.innerHTML = 'Create account <i class="ti ti-arrow-right"></i>';
+    }
+  }
+
+  // ── CHECK IF ALREADY LOGGED IN ─────────────────────
+  if (localStorage.getItem('token')) {
+    window.location.href = 'dashboard.html';
+  }
+</script>
+</body>
+</html>
