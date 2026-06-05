@@ -15,6 +15,7 @@ import '../../../providers/theme_provider.dart';
 import '../../widgets/shared/buttons.dart';
 import '../../widgets/shared/inputs.dart';
 import 'registration_page.dart';
+import 'forgot_password_page.dart';
 import 'reset_password_page.dart';
 import '../dashboard/job_seeker_dashboard.dart';
 import '../dashboard/mentor_dashboard.dart';
@@ -228,7 +229,7 @@ class _Card extends StatelessWidget {
             child: GestureDetector(
               onTap: () => Navigator.push(context,
                   MaterialPageRoute(
-                    builder: (_) => const ResetPasswordPage(email: ''))),
+                    builder: (_) => const ForgotPasswordPage())),
               child: Text(lang.t(S.forgotPassword), style: const TextStyle(
                 color: AppColors.primaryCyan, fontSize: 13,
                 fontWeight: FontWeight.w600)))),
