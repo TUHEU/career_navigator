@@ -1,30 +1,68 @@
-// This is a basic Flutter widget test.
-//
-// To perform an interaction with a widget in your test, use the WidgetTester
-// utility in the flutter_test package. For example, you can send tap and scroll
-// gestures. You can also use WidgetTester to find child widgets in the widget
-// tree, read text, and verify that the values of widget properties are correct.
+// test/widget_test.dart
+// Career Navigator — Widget smoke test
+// Verifies the app boots inside its full provider tree without crashing.
+// FIX: SplashScreen starts timers (auto-navigate + pulsing dots) in initState.
+// We let those timers fire and settle before the test ends, so no timer is
+// left pending when the widget tree is disposed.
 
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
+import 'package:provider/provider.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 
 import 'package:career_navigator/main.dart';
+import 'package:career_navigator/providers/theme_provider.dart';
+import 'package:career_navigator/providers/auth_provider.dart';
+import 'package:career_navigator/providers/chat_provider.dart';
+import 'package:career_navigator/providers/job_provider.dart';
+import 'package:career_navigator/providers/notification_provider.dart';
+import 'package:career_navigator/providers/guest_provider.dart';
+import 'package:career_navigator/providers/user_provider.dart';
+import 'package:career_navigator/l10n/language_provider.dart';
+
+Widget _app() => MultiProvider(
+  providers: [
+    ChangeNotifierProvider(create: (_) => ThemeProvider()),
+    ChangeNotifierProvider(create: (_) => LanguageProvider()),
+    ChangeNotifierProvider(create: (_) => GuestProvider()),
+    ChangeNotifierProvider(create: (_) => AuthProvider()),
+    ChangeNotifierProvider(create: (_) => UserProvider()),
+    ChangeNotifierProvider(create: (_) => ChatProvider()),
+    ChangeNotifierProvider(create: (_) => JobProvider()),
+    ChangeNotifierProvider(create: (_) => NotificationProvider()),
+  ],
+  child: const CareerNavigatorApp(),
+);
 
 void main() {
-  testWidgets('Counter increments smoke test', (WidgetTester tester) async {
-    // Build our app and trigger a frame.
-    await tester.pumpWidget(const CareerNavigatorApp());
+  TestWidgetsFlutterBinding.ensureInitialized();
 
-    // Verify that our counter starts at 0.
-    expect(find.text('0'), findsOneWidget);
-    expect(find.text('1'), findsNothing);
+  setUp(() {
+    // Provide empty mock prefs so ThemeProvider / LanguageProvider
+    // don't fail reading SharedPreferences during the test.
+    SharedPreferences.setMockInitialValues({});
+  });
 
-    // Tap the '+' icon and trigger a frame.
-    await tester.tap(find.byIcon(Icons.add));
-    await tester.pump();
+  testWidgets('app builds a MaterialApp', (tester) async {
+    await tester.pumpWidget(_app());
 
-    // Verify that our counter has incremented.
-    expect(find.text('0'), findsNothing);
-    expect(find.text('1'), findsOneWidget);
+    // SplashScreen schedules timers; pump through them so none stay pending.
+    await tester.pump(const Duration(seconds: 1)); // pulsing-dots tick
+    await tester.pump(const Duration(seconds: 3)); // splash auto-navigate fires
+    await tester.pump(const Duration(seconds: 1)); // settle any follow-up frame
+
+    expect(find.byType(MaterialApp), findsOneWidget);
+  });
+
+  testWidgets('app title and banner correct', (tester) async {
+    await tester.pumpWidget(_app());
+
+    await tester.pump(const Duration(seconds: 1));
+    await tester.pump(const Duration(seconds: 3));
+    await tester.pump(const Duration(seconds: 1));
+
+    final app = tester.widget<MaterialApp>(find.byType(MaterialApp));
+    expect(app.title, 'Career Navigator');
+    expect(app.debugShowCheckedModeBanner, isFalse);
   });
 }
