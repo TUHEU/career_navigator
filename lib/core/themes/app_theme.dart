@@ -63,13 +63,13 @@ class AppColors {
   static Color cyan(bool isDark) => isDark ? primaryCyanLight : primaryCyan;
 }
 
-enum AppBackground { bg8, bg6 }
+enum AppBackground { bg1, bg6 }
 
 extension AppBackgroundExt on AppBackground {
   String get assetPath {
     switch (this) {
       case AppBackground.bg8:
-        return 'assets/background/bg8.png';
+        return 'assets/background/bg1.png';
       case AppBackground.bg6:
         return 'assets/background/bg6.png';
     }
