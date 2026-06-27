@@ -128,7 +128,8 @@ const List<_Command> _commands = [
 
 // ── Main Page ─────────────────────────────────────────────────
 class AIChatPage extends StatefulWidget {
-  const AIChatPage({super.key});
+  final String? initialCommand;
+  const AIChatPage({super.key, this.initialCommand});
   @override
   State<AIChatPage> createState() => _AIChatPageState();
 }

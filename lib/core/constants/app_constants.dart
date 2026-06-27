@@ -6,7 +6,7 @@ class AppConstants {
 
   // ── API URL ─────────────────────────────────────────────
   // ✅ VPS production server
-  static const String baseUrl = 'http://38.242.246.126:5000';
+  static const String baseUrl = 'http://192.168.1.191:5000';
 
   // Uncomment one of these for local dev:
   // static const String baseUrl = 'http://10.0.2.2:5000';   // Android emulator
