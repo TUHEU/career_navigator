@@ -1,6 +1,7 @@
 // presentation/screens/settings/about_us_page.dart
 // v9 — Solo Fahdil spotlight with proper GitHub avatar loading
 import 'package:flutter/material.dart';
+import 'package:cached_network_image/cached_network_image.dart';
 import 'package:url_launcher/url_launcher.dart';
 import 'package:provider/provider.dart';
 
@@ -113,7 +114,7 @@ class AboutUsPage extends StatelessWidget {
             const SizedBox(height: 24),
 
             Text(
-              '© 2026 Career Navigator\nMade with ❤️ in Cameroon',
+              '© 2025 Career Navigator\nMade with ❤️ in Cameroon',
               textAlign: TextAlign.center,
               style: TextStyle(
                 color: AppColors.textMuted(isDark),
@@ -250,21 +251,22 @@ class _FahdilCard extends StatelessWidget {
 
   Widget _buildAvatar() {
     return ClipOval(
-      child: Image.network(
-        _avatarUrl,
+      child: CachedNetworkImage(
+        imageUrl: _avatarUrl,
         width: 80,
         height: 80,
         fit: BoxFit.cover,
-        loadingBuilder:
-            (_, child, progress) =>
-                progress == null ? child : _initialsCircle(),
-        errorBuilder:
-            (_, __, ___) => Image.network(
-              _avatarUrl2,
+        // Show initials while loading
+        placeholder: (_, __) => _initialsCircle(),
+        // On error try second URL, then fall back to initials
+        errorWidget:
+            (_, __, ___) => CachedNetworkImage(
+              imageUrl: _avatarUrl2,
               width: 80,
               height: 80,
               fit: BoxFit.cover,
-              errorBuilder: (_, __, ___) => _initialsCircle(),
+              placeholder: (_, __) => _initialsCircle(),
+              errorWidget: (_, __, ___) => _initialsCircle(),
             ),
       ),
     );
