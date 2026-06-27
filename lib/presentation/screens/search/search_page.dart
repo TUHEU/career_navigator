@@ -1,3 +1,6 @@
+// presentation/screens/search/search_page.dart
+// v9 — Redesigned: mentor cards with expertise tags, connect button,
+//       tabbed All/Mentors/Seekers, profile avatars, TalentBridge-inspired
 import 'dart:convert';
 import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
@@ -15,588 +18,346 @@ import '../chat/chat_page.dart';
 
 class SearchPage extends StatefulWidget {
   const SearchPage({super.key});
-
   @override
   State<SearchPage> createState() => _SearchPageState();
 }
 
 class _SearchPageState extends State<SearchPage>
     with SingleTickerProviderStateMixin {
-  final _searchCtrl = TextEditingController();
-  TabController? _tabCtrl;
+  final _ctrl  = TextEditingController();
+  late TabController _tab;
 
-  List<Map<String, dynamic>> _allUsers = [];
-  List<Map<String, dynamic>> _mentors  = [];
-  List<Map<String, dynamic>> _seekers  = [];
-
-  bool   _isLoading   = false;
-  bool   _hasSearched = false;
-  int?   _sendingTo;
-  int?   _currentUid;
+  List<Map<String, dynamic>> _all = [], _mentors = [], _seekers = [];
+  bool _loading = false, _searched = false;
+  int? _connecting, _currentUid;
 
   @override
   void initState() {
     super.initState();
-    _tabCtrl = TabController(length: 3, vsync: this);
+    _tab = TabController(length: 3, vsync: this);
     WidgetsBinding.instance.addPostFrameCallback((_) {
-      if (mounted) {
-        _currentUid = context.read<AuthProvider>().currentUser?.id;
-        _loadAll();
-      }
+      _currentUid = context.read<AuthProvider>().currentUser?.id;
+      _loadAll();
     });
   }
 
   @override
-  void dispose() {
-    _searchCtrl.dispose();
-    _tabCtrl?.dispose();
-    super.dispose();
-  }
+  void dispose() { _ctrl.dispose(); _tab.dispose(); super.dispose(); }
 
   Map<String, String> _headers(String token) => {
-        'Content-Type': 'application/json',
-        'Authorization': 'Bearer $token',
-      };
+    'Content-Type': 'application/json',
+    'Authorization': 'Bearer $token',
+  };
 
-  // ── Load all users ────────────────────────────────────────
   Future<void> _loadAll() async {
-    setState(() => _isLoading = true);
+    setState(() => _loading = true);
     try {
-      final token =
-          await context.read<AuthProvider>().getAccessToken() ?? '';
-      final res = await http
-          .get(
-            Uri.parse('${AppConstants.baseUrl}/users'),
-            headers: _headers(token),
-          )
-          .timeout(AppConstants.connectionTimeout);
-
+      final token = await context.read<AuthProvider>().getAccessToken() ?? '';
+      final res = await http.get(
+        Uri.parse('${AppConstants.baseUrl}/users'),
+        headers: _headers(token),
+      ).timeout(AppConstants.connectionTimeout);
       final body = jsonDecode(res.body) as Map<String, dynamic>;
       if (mounted && body['success'] == true) {
         final data  = body['data'] as Map<String, dynamic>;
         final users = List<Map<String, dynamic>>.from(data['users'] ?? []);
         setState(() {
-          _allUsers    = users;
-          _mentors     = users.where((u) => u['role'] == 'mentor').toList();
-          _seekers     = users.where((u) => u['role'] == 'job_seeker').toList();
-          _hasSearched = true;
-          _isLoading   = false;
+          _all      = users;
+          _mentors  = users.where((u) => u['role'] == 'mentor').toList();
+          _seekers  = users.where((u) => u['role'] == 'job_seeker').toList();
+          _searched = true;
+          _loading  = false;
         });
       } else {
-        if (mounted) setState(() => _isLoading = false);
+        if (mounted) setState(() => _loading = false);
       }
-    } catch (e) {
-      if (mounted) setState(() => _isLoading = false);
+    } catch (_) {
+      if (mounted) setState(() => _loading = false);
     }
   }
 
-  // ── Search ────────────────────────────────────────────────
   Future<void> _search() async {
-    final q = _searchCtrl.text.trim();
+    final q = _ctrl.text.trim();
     if (q.isEmpty) { _loadAll(); return; }
-
-    setState(() => _isLoading = true);
+    setState(() => _loading = true);
     try {
-      final token =
-          await context.read<AuthProvider>().getAccessToken() ?? '';
-      final uri = Uri.parse(
-        '${AppConstants.baseUrl}/users?q=${Uri.encodeComponent(q)}',
-      );
-      final res = await http
-          .get(uri, headers: _headers(token))
-          .timeout(AppConstants.connectionTimeout);
-
+      final token = await context.read<AuthProvider>().getAccessToken() ?? '';
+      final res = await http.get(
+        Uri.parse('${AppConstants.baseUrl}/users/search?q=${Uri.encodeComponent(q)}'),
+        headers: _headers(token),
+      ).timeout(AppConstants.connectionTimeout);
       final body = jsonDecode(res.body) as Map<String, dynamic>;
       if (mounted && body['success'] == true) {
-        final data  = body['data'] as Map<String, dynamic>;
-        final users = List<Map<String, dynamic>>.from(data['users'] ?? []);
+        final users = List<Map<String, dynamic>>.from(body['data'] ?? []);
         setState(() {
-          _allUsers    = users;
-          _mentors     = users.where((u) => u['role'] == 'mentor').toList();
-          _seekers     = users.where((u) => u['role'] == 'job_seeker').toList();
-          _hasSearched = true;
-          _isLoading   = false;
+          _all      = users;
+          _mentors  = users.where((u) => u['role'] == 'mentor').toList();
+          _seekers  = users.where((u) => u['role'] == 'job_seeker').toList();
+          _searched = true;
+          _loading  = false;
         });
       } else {
-        if (mounted) setState(() => _isLoading = false);
+        if (mounted) setState(() => _loading = false);
       }
-    } catch (e) {
-      if (mounted) setState(() => _isLoading = false);
+    } catch (_) {
+      if (mounted) setState(() => _loading = false);
     }
   }
 
-  // ── Connect & open chat ───────────────────────────────────
   Future<void> _connect(Map<String, dynamic> user) async {
-    final id            = user['id']        as int?    ?? 0;
-    final recipientName = user['full_name'] as String? ?? 'User';
-
-    if (_sendingTo != null) return;
-    setState(() => _sendingTo = id);
-
+    final uid = user['id'] as int;
+    if (uid == _currentUid) return;
+    setState(() => _connecting = uid);
     try {
-      final token =
-          await context.read<AuthProvider>().getAccessToken() ?? '';
-      final res = await http
-          .post(
-            Uri.parse('${AppConstants.baseUrl}/requests'),
-            headers: _headers(token),
-            body: jsonEncode({'recipient_id': id}),
-          )
-          .timeout(AppConstants.connectionTimeout);
-
+      final token = await context.read<AuthProvider>().getAccessToken() ?? '';
+      final res = await http.post(
+        Uri.parse('${AppConstants.baseUrl}/connections/request'),
+        headers: _headers(token),
+        body: jsonEncode({'addressee_id': uid}),
+      ).timeout(AppConstants.connectionTimeout);
       final body = jsonDecode(res.body) as Map<String, dynamic>;
-
-      if (!mounted) return;
-
-      if (body['success'] == true) {
-        for (final list in [_allUsers, _mentors, _seekers]) {
-          for (final u in list) {
-            if (u['id'] == id) u['already_connected'] = 1;
-          }
-        }
-        setState(() {});
-
-        final conversationId =
-            (body['data'] as Map<String, dynamic>?)?['conversation_id'] as int?;
-
-        if (conversationId != null && mounted) {
-          Navigator.push(
-            context,
-            MaterialPageRoute(
-              builder: (_) => ChatPage(
-                conversationId: conversationId,
-                recipientId:    id,
-                recipientName:  recipientName,
-              ),
-            ),
-          );
+      if (mounted) {
+        if (body['success'] == true) {
+          Helpers.showSnackBar(context, '✅ Connection request sent!');
         } else {
-          Helpers.showSnackBar(context, 'Connected with $recipientName!');
+          Helpers.showSnackBar(context,
+            body['message'] ?? 'Already connected', isError: true);
         }
-      } else {
-        Helpers.showSnackBar(
-          context,
-          body['message'] as String? ?? 'Failed to connect',
-          isError: true,
-        );
       }
-    } catch (e) {
-      if (mounted) Helpers.showSnackBar(context, 'Error: $e', isError: true);
+    } catch (_) {
+      if (mounted) Helpers.showSnackBar(context, 'Connection failed', isError: true);
     } finally {
-      if (mounted) setState(() => _sendingTo = null);
+      if (mounted) setState(() => _connecting = null);
     }
   }
 
-  // ── Open existing chat ────────────────────────────────────
-  Future<void> _openExistingChat(Map<String, dynamic> user) async {
-    final id            = user['id']        as int?    ?? 0;
-    final recipientName = user['full_name'] as String? ?? 'User';
-
-    try {
-      final token =
-          await context.read<AuthProvider>().getAccessToken() ?? '';
-      final res = await http
-          .get(
-            Uri.parse('${AppConstants.baseUrl}/chat/conversations'),
-            headers: _headers(token),
-          )
-          .timeout(AppConstants.connectionTimeout);
-
-      final body = jsonDecode(res.body) as Map<String, dynamic>;
-      if (body['success'] == true) {
-        final convs =
-            List<Map<String, dynamic>>.from(body['data'] ?? []);
-        final conv = convs.firstWhere(
-          (c) => c['other_user_id'] == id,
-          orElse: () => {},
-        );
-        if (conv.isNotEmpty && mounted) {
-          Navigator.push(
-            context,
-            MaterialPageRoute(
-              builder: (_) => ChatPage(
-                conversationId: conv['id'] as int,
-                recipientId:    id,
-                recipientName:  recipientName,
-              ),
-            ),
-          );
-          return;
-        }
-      }
-    } catch (_) {}
-
-    if (mounted) {
-      Helpers.showSnackBar(context, 'Could not open conversation');
-    }
-  }
-
-  // ── User card ─────────────────────────────────────────────
-  Widget _userCard(Map<String, dynamic> user, bool isDark, LanguageProvider lang) {
-    final id        = user['id']                 as int?    ?? 0;
-    final name      = user['full_name']           as String? ?? 'User';
-    final picture   = user['profile_picture_url'] as String?;
-    final role      = user['role']                as String? ?? '';
-    final headline  = user['headline']            as String?;
-    final jobTitle  = user['current_job_title']   as String?;
-    final rating    = user['rating'];
-    final connected = (user['already_connected']  as int?) == 1;
-    final isSending = _sendingTo == id;
-    final canConnect = id != _currentUid;
-
-    return Container(
-      margin: const EdgeInsets.only(bottom: 10),
-      padding: const EdgeInsets.all(14),
-      decoration: BoxDecoration(
-        color: AppColors.card(isDark),
-        borderRadius: BorderRadius.circular(14),
-        border: Border.all(color: AppColors.border(isDark)),
-      ),
-      child: Row(
-        children: [
-          // Avatar
-          CircleAvatar(
-            radius: 26,
-            backgroundColor: AppColors.primaryCyan.withOpacity(0.2),
-            backgroundImage: picture != null ? NetworkImage(picture) : null,
-            child: picture == null
-                ? Text(
-                    Helpers.getInitials(name),
-                    style: const TextStyle(
-                      color: AppColors.primaryCyan,
-                      fontWeight: FontWeight.bold,
-                    ),
-                  )
-                : null,
-          ),
-          const SizedBox(width: 12),
-
-          // Info
-          Expanded(
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Row(
-                  children: [
-                    Expanded(
-                      child: Text(
-                        name,
-                        style: TextStyle(
-                          color: AppColors.text(isDark),
-                          fontWeight: FontWeight.bold,
-                          fontSize: 14,
-                        ),
-                      ),
-                    ),
-                    // Role badge
-                    Container(
-                      padding: const EdgeInsets.symmetric(
-                          horizontal: 7, vertical: 2),
-                      decoration: BoxDecoration(
-                        color: (role == 'mentor'
-                                ? AppColors.primaryCyan
-                                : Colors.purple)
-                            .withOpacity(0.12),
-                        borderRadius: BorderRadius.circular(8),
-                        border: Border.all(
-                          color: (role == 'mentor'
-                                  ? AppColors.primaryCyan
-                                  : Colors.purple)
-                              .withOpacity(0.4),
-                        ),
-                      ),
-                      child: Text(
-                        role == 'mentor'
-                            ? lang.t(S.mentor)
-                            : lang.t(S.jobSeeker),
-                        style: TextStyle(
-                          color: role == 'mentor'
-                              ? AppColors.primaryCyan
-                              : Colors.purple,
-                          fontSize: 10,
-                          fontWeight: FontWeight.w600,
-                        ),
-                      ),
-                    ),
-                  ],
-                ),
-                if (headline != null || jobTitle != null) ...[
-                  const SizedBox(height: 3),
-                  Text(
-                    headline ?? jobTitle ?? '',
-                    maxLines: 1,
-                    overflow: TextOverflow.ellipsis,
-                    style: TextStyle(
-                      color: AppColors.textSecondary(isDark),
-                      fontSize: 12,
-                    ),
-                  ),
-                ],
-                if (role == 'mentor' && rating != null) ...[
-                  const SizedBox(height: 4),
-                  Row(
-                    children: [
-                      const Icon(Icons.star_rounded,
-                          color: Color(0xFFFFC107), size: 13),
-                      const SizedBox(width: 3),
-                      Text(
-                        (rating as num).toStringAsFixed(1),
-                        style: TextStyle(
-                          color: AppColors.textMuted(isDark),
-                          fontSize: 11,
-                        ),
-                      ),
-                    ],
-                  ),
-                ],
-              ],
-            ),
-          ),
-
-          // ── FIX: Connect button — use intrinsic width, never unbounded ──
-          if (canConnect) ...[
-            const SizedBox(width: 8),
-            connected
-                ? GestureDetector(
-                    onTap: () => _openExistingChat(user),
-                    child: Container(
-                      padding: const EdgeInsets.symmetric(
-                          horizontal: 10, vertical: 6),
-                      decoration: BoxDecoration(
-                        color: Colors.green.withOpacity(0.12),
-                        borderRadius: BorderRadius.circular(8),
-                        border: Border.all(
-                            color: Colors.green.withOpacity(0.4)),
-                      ),
-                      child: Text(
-                        lang.isFrench ? 'Message' : 'Message',
-                        style: const TextStyle(
-                          color: Colors.green,
-                          fontSize: 11,
-                          fontWeight: FontWeight.w600,
-                        ),
-                      ),
-                    ),
-                  )
-                : SizedBox(
-                    height: 34,
-                    // ✅ Fixed: explicit width prevents BoxConstraints crash
-                    width: 88,
-                    child: ElevatedButton(
-                      onPressed: isSending ? null : () => _connect(user),
-                      style: ElevatedButton.styleFrom(
-                        backgroundColor: AppColors.primaryCyan,
-                        foregroundColor: Colors.black,
-                        padding: EdgeInsets.zero,
-                        shape: RoundedRectangleBorder(
-                          borderRadius: BorderRadius.circular(8),
-                        ),
-                      ),
-                      child: isSending
-                          ? const SizedBox(
-                              width: 14,
-                              height: 14,
-                              child: CircularProgressIndicator(
-                                strokeWidth: 2,
-                                color: Colors.black,
-                              ),
-                            )
-                          : Text(
-                              lang.isFrench ? 'Connecter' : 'Connect',
-                              style: const TextStyle(
-                                fontSize: 12,
-                                fontWeight: FontWeight.bold,
-                              ),
-                            ),
-                    ),
-                  ),
-          ],
-        ],
-      ),
-    );
-  }
-
-  // ── Empty state ───────────────────────────────────────────
-  Widget _empty(String msg, bool isDark) => Center(
-        child: Padding(
-          padding: const EdgeInsets.all(40),
-          child: Column(
-            mainAxisSize: MainAxisSize.min,
-            children: [
-              Icon(Icons.people_outline,
-                  size: 56,
-                  color: AppColors.textMuted(isDark).withOpacity(0.4)),
-              const SizedBox(height: 12),
-              Text(msg,
-                  textAlign: TextAlign.center,
-                  style: TextStyle(
-                      color: AppColors.textMuted(isDark), fontSize: 14)),
-            ],
-          ),
-        ),
-      );
-
-  // ── Build ─────────────────────────────────────────────────
   @override
   Widget build(BuildContext context) {
     final isDark = context.watch<ThemeProvider>().isDarkMode;
     final lang   = context.watch<LanguageProvider>();
 
-    final labelAll      = lang.isFrench ? 'Tous (${_allUsers.length})' : 'All (${_allUsers.length})';
-    final labelMentors  = lang.isFrench ? 'Mentors (${_mentors.length})' : 'Mentors (${_mentors.length})';
-    final labelSeekers  = lang.isFrench ? 'Chercheurs (${_seekers.length})' : 'Seekers (${_seekers.length})';
-    final hintSearch    = lang.isFrench ? 'Rechercher par nom...' : 'Search by name or title...';
-    final hintInfo      = lang.isFrench
-        ? 'Appuyez sur Connecter pour démarrer une conversation'
-        : 'Tap Connect to start a conversation with anyone';
-    final titleDiscover = lang.isFrench ? 'Découvrir' : 'Discover People';
+    final tabs = [_all, _mentors, _seekers];
+    final labels = ['All (${_all.length})', 'Mentors', 'Job Seekers'];
 
     return Scaffold(
       backgroundColor: AppColors.background(isDark),
-      appBar: AppBar(
-        title: Text(titleDiscover),
-        backgroundColor: Colors.transparent,
-        elevation: 0,
-        bottom: TabBar(
-          controller: _tabCtrl!,
+      body: SafeArea(child: Column(children: [
+        Padding(
+          padding: const EdgeInsets.fromLTRB(20, 16, 20, 12),
+          child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
+            Text('Discover People', style: TextStyle(
+              color: AppColors.text(isDark), fontSize: 24,
+              fontWeight: FontWeight.bold)),
+            const SizedBox(height: 4),
+            Text('Connect with mentors & professionals', style: TextStyle(
+              color: AppColors.textMuted(isDark), fontSize: 13)),
+            const SizedBox(height: 14),
+            TextField(
+              controller: _ctrl,
+              style: TextStyle(color: AppColors.text(isDark)),
+              onSubmitted: (_) => _search(),
+              decoration: InputDecoration(
+                hintText: 'Search by name, skills, role...',
+                hintStyle: TextStyle(color: AppColors.textMuted(isDark)),
+                prefixIcon: const Icon(Icons.search, color: AppColors.primaryCyan),
+                suffixIcon: Row(mainAxisSize: MainAxisSize.min, children: [
+                  if (_ctrl.text.isNotEmpty)
+                    IconButton(
+                      icon: Icon(Icons.clear, color: AppColors.textMuted(isDark), size: 18),
+                      onPressed: () { _ctrl.clear(); _loadAll(); }),
+                  IconButton(
+                    icon: const Icon(Icons.search, color: AppColors.primaryCyan, size: 20),
+                    onPressed: _search),
+                ]),
+                filled: true, fillColor: AppColors.card(isDark),
+                border: OutlineInputBorder(
+                  borderRadius: BorderRadius.circular(16), borderSide: BorderSide.none),
+                enabledBorder: OutlineInputBorder(
+                  borderRadius: BorderRadius.circular(16),
+                  borderSide: BorderSide(color: AppColors.border(isDark))),
+                focusedBorder: OutlineInputBorder(
+                  borderRadius: BorderRadius.circular(16),
+                  borderSide: const BorderSide(color: AppColors.primaryCyan))),
+            ),
+          ]),
+        ),
+        TabBar(
+          controller: _tab,
           labelColor: AppColors.primaryCyan,
           unselectedLabelColor: AppColors.textMuted(isDark),
-          indicatorColor: AppColors.primaryCyan,
-          tabs: [
-            Tab(text: labelAll),
-            Tab(text: labelMentors),
-            Tab(text: labelSeekers),
-          ],
+          indicatorColor: AppColors.primaryCyan, indicatorWeight: 2,
+          dividerColor: AppColors.border(isDark),
+          labelStyle: const TextStyle(fontWeight: FontWeight.bold, fontSize: 13),
+          tabs: labels.map((l) => Tab(text: l)).toList(),
         ),
-      ),
-      body: Column(
-        children: [
-          // Search bar
-          Padding(
-            padding: const EdgeInsets.fromLTRB(16, 12, 16, 8),
-            child: Row(
-              children: [
-                Expanded(
-                  child: TextField(
-                    controller: _searchCtrl,
-                    style: TextStyle(color: AppColors.text(isDark)),
-                    decoration: InputDecoration(
-                      hintText: hintSearch,
-                      hintStyle:
-                          TextStyle(color: AppColors.textMuted(isDark)),
-                      prefixIcon: const Icon(Icons.search,
-                          color: AppColors.primaryCyan),
-                      filled: true,
-                      fillColor: AppColors.inputFill(isDark),
-                      border: OutlineInputBorder(
-                        borderRadius: BorderRadius.circular(14),
-                        borderSide: BorderSide.none,
-                      ),
-                      contentPadding:
-                          const EdgeInsets.symmetric(vertical: 0),
+        Expanded(child: _loading
+          ? const LoadingIndicator()
+          : TabBarView(controller: _tab,
+              children: tabs.map((list) => list.isEmpty
+                ? _EmptyState(isDark: isDark)
+                : ListView.builder(
+                    padding: const EdgeInsets.fromLTRB(20, 12, 20, 20),
+                    itemCount: list.length,
+                    itemBuilder: (_, i) => _UserCard(
+                      user: list[i], isDark: isDark,
+                      isMe: list[i]['id'] == _currentUid,
+                      isConnecting: _connecting == list[i]['id'],
+                      onConnect: () => _connect(list[i]),
+                      onMessage: () => Navigator.push(context,
+                        MaterialPageRoute(builder: (_) => ChatPage(
+                          conversationId: 0,
+                          recipientId: list[i]['id'] as int,
+                          recipientName: list[i]['full_name'] ?? 'User'))),
                     ),
-                    onSubmitted: (_) => _search(),
-                    onChanged: (v) {
-                      if (v.isEmpty) _loadAll();
-                    },
-                  ),
-                ),
-                const SizedBox(width: 8),
-                IconButton(
-                  onPressed: _search,
-                  icon: const Icon(Icons.search),
-                  color: AppColors.primaryCyan,
-                  style: IconButton.styleFrom(
-                    backgroundColor:
-                        AppColors.primaryCyan.withOpacity(0.12),
-                    shape: RoundedRectangleBorder(
-                      borderRadius: BorderRadius.circular(12),
-                    ),
-                  ),
-                ),
-              ],
-            ),
-          ),
-
-          // Hint
-          Padding(
-            padding: const EdgeInsets.fromLTRB(16, 0, 16, 8),
-            child: Row(
-              children: [
-                Icon(Icons.info_outline,
-                    size: 14,
-                    color: AppColors.primaryCyan.withOpacity(0.8)),
-                const SizedBox(width: 6),
-                Expanded(
-                  child: Text(
-                    hintInfo,
-                    style: TextStyle(
-                        color: AppColors.textMuted(isDark), fontSize: 12),
-                  ),
-                ),
-              ],
-            ),
-          ),
-
-          // Tab content
-          Expanded(
-            child: _isLoading
-                ? const LoadingIndicator()
-                : TabBarView(
-                    controller: _tabCtrl!,
-                    children: [
-                      _allUsers.isEmpty
-                          ? _empty(
-                              _hasSearched
-                                  ? (lang.isFrench
-                                      ? 'Aucun utilisateur trouvé'
-                                      : 'No users found')
-                                  : (lang.isFrench
-                                      ? 'Chargement...'
-                                      : 'Loading...'),
-                              isDark)
-                          : RefreshIndicator(
-                              onRefresh: _loadAll,
-                              color: AppColors.primaryCyan,
-                              child: ListView.builder(
-                                padding: const EdgeInsets.fromLTRB(
-                                    16, 4, 16, 16),
-                                itemCount: _allUsers.length,
-                                itemBuilder: (_, i) =>
-                                    _userCard(_allUsers[i], isDark, lang),
-                              ),
-                            ),
-                      _mentors.isEmpty
-                          ? _empty(
-                              lang.isFrench
-                                  ? 'Aucun mentor trouvé'
-                                  : 'No mentors found',
-                              isDark)
-                          : ListView.builder(
-                              padding: const EdgeInsets.fromLTRB(
-                                  16, 4, 16, 16),
-                              itemCount: _mentors.length,
-                              itemBuilder: (_, i) =>
-                                  _userCard(_mentors[i], isDark, lang),
-                            ),
-                      _seekers.isEmpty
-                          ? _empty(
-                              lang.isFrench
-                                  ? 'Aucun chercheur trouvé'
-                                  : 'No job seekers found',
-                              isDark)
-                          : ListView.builder(
-                              padding: const EdgeInsets.fromLTRB(
-                                  16, 4, 16, 16),
-                              itemCount: _seekers.length,
-                              itemBuilder: (_, i) =>
-                                  _userCard(_seekers[i], isDark, lang),
-                            ),
-                    ],
-                  ),
-          ),
-        ],
-      ),
+                  )
+              ).toList()),
+        ),
+      ])),
     );
   }
+}
+
+// ── User Card ─────────────────────────────────────────────────────
+class _UserCard extends StatelessWidget {
+  final Map<String, dynamic> user;
+  final bool isDark, isMe, isConnecting;
+  final VoidCallback onConnect, onMessage;
+  const _UserCard({
+    required this.user, required this.isDark,
+    required this.isMe, required this.isConnecting,
+    required this.onConnect, required this.onMessage,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    final role    = user['role'] as String? ?? 'job_seeker';
+    final isMentor= role == 'mentor';
+    final name    = user['full_name'] as String? ?? 'User';
+    final headline= user['headline'] as String? ?? role.replaceAll('_', ' ');
+    final avatar  = user['profile_picture_url'] as String?;
+    final loc     = user['location'] as String?;
+    final skills  = user['skills'] is List
+        ? (user['skills'] as List).take(3).map((s) => s.toString()).toList()
+        : <String>[];
+
+    final roleColor = isMentor ? const Color(0xFF7C3AED) : AppColors.primaryCyan;
+
+    return Container(
+      margin: const EdgeInsets.only(bottom: 14),
+      padding: const EdgeInsets.all(16),
+      decoration: BoxDecoration(
+        color: AppColors.card(isDark),
+        borderRadius: BorderRadius.circular(20),
+        border: Border.all(color: AppColors.border(isDark))),
+      child: Row(crossAxisAlignment: CrossAxisAlignment.start, children: [
+        // Avatar
+        Stack(children: [
+          CircleAvatar(
+            radius: 28,
+            backgroundColor: roleColor.withOpacity(0.15),
+            backgroundImage: avatar != null ? NetworkImage(avatar) : null,
+            child: avatar == null ? Text(name.isNotEmpty ? name[0].toUpperCase() : '?',
+              style: TextStyle(color: roleColor, fontWeight: FontWeight.bold, fontSize: 18)) : null,
+          ),
+          if (isMentor)
+            Positioned(bottom: 0, right: 0, child: Container(
+              width: 16, height: 16,
+              decoration: const BoxDecoration(
+                color: Color(0xFF7C3AED), shape: BoxShape.circle),
+              child: const Icon(Icons.school, color: Colors.white, size: 10),
+            )),
+        ]),
+        const SizedBox(width: 12),
+        Expanded(child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
+          Row(children: [
+            Expanded(child: Text(name, style: TextStyle(
+              color: AppColors.text(isDark), fontWeight: FontWeight.bold, fontSize: 15),
+              maxLines: 1, overflow: TextOverflow.ellipsis)),
+            Container(
+              padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 3),
+              decoration: BoxDecoration(
+                color: roleColor.withOpacity(0.1),
+                borderRadius: BorderRadius.circular(12),
+                border: Border.all(color: roleColor.withOpacity(0.3))),
+              child: Text(isMentor ? 'Mentor' : 'Seeker', style: TextStyle(
+                color: roleColor, fontSize: 10, fontWeight: FontWeight.bold)),
+            ),
+          ]),
+          const SizedBox(height: 2),
+          Text(headline, style: TextStyle(
+            color: AppColors.textSecondary(isDark), fontSize: 12),
+            maxLines: 1, overflow: TextOverflow.ellipsis),
+          if (loc != null) ...[
+            const SizedBox(height: 3),
+            Row(children: [
+              Icon(Icons.location_on_outlined, size: 11,
+                  color: AppColors.textMuted(isDark)),
+              const SizedBox(width: 2),
+              Text(loc, style: TextStyle(
+                color: AppColors.textMuted(isDark), fontSize: 11)),
+            ]),
+          ],
+          if (skills.isNotEmpty) ...[
+            const SizedBox(height: 8),
+            Wrap(spacing: 4, children: skills.map((s) => Container(
+              padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 3),
+              decoration: BoxDecoration(
+                color: AppColors.primaryCyan.withOpacity(0.08),
+                borderRadius: BorderRadius.circular(8),
+                border: Border.all(color: AppColors.primaryCyan.withOpacity(0.2))),
+              child: Text(s, style: const TextStyle(
+                color: AppColors.primaryCyan, fontSize: 10)),
+            )).toList()),
+          ],
+          if (!isMe) ...[
+            const SizedBox(height: 10),
+            Row(children: [
+              Expanded(child: OutlinedButton.icon(
+                onPressed: isConnecting ? null : onConnect,
+                icon: isConnecting
+                    ? const SizedBox(width: 12, height: 12,
+                        child: CircularProgressIndicator(strokeWidth: 2))
+                    : const Icon(Icons.person_add_outlined, size: 14),
+                label: Text(isConnecting ? '...' : 'Connect',
+                    style: const TextStyle(fontSize: 12)),
+                style: OutlinedButton.styleFrom(
+                  padding: const EdgeInsets.symmetric(vertical: 6),
+                  foregroundColor: AppColors.primaryCyan,
+                  side: BorderSide(color: AppColors.primaryCyan.withOpacity(0.4)),
+                  shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(10))),
+              )),
+              const SizedBox(width: 8),
+              Expanded(child: ElevatedButton.icon(
+                onPressed: onMessage,
+                icon: const Icon(Icons.chat_bubble_outline, size: 14),
+                label: const Text('Message', style: TextStyle(fontSize: 12)),
+                style: ElevatedButton.styleFrom(
+                  padding: const EdgeInsets.symmetric(vertical: 6),
+                  backgroundColor: AppColors.primaryCyan,
+                  foregroundColor: Colors.black,
+                  shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(10))),
+              )),
+            ]),
+          ],
+        ])),
+      ]),
+    );
+  }
+}
+
+class _EmptyState extends StatelessWidget {
+  final bool isDark;
+  const _EmptyState({required this.isDark});
+  @override
+  Widget build(BuildContext context) => Center(child: Column(
+    mainAxisSize: MainAxisSize.min,
+    children: [
+      Icon(Icons.search_off_rounded, size: 64, color: AppColors.textMuted(isDark)),
+      const SizedBox(height: 12),
+      Text('No users found', style: TextStyle(
+        color: AppColors.text(isDark), fontSize: 16, fontWeight: FontWeight.bold)),
+    ],
+  ));
 }

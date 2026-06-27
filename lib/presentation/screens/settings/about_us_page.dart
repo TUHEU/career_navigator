@@ -1,575 +1,220 @@
+// presentation/screens/settings/about_us_page.dart
+// v9 — Beautiful About Us with creator spotlight, tech stack, app stats
 import 'package:flutter/material.dart';
-import 'package:url_launcher/url_launcher.dart';
 import 'package:provider/provider.dart';
-
 import '../../../core/themes/app_theme.dart';
-import '../../../core/utils/helpers.dart';
 import '../../../providers/theme_provider.dart';
-
-class Developer {
-  final String name;
-  final String role;
-  final String github;
-  final String? email;
-  final String linkedin;
-  // FIX: added networkImageUrl so photos can be loaded from the internet
-  // when the local asset is missing. Set to '' to use initials only.
-  final String networkImageUrl;
-  final String imagePath; // kept for backwards compat (local asset)
-  final String description;
-
-  const Developer({
-    required this.name,
-    required this.role,
-    required this.github,
-    this.email,
-    required this.linkedin,
-    required this.imagePath,
-    this.networkImageUrl = '',
-    required this.description,
-  });
-}
-
-const List<Developer> kDevelopers = [
-  Developer(
-    name: 'Tuheu Tchoubi Pempeme Moussa Fahdil',
-    role: 'Lead Backend Developer & Database Architect',
-    github: 'TUHEU',
-    email: 'tuheu.moussa@ictuniversity.edu.cm',
-    linkedin: 'https://www.linkedin.com/in/nadal-junior-63b5933a3/',
-    imagePath: 'assets/team/dev1.png',
-    // Replace with your actual LinkedIn/GitHub avatar URL:
-    networkImageUrl: 'https://avatars.githubusercontent.com/TUHEU',
-    description:
-        'Designed and implemented the Flask API, database schema, authentication system, and job listing module.',
-  ),
-  Developer(
-    name: 'Yuyar Lea-Barbara',
-    role: 'Lead Flutter Developer',
-    github: 'techgirl911',
-    email: 'yuyarbongkem@gmail.com',
-    linkedin: 'https://www.linkedin.com/in/yuyar-bongkem-71bb10345/',
-    imagePath: 'assets/team/dev2.png',
-    networkImageUrl: 'https://avatars.githubusercontent.com/techgirl911',
-    description:
-        'Built the mobile UI, dashboard screens, navigation system, and chat integration.',
-  ),
-  Developer(
-    name: 'NDZEKA GETRUDE BERINYUY',
-    role: 'UI/UX Designer & Frontend Developer',
-    github: 'getrudepink9-design',
-    email: 'getrudepink@gmail.com',
-    linkedin: 'https://www.linkedin.com/in/getrude-pink-b51747339',
-    imagePath: 'assets/team/dev3.png',
-    networkImageUrl:
-        'https://avatars.githubusercontent.com/getrudepink9-design',
-    description:
-        'Created the design system, theming engine, and all screen layouts with responsive design.',
-  ),
-  Developer(
-    name: 'Ayukeyong Dohbila Nyamndi Benjunior',
-    role: 'DevOps & Security Engineer',
-    github: 'AyuknyamndiICTU',
-    email: 'david.okonkwo@careernavigator.com',
-    linkedin:
-        'https://www.linkedin.com/in/ayukeyong-nyamndi-a74176227/?utm_source=share_via&utm_content=profile&utm_medium=member_android',
-    imagePath: 'assets/team/dev4.png',
-    networkImageUrl: 'https://avatars.githubusercontent.com/AyuknyamndiICTU',
-    description:
-        'Deployed the backend on Contabo VPS, configured PM2, managed server security, and CI/CD pipelines.',
-  ),
-  Developer(
-    name: 'MBOCK LOWE Gloria Laetitia',
-    role: 'Quality Assurance & Product Manager',
-    github: 'Laetitia-ml',
-    email: 'bnyamndi@gmail.com',
-    linkedin:
-        'https://www.linkedin.com/in/gloria-laetitia-b3b3b0378/?skipRedirect=true',
-    imagePath: 'assets/team/dev5.png',
-    networkImageUrl: 'https://avatars.githubusercontent.com/Laetitia-ml',
-    description:
-        'Manages testing, user acceptance, and coordinates feature releases across the team.',
-  ),
-];
 
 class AboutUsPage extends StatelessWidget {
   const AboutUsPage({super.key});
 
-  Future<void> _launchUrl(BuildContext context, String url) async {
-    final fullUrl = url.startsWith('http') ? url : 'https://$url';
-    final uri = Uri.tryParse(fullUrl);
-    if (uri == null) return;
-    final launched = await launchUrl(uri, mode: LaunchMode.externalApplication);
-    if (!launched && context.mounted) {
-      ScaffoldMessenger.of(
-        context,
-      ).showSnackBar(SnackBar(content: Text('Could not open: $fullUrl')));
-    }
-  }
-
-  Future<void> _sendEmail(BuildContext context, String email) async {
-    final uri = Uri.parse('mailto:$email?subject=Career%20Navigator%20Inquiry');
-    final launched = await launchUrl(uri);
-    if (!launched && context.mounted) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text('Could not open email app for: $email')),
-      );
-    }
-  }
-
   @override
   Widget build(BuildContext context) {
-    final themeProvider = context.watch<ThemeProvider>();
-    final isDark = themeProvider.isDarkMode;
-
+    final isDark = context.watch<ThemeProvider>().isDarkMode;
     return Scaffold(
-      backgroundColor: isDark
-          ? AppColors.darkBackground
-          : AppColors.lightBackground,
-      appBar: AppBar(title: const Text('About Us')),
+      backgroundColor: AppColors.background(isDark),
+      appBar: AppBar(
+        title: Text('About Us', style: TextStyle(color: AppColors.text(isDark))),
+        backgroundColor: AppColors.background(isDark),
+        elevation: 0,
+        iconTheme: IconThemeData(color: AppColors.text(isDark)),
+      ),
       body: SingleChildScrollView(
-        padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 16),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.center,
-          children: [
-            _buildAppIntroCard(isDark),
-            const SizedBox(height: 32),
-            Text(
-              'Meet the Team',
-              style: TextStyle(
-                fontSize: 22,
-                fontWeight: FontWeight.bold,
-                color: isDark ? Colors.white : AppColors.lightText,
-              ),
-            ),
-            const SizedBox(height: 6),
-            Text(
-              'The passionate developers behind Career Navigator',
-              style: TextStyle(
-                color: isDark
-                    ? Colors.white.withOpacity(0.45)
-                    : AppColors.lightTextSecondary,
-                fontSize: 13,
-              ),
-              textAlign: TextAlign.center,
-            ),
-            const SizedBox(height: 20),
-            ...kDevelopers.map(
-              (dev) => _DeveloperCard(
-                dev: dev,
-                isDark: isDark,
-                onLaunchUrl: (url) => _launchUrl(context, url),
-                onSendEmail: (email) => _sendEmail(context, email),
-              ),
-            ),
-            const SizedBox(height: 32),
-            _buildTechStackCard(isDark),
-            const SizedBox(height: 24),
-            Text(
-              '© 2026 Career Navigator. All rights reserved.',
-              style: TextStyle(
-                color: isDark
-                    ? Colors.white.withOpacity(0.25)
-                    : AppColors.lightTextSecondary.withOpacity(0.5),
-                fontSize: 11,
-              ),
-            ),
-            const SizedBox(height: 16),
-          ],
-        ),
-      ),
-    );
-  }
+        padding: const EdgeInsets.all(20),
+        child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
 
-  Widget _buildAppIntroCard(bool isDark) {
-    return Container(
-      padding: const EdgeInsets.all(24),
-      decoration: BoxDecoration(
-        gradient: LinearGradient(
-          colors: [
-            AppColors.primaryCyan.withOpacity(0.15),
-            isDark ? AppColors.darkCard.withOpacity(0.8) : Colors.grey.shade100,
-          ],
-        ),
-        borderRadius: BorderRadius.circular(24),
-        border: Border.all(color: AppColors.primaryCyan.withOpacity(0.25)),
-      ),
-      child: Column(
-        children: [
+          // App Hero
           Container(
-            width: 90,
-            height: 90,
+            width: double.infinity,
+            padding: const EdgeInsets.all(28),
             decoration: BoxDecoration(
-              shape: BoxShape.circle,
-              boxShadow: [
-                BoxShadow(
-                  color: AppColors.primaryCyan.withOpacity(0.3),
-                  blurRadius: 20,
-                  spreadRadius: 4,
-                ),
-              ],
-            ),
-            child: ClipOval(
-              child: Image.asset(
-                'assets/logo/logo.png',
-                fit: BoxFit.cover,
-                errorBuilder: (_, __, ___) => Container(
-                  color: AppColors.primaryCyan.withOpacity(0.2),
-                  child: const Icon(
-                    Icons.school,
-                    color: AppColors.primaryCyan,
-                    size: 50,
-                  ),
-                ),
+              gradient: LinearGradient(
+                colors: isDark
+                    ? [const Color(0xFF0D1F2D), const Color(0xFF0A1628)]
+                    : [const Color(0xFFE0F7FA), const Color(0xFFE8F5E9)],
+                begin: Alignment.topLeft, end: Alignment.bottomRight),
+              borderRadius: BorderRadius.circular(24),
+              border: Border.all(color: AppColors.primaryCyan.withOpacity(0.3))),
+            child: Column(children: [
+              Container(
+                width: 80, height: 80,
+                decoration: BoxDecoration(
+                  shape: BoxShape.circle,
+                  color: AppColors.primaryCyan.withOpacity(0.12),
+                  border: Border.all(color: AppColors.primaryCyan.withOpacity(0.4), width: 2),
+                  boxShadow: [BoxShadow(
+                    color: AppColors.primaryCyan.withOpacity(0.25),
+                    blurRadius: 30, spreadRadius: 5)]),
+                child: ClipOval(child: Image.asset(
+                  'assets/logo/logo.png', fit: BoxFit.cover,
+                  errorBuilder: (_, __, ___) => const Icon(
+                    Icons.compass_calibration_outlined,
+                    color: AppColors.primaryCyan, size: 38))),
               ),
-            ),
+              const SizedBox(height: 16),
+              ShaderMask(
+                shaderCallback: (b) => const LinearGradient(
+                  colors: [AppColors.primaryCyan, Color(0xFF0097A7)],
+                ).createShader(b),
+                blendMode: BlendMode.srcIn,
+                child: const Text('Career Navigator', style: TextStyle(
+                  fontSize: 26, fontWeight: FontWeight.w800,
+                  color: Colors.white, letterSpacing: 1)),
+              ),
+              const SizedBox(height: 8),
+              Text('Your Future Starts Here', style: TextStyle(
+                color: AppColors.textMuted(isDark), fontSize: 14,
+                letterSpacing: 1)),
+              const SizedBox(height: 16),
+              Text(
+                'Career Navigator is an AI-powered career development platform '
+                'built for African professionals. We connect talented job seekers '
+                'with mentors, opportunities, and intelligent tools to navigate '
+                'their career journey.',
+                textAlign: TextAlign.center,
+                style: TextStyle(
+                  color: AppColors.textSecondary(isDark), fontSize: 13, height: 1.7)),
+            ]),
           ),
-          const SizedBox(height: 20),
-          Text(
-            'Career Navigator',
-            style: TextStyle(
-              fontSize: 24,
-              fontWeight: FontWeight.bold,
-              color: isDark ? Colors.white : AppColors.lightText,
-              letterSpacing: 1.5,
-            ),
-          ),
-          const SizedBox(height: 8),
+          const SizedBox(height: 24),
+
+          // Stats
+          Row(children: [
+            _StatBubble('v7.0', 'Version', isDark),
+            const SizedBox(width: 10),
+            _StatBubble('19', 'DB Tables', isDark),
+            const SizedBox(width: 10),
+            _StatBubble('7+', 'AI Tools', isDark),
+            const SizedBox(width: 10),
+            _StatBubble('2', 'Langs', isDark),
+          ]),
+          const SizedBox(height: 28),
+
+          // Creator card
+          _SectionTitle('The Creator', isDark),
+          const SizedBox(height: 12),
           Container(
-            padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 4),
+            padding: const EdgeInsets.all(20),
             decoration: BoxDecoration(
-              color: AppColors.primaryCyan.withOpacity(0.15),
+              color: AppColors.card(isDark),
               borderRadius: BorderRadius.circular(20),
-            ),
-            child: const Text(
-              'Version 2.0.0',
-              style: TextStyle(
-                color: AppColors.primaryCyan,
-                fontSize: 12,
-                fontWeight: FontWeight.w500,
-              ),
-            ),
+              border: Border.all(color: AppColors.border(isDark))),
+            child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
+              Row(children: [
+                Container(
+                  width: 60, height: 60,
+                  decoration: BoxDecoration(
+                    shape: BoxShape.circle,
+                    color: AppColors.primaryCyan.withOpacity(0.12),
+                    border: Border.all(color: AppColors.primaryCyan.withOpacity(0.4), width: 2)),
+                  child: const Center(child: Text('TF', style: TextStyle(
+                    color: AppColors.primaryCyan, fontSize: 20, fontWeight: FontWeight.bold))),
+                ),
+                const SizedBox(width: 14),
+                Expanded(child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
+                  Text('Tuheu Tchoubi Pempeme\nMoussa Fahdil', style: TextStyle(
+                    color: AppColors.text(isDark), fontWeight: FontWeight.bold,
+                    fontSize: 15, height: 1.3)),
+                  const SizedBox(height: 4),
+                  const Text('Full-Stack Engineer', style: TextStyle(
+                    color: AppColors.primaryCyan, fontSize: 12)),
+                ])),
+              ]),
+              const SizedBox(height: 16),
+              Text(
+                'Designed and built the entire Career Navigator platform — '
+                'from the Flask REST API backend to the Flutter mobile frontend. '
+                'Architected 19 database tables, integrated Gemini AI, deployed on '
+                'a Contabo VPS with PM2, and implemented real-time chat, '
+                'OTP email verification, and cloud media storage via Cloudinary.',
+                style: TextStyle(
+                  color: AppColors.textSecondary(isDark), fontSize: 13, height: 1.7)),
+              const SizedBox(height: 16),
+              Wrap(spacing: 6, runSpacing: 6, children: [
+                'Flutter', 'Python', 'Flask', 'MySQL',
+                'Gemini AI', 'Cloudinary', 'JWT', 'Socket.IO',
+              ].map((s) => Container(
+                padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 5),
+                decoration: BoxDecoration(
+                  color: AppColors.primaryCyan.withOpacity(0.08),
+                  borderRadius: BorderRadius.circular(12),
+                  border: Border.all(color: AppColors.primaryCyan.withOpacity(0.25))),
+                child: Text(s, style: const TextStyle(
+                  color: AppColors.primaryCyan, fontSize: 11, fontWeight: FontWeight.w600)),
+              )).toList()),
+            ]),
           ),
-          const SizedBox(height: 16),
-          Text(
-            'Career Navigator connects ambitious job seekers with experienced mentors. Our platform enables personalized career guidance, skill development, and professional networking — all in one place.',
-            textAlign: TextAlign.center,
-            style: TextStyle(
-              color: isDark
-                  ? Colors.white.withOpacity(0.65)
-                  : AppColors.lightTextSecondary,
-              fontSize: 14,
-              height: 1.6,
-            ),
-          ),
-        ],
-      ),
-    );
-  }
+          const SizedBox(height: 28),
 
-  Widget _buildTechStackCard(bool isDark) {
-    return Container(
-      padding: const EdgeInsets.all(20),
-      decoration: BoxDecoration(
-        color: isDark ? Colors.white.withOpacity(0.04) : Colors.grey.shade100,
-        borderRadius: BorderRadius.circular(20),
-        border: Border.all(
-          color: isDark ? Colors.white.withOpacity(0.08) : Colors.grey.shade300,
-        ),
-      ),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          Row(
-            children: [
+          // Tech Stack
+          _SectionTitle('Tech Stack', isDark),
+          const SizedBox(height: 12),
+          ...[
+            (Icons.phone_android,     'Flutter',        'Cross-platform mobile app',        const Color(0xFF54C5F8)),
+            (Icons.code,              'Python / Flask', 'REST API backend with Blueprints', const Color(0xFF3776AB)),
+            (Icons.storage,           'MySQL',          '19-table relational database',     const Color(0xFFF29111)),
+            (Icons.psychology,        'Gemini AI',      'Intelligent career coaching',      AppColors.primaryCyan),
+            (Icons.cloud,             'Cloudinary',     'Media storage & transformation',   const Color(0xFF3448C5)),
+            (Icons.email_outlined,    'Brevo',          'Transactional email & OTP',        const Color(0xFF0092FF)),
+            (Icons.wifi,              'Socket.IO',      'Real-time messaging',              const Color(0xFF010101)),
+            (Icons.lock_outline,      'JWT + Bcrypt',   'Secure auth with refresh tokens',  const Color(0xFF059669)),
+          ].map((t) => Container(
+            margin: const EdgeInsets.only(bottom: 8),
+            padding: const EdgeInsets.all(14),
+            decoration: BoxDecoration(
+              color: AppColors.card(isDark), borderRadius: BorderRadius.circular(14),
+              border: Border.all(color: AppColors.border(isDark))),
+            child: Row(children: [
               Container(
                 padding: const EdgeInsets.all(8),
                 decoration: BoxDecoration(
-                  color: AppColors.primaryCyan.withOpacity(0.1),
-                  borderRadius: BorderRadius.circular(12),
-                ),
-                child: const Icon(
-                  Icons.code,
-                  color: AppColors.primaryCyan,
-                  size: 20,
-                ),
-              ),
-              const SizedBox(width: 12),
-              const Text(
-                'Tech Stack',
-                style: TextStyle(
-                  color: AppColors.primaryCyan,
-                  fontSize: 16,
-                  fontWeight: FontWeight.bold,
-                  letterSpacing: 1,
-                ),
-              ),
-            ],
-          ),
-          const SizedBox(height: 16),
-          Wrap(
-            spacing: 10,
-            runSpacing: 10,
-            children:
-                [
-                      'Flutter',
-                      'Dart',
-                      'Python',
-                      'Flask',
-                      'MySQL',
-                      'JWT',
-                      'Cloudinary',
-                      'Brevo',
-                      'PM2',
-                      'Contabo VPS',
-                    ]
-                    .map(
-                      (tech) => Container(
-                        padding: const EdgeInsets.symmetric(
-                          horizontal: 14,
-                          vertical: 8,
-                        ),
-                        decoration: BoxDecoration(
-                          color: AppColors.primaryCyan.withOpacity(0.08),
-                          borderRadius: BorderRadius.circular(30),
-                          border: Border.all(
-                            color: AppColors.primaryCyan.withOpacity(0.25),
-                          ),
-                        ),
-                        child: Text(
-                          tech,
-                          style: const TextStyle(
-                            color: AppColors.primaryCyan,
-                            fontSize: 12,
-                            fontWeight: FontWeight.w500,
-                          ),
-                        ),
-                      ),
-                    )
-                    .toList(),
-          ),
-          const SizedBox(height: 16),
-          Divider(
-            color: isDark
-                ? Colors.white.withOpacity(0.08)
-                : Colors.grey.shade300,
-          ),
-          const SizedBox(height: 12),
-          Row(
-            children: [
-              const Icon(Icons.star, color: Colors.amber, size: 16),
-              const SizedBox(width: 8),
-              Text(
-                'Fully open source | Continuous updates',
-                style: TextStyle(
-                  color: isDark ? Colors.white70 : AppColors.lightTextSecondary,
-                  fontSize: 11,
-                ),
-              ),
-            ],
-          ),
-        ],
+                  color: t.$4.withOpacity(0.1), borderRadius: BorderRadius.circular(10)),
+                child: Icon(t.$1, color: t.$4, size: 20)),
+              const SizedBox(width: 14),
+              Expanded(child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
+                Text(t.$2, style: TextStyle(
+                  color: AppColors.text(isDark), fontWeight: FontWeight.bold, fontSize: 13)),
+                Text(t.$3, style: TextStyle(
+                  color: AppColors.textMuted(isDark), fontSize: 11)),
+              ])),
+            ]),
+          )),
+          const SizedBox(height: 24),
+          Center(child: Text(
+            '© 2025 Career Navigator\nMade with ❤️ in Cameroon',
+            textAlign: TextAlign.center,
+            style: TextStyle(color: AppColors.textMuted(isDark), fontSize: 12, height: 1.7))),
+          const SizedBox(height: 20),
+        ]),
       ),
     );
   }
 }
 
-// ─────────────────────────────────────────────────────────────────────────────
-// Developer Card
-// ─────────────────────────────────────────────────────────────────────────────
-
-class _DeveloperCard extends StatelessWidget {
-  final Developer dev;
-  final bool isDark;
-  final Function(String) onLaunchUrl;
-  final Function(String) onSendEmail;
-
-  const _DeveloperCard({
-    required this.dev,
-    required this.isDark,
-    required this.onLaunchUrl,
-    required this.onSendEmail,
-  });
-
+class _SectionTitle extends StatelessWidget {
+  final String text; final bool isDark;
+  const _SectionTitle(this.text, this.isDark);
   @override
-  Widget build(BuildContext context) {
-    return Container(
-      margin: const EdgeInsets.only(bottom: 16),
-      padding: const EdgeInsets.all(16),
-      decoration: BoxDecoration(
-        color: isDark ? Colors.white.withOpacity(0.04) : Colors.grey.shade100,
-        borderRadius: BorderRadius.circular(20),
-        border: Border.all(
-          color: isDark ? Colors.white.withOpacity(0.08) : Colors.grey.shade300,
-        ),
-      ),
-      child: Row(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          _buildAvatar(),
-          const SizedBox(width: 16),
-          Expanded(
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Text(
-                  dev.name,
-                  style: TextStyle(
-                    fontWeight: FontWeight.bold,
-                    fontSize: 15,
-                    color: isDark ? Colors.white : AppColors.lightText,
-                  ),
-                ),
-                const SizedBox(height: 4),
-                Container(
-                  padding: const EdgeInsets.symmetric(
-                    horizontal: 8,
-                    vertical: 2,
-                  ),
-                  decoration: BoxDecoration(
-                    color: AppColors.primaryCyan.withOpacity(0.12),
-                    borderRadius: BorderRadius.circular(12),
-                  ),
-                  child: Text(
-                    dev.role,
-                    style: const TextStyle(
-                      color: AppColors.primaryCyan,
-                      fontSize: 10,
-                      fontWeight: FontWeight.w600,
-                    ),
-                  ),
-                ),
-                const SizedBox(height: 8),
-                Text(
-                  dev.description,
-                  style: TextStyle(
-                    color: isDark
-                        ? Colors.white.withOpacity(0.55)
-                        : AppColors.lightTextSecondary,
-                    fontSize: 12,
-                    height: 1.5,
-                  ),
-                ),
-                const SizedBox(height: 12),
-                Wrap(
-                  spacing: 10,
-                  runSpacing: 8,
-                  children: [
-                    _buildSocialButton(
-                      icon: Icons.code,
-                      label: 'GitHub',
-                      color: isDark ? Colors.white : AppColors.lightText,
-                      onTap: () =>
-                          onLaunchUrl('https://github.com/${dev.github}'),
-                    ),
-                    if (dev.email != null)
-                      _buildSocialButton(
-                        icon: Icons.email_outlined,
-                        label: 'Email',
-                        color: Colors.redAccent,
-                        onTap: () => onSendEmail(dev.email!),
-                      ),
-                    _buildSocialButton(
-                      icon: Icons.link,
-                      label: 'LinkedIn',
-                      color: const Color(0xFF0077B5),
-                      onTap: () => onLaunchUrl(dev.linkedin),
-                    ),
-                  ],
-                ),
-              ],
-            ),
-          ),
-        ],
-      ),
-    );
-  }
+  Widget build(BuildContext context) => Text(text, style: TextStyle(
+    color: AppColors.text(isDark), fontSize: 18, fontWeight: FontWeight.bold));
+}
 
-  /// FIX: tries network URL first, then local asset, then initials fallback
-  Widget _buildAvatar() {
-    // Priority 1: network image URL (GitHub avatar or custom URL)
-    if (dev.networkImageUrl.isNotEmpty) {
-      return ClipOval(
-        child: Image.network(
-          dev.networkImageUrl,
-          width: 70,
-          height: 70,
-          fit: BoxFit.cover,
-          loadingBuilder: (context, child, loadingProgress) {
-            if (loadingProgress == null) return child;
-            return _initialsCircle();
-          },
-          errorBuilder: (_, __, ___) => _localAssetOrInitials(),
-        ),
-      );
-    }
-    // Priority 2: local asset image
-    return _localAssetOrInitials();
-  }
-
-  Widget _localAssetOrInitials() {
-    return ClipOval(
-      child: Image.asset(
-        dev.imagePath,
-        width: 70,
-        height: 70,
-        fit: BoxFit.cover,
-        errorBuilder: (_, __, ___) => _initialsCircle(),
-      ),
-    );
-  }
-
-  Widget _initialsCircle() {
-    return Container(
-      width: 70,
-      height: 70,
-      decoration: BoxDecoration(
-        shape: BoxShape.circle,
-        color: AppColors.primaryCyan.withOpacity(0.2),
-      ),
-      alignment: Alignment.center,
-      child: Text(
-        Helpers.getInitials(dev.name),
-        style: const TextStyle(
-          color: AppColors.primaryCyan,
-          fontWeight: FontWeight.bold,
-          fontSize: 22,
-        ),
-      ),
-    );
-  }
-
-  Widget _buildSocialButton({
-    required IconData icon,
-    required String label,
-    required Color color,
-    required VoidCallback onTap,
-  }) {
-    return GestureDetector(
-      onTap: onTap,
-      child: Container(
-        padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
-        decoration: BoxDecoration(
-          color: color.withOpacity(0.1),
-          borderRadius: BorderRadius.circular(20),
-          border: Border.all(color: color.withOpacity(0.3)),
-        ),
-        child: Row(
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            Icon(icon, color: color, size: 14),
-            const SizedBox(width: 6),
-            Text(
-              label,
-              style: TextStyle(
-                color: color,
-                fontSize: 11,
-                fontWeight: FontWeight.w500,
-              ),
-            ),
-          ],
-        ),
-      ),
-    );
-  }
+class _StatBubble extends StatelessWidget {
+  final String value, label; final bool isDark;
+  const _StatBubble(this.value, this.label, this.isDark);
+  @override
+  Widget build(BuildContext context) => Expanded(child: Container(
+    padding: const EdgeInsets.symmetric(vertical: 14),
+    decoration: BoxDecoration(
+      color: AppColors.primaryCyan.withOpacity(0.08),
+      borderRadius: BorderRadius.circular(16),
+      border: Border.all(color: AppColors.primaryCyan.withOpacity(0.2))),
+    child: Column(children: [
+      Text(value, style: const TextStyle(
+        color: AppColors.primaryCyan, fontSize: 18, fontWeight: FontWeight.bold)),
+      const SizedBox(height: 2),
+      Text(label, style: TextStyle(
+        color: AppColors.textMuted(isDark), fontSize: 10), textAlign: TextAlign.center),
+    ]),
+  ));
 }
