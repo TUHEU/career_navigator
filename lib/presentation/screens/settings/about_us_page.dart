@@ -114,7 +114,7 @@ class AboutUsPage extends StatelessWidget {
             const SizedBox(height: 24),
 
             Text(
-              '© 2025 Career Navigator\nMade with ❤️ in Cameroon',
+              '© 2026 Career Navigator\nMade with ❤️ in Cameroon',
               textAlign: TextAlign.center,
               style: TextStyle(
                 color: AppColors.textMuted(isDark),
