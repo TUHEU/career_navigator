@@ -28,4 +28,15 @@ class TokenStore {
     final token = await getAccess();
     return token != null && token.isNotEmpty;
   }
+
+  // ── v11: first-launch tracking for onboarding ──────────────
+  Future<bool> isFirstLaunch() async {
+    final prefs = await SharedPreferences.getInstance();
+    return !(prefs.getBool('has_launched_before') ?? false);
+  }
+
+  Future<void> setFirstLaunchDone() async {
+    final prefs = await SharedPreferences.getInstance();
+    await prefs.setBool('has_launched_before', true);
+  }
 }

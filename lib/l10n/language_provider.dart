@@ -17,6 +17,8 @@ class LanguageProvider extends ChangeNotifier {
       _lang == AppLanguage.french ? '🇫🇷 Français' : '🇬🇧 English';
   String      get languageCode  =>
       _lang == AppLanguage.french ? 'fr' : 'en';
+  Locale      get locale =>
+      Locale(_lang == AppLanguage.french ? 'fr' : 'en');
 
   LanguageProvider() { _load(); }
 

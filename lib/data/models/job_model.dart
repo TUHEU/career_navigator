@@ -1,51 +1,31 @@
-// data/models/job_model.dart
-// Updated: latitude, longitude, contactEmail, contactPhone, companyWebsite
-import 'package:flutter/material.dart';
-
-int? _toInt(dynamic v) {
-  if (v == null) return null;
-  if (v is int) return v;
-  if (v is double) return v.toInt();
-  return int.tryParse(v.toString());
-}
-
-double? _toDouble(dynamic v) {
-  if (v == null) return null;
-  if (v is double) return v;
-  if (v is int) return v.toDouble();
-  return double.tryParse(v.toString());
-}
-
+// data/models/job_model.dart — v11
 class JobListing {
-  final int     id;
-  final String  title;
-  final String  company;
+  final int id;
+  final String title;
+  final String company;
   final String? companyLogo;
-  final String  location;
-  final String  locationType;
-  final String  employmentType;
-  final String  experienceLevel;
-  final int?    salaryMin;
-  final int?    salaryMax;
-  final String  salaryCurrency;
-  final String  description;
-  final String  requirements;
-  final String  responsibilities;
+  final String location;
+  final String locationType;
+  final String employmentType;
+  final String experienceLevel;
+  final int? salaryMin;
+  final int? salaryMax;
+  final String salaryCurrency;
+  final String description;
+  final String requirements;
+  final String responsibilities;
   final String? benefits;
   final List<String>? skillsRequired;
-  final int?    postedBy;
-  final bool    isActive;
-  final int     viewsCount;
-  final int     applicationsCount;
+  final bool isFeatured;
+  final int viewsCount;
+  final int applicationsCount;
   final DateTime? expiresAt;
-  final DateTime  createdAt;
-
-  // ── NEW: Geolocation + contact ───────────────────────────
+  final String? categoryName;
+  final String? categoryColor;
+  final DateTime createdAt;
   final double? latitude;
   final double? longitude;
   final String? contactEmail;
-  final String? contactPhone;
-  final String? companyWebsite;
 
   const JobListing({
     required this.id,
@@ -53,206 +33,240 @@ class JobListing {
     required this.company,
     this.companyLogo,
     required this.location,
-    this.locationType      = 'onsite',
-    this.employmentType    = 'full_time',
-    this.experienceLevel   = 'mid',
+    required this.locationType,
+    required this.employmentType,
+    required this.experienceLevel,
     this.salaryMin,
     this.salaryMax,
-    this.salaryCurrency    = 'USD',
+    this.salaryCurrency = 'USD',
     required this.description,
     required this.requirements,
     required this.responsibilities,
     this.benefits,
     this.skillsRequired,
-    this.postedBy,
-    this.isActive          = true,
-    this.viewsCount        = 0,
+    this.isFeatured = false,
+    this.viewsCount = 0,
     this.applicationsCount = 0,
     this.expiresAt,
+    this.categoryName,
+    this.categoryColor,
     required this.createdAt,
     this.latitude,
     this.longitude,
     this.contactEmail,
-    this.contactPhone,
-    this.companyWebsite,
   });
 
-  factory JobListing.fromJson(Map<String, dynamic> json) {
-    List<String>? skills;
-    final raw = json['skills_required'];
-    if (raw != null) {
-      try {
-        if (raw is List)        skills = List<String>.from(raw);
-        else if (raw is String) skills = raw.split(',').map((s) => s.trim()).toList();
-      } catch (_) {}
+  factory JobListing.fromJson(Map<String, dynamic> j) => JobListing(
+    id:               _toInt(j['id']) ?? 0,
+    title:            j['title'] as String? ?? '',
+    company:          j['company'] as String? ?? '',
+    companyLogo:      j['company_logo'] as String?,
+    location:         j['location'] as String? ?? '',
+    locationType:     j['location_type'] as String? ?? 'onsite',
+    employmentType:   j['employment_type'] as String? ?? 'full_time',
+    experienceLevel:  j['experience_level'] as String? ?? 'mid',
+    salaryMin:        _toInt(j['salary_min']),
+    salaryMax:        _toInt(j['salary_max']),
+    salaryCurrency:   j['salary_currency'] as String? ?? 'USD',
+    description:      j['description'] as String? ?? '',
+    requirements:     j['requirements'] as String? ?? '',
+    responsibilities: j['responsibilities'] as String? ?? '',
+    benefits:         j['benefits'] as String?,
+    skillsRequired:   _parseSkills(j['skills_required']),
+    isFeatured:       (j['is_featured'] as num?)?.toInt() == 1 ||
+                       j['is_featured'] == true,
+    viewsCount:       _toInt(j['views_count']) ?? 0,
+    applicationsCount:_toInt(j['applications_count']) ?? 0,
+    expiresAt:        j['deadline'] != null
+        ? DateTime.tryParse(j['deadline'] as String) : null,
+    categoryName:     j['category_name'] as String?,
+    categoryColor:    j['category_color'] as String?,
+    createdAt:        DateTime.tryParse(
+        j['created_at'] as String? ?? '') ?? DateTime.now(),
+    latitude:         _toDouble(j['latitude']),
+    longitude:        _toDouble(j['longitude']),
+    contactEmail:     j['contact_email'] as String?,
+  );
+
+  static int? _toInt(dynamic v) {
+    if (v == null) return null;
+    if (v is num) return v.toInt();
+    if (v is String) return int.tryParse(v);
+    return null;
+  }
+
+  static double? _toDouble(dynamic v) {
+    if (v == null) return null;
+    if (v is num) return v.toDouble();
+    if (v is String) return double.tryParse(v);
+    return null;
+  }
+
+  static List<String>? _parseSkills(dynamic v) {
+    if (v == null) return null;
+    if (v is List) return List<String>.from(v);
+    if (v is String) {
+      if (v.trim().isEmpty) return null;
+      return v.split(',').map((s) => s.trim()).where((s) => s.isNotEmpty).toList();
     }
-    return JobListing(
-      id:               _toInt(json['id'])               ?? 0,
-      title:            json['title']                    as String? ?? '',
-      company:          json['company']                  as String? ?? '',
-      companyLogo:      json['company_logo']             as String?,
-      location:         json['location']                 as String? ?? '',
-      locationType:     json['location_type']            as String? ?? 'onsite',
-      employmentType:   json['employment_type']          as String? ?? 'full_time',
-      experienceLevel:  json['experience_level']         as String? ?? 'mid',
-      salaryMin:        _toInt(json['salary_min']),
-      salaryMax:        _toInt(json['salary_max']),
-      salaryCurrency:   json['salary_currency']          as String? ?? 'USD',
-      description:      json['description']              as String? ?? '',
-      requirements:     json['requirements']             as String? ?? '',
-      responsibilities: json['responsibilities']         as String? ?? '',
-      benefits:         json['benefits']                 as String?,
-      skillsRequired:   skills,
-      postedBy:         _toInt(json['posted_by']),
-      isActive:         _toInt(json['is_active'])        == 1,
-      viewsCount:       _toInt(json['views_count'])      ?? 0,
-      applicationsCount:_toInt(json['applications_count']) ?? 0,
-      expiresAt:        json['expires_at'] != null
-          ? DateTime.tryParse(json['expires_at'] as String) : null,
-      createdAt:        DateTime.tryParse(json['created_at'] as String? ?? '')
-          ?? DateTime.now(),
-      // NEW fields
-      latitude:         _toDouble(json['latitude']),
-      longitude:        _toDouble(json['longitude']),
-      contactEmail:     json['contact_email']            as String?,
-      contactPhone:     json['contact_phone']            as String?,
-      companyWebsite:   json['company_website']          as String?,
-    );
+    return null;
   }
 
-  // ── Helpers ───────────────────────────────────────────────
-  bool get hasLocation  => latitude != null && longitude != null;
-  bool get hasContact   => contactEmail != null || contactPhone != null;
-  bool get hasSalary    => salaryMin != null || salaryMax != null;
-  bool get isRemote     => locationType == 'remote';
-  bool get isHybrid     => locationType == 'hybrid';
-  bool get isFullTime   => employmentType == 'full_time';
-  bool get isExpired    => expiresAt != null && DateTime.now().isAfter(expiresAt!);
+  Map<String, dynamic> toJson() => {
+    'id': id, 'title': title, 'company': company,
+    'location': location, 'location_type': locationType,
+    'employment_type': employmentType, 'experience_level': experienceLevel,
+    'salary_min': salaryMin, 'salary_max': salaryMax,
+    'salary_currency': salaryCurrency,
+  };
 
-  String _fmt(int n) {
-    if (n >= 1000000) return '${(n / 1000000).toStringAsFixed(1)}M';
-    if (n >= 1000)    return '${(n / 1000).toStringAsFixed(0)}K';
-    return n.toString();
-  }
+  // ── Boolean helpers ───────────────────────────────────────────
+  bool get isRemote   => locationType.toLowerCase() == 'remote';
+  bool get isHybrid   => locationType.toLowerCase() == 'hybrid';
+  bool get isOnsite   => locationType.toLowerCase() == 'onsite';
+  bool get isFullTime => employmentType.toLowerCase() == 'full_time';
+  bool get isPartTime => employmentType.toLowerCase() == 'part_time';
 
+  bool get hasLocation => latitude != null && longitude != null;
+  bool get hasContact  => contactEmail != null && contactEmail!.isNotEmpty;
+  bool get hasSalary   => salaryMin != null || salaryMax != null;
+
+  // ── Display helpers ──────────────────────────────────────────
   String get salaryText {
-    if (salaryMin == null && salaryMax == null) return 'Salary not specified';
-    if (salaryMin != null && salaryMax != null)
-      return '$salaryCurrency ${_fmt(salaryMin!)} – ${_fmt(salaryMax!)}';
-    if (salaryMin != null) return '$salaryCurrency ${_fmt(salaryMin!)}+';
-    return 'Up to $salaryCurrency ${_fmt(salaryMax!)}';
+    if (!hasSalary) return 'Salary not specified';
+    String fmt(int v) {
+      if (v >= 1000000) {
+        return '${(v / 1000000).toStringAsFixed(1)}M';
+      } else if (v >= 1000) {
+        return '${(v / 1000).round()}K';
+      }
+      return '$v';
+    }
+    if (salaryMin != null && salaryMax != null) {
+      return '$salaryCurrency ${fmt(salaryMin!)} - ${fmt(salaryMax!)}';
+    } else if (salaryMin != null) {
+      return '$salaryCurrency ${fmt(salaryMin!)}+';
+    } else {
+      return 'Up to $salaryCurrency ${fmt(salaryMax!)}';
+    }
   }
-
-  String get employmentTypeDisplay => employmentType
-      .replaceAll('_', ' ').split(' ')
-      .map((w) => w[0].toUpperCase() + w.substring(1)).join(' ');
-
-  String get locationTypeDisplay =>
-      locationType[0].toUpperCase() + locationType.substring(1);
 
   String get experienceLevelDisplay {
-    const m = {
-      'entry': 'Entry Level', 'mid': 'Mid Level',
-      'senior': 'Senior Level', 'lead': 'Lead', 'executive': 'Executive',
-    };
-    return m[experienceLevel] ?? experienceLevel;
-  }
-
-  Color get locationTypeColor {
-    switch (locationType) {
-      case 'remote': return Colors.green;
-      case 'hybrid': return Colors.orange;
-      default:       return Colors.blue;
+    switch (experienceLevel.toLowerCase()) {
+      case 'entry':    return 'Entry Level';
+      case 'mid':       return 'Mid Level';
+      case 'senior':    return 'Senior Level';
+      case 'lead':      return 'Lead';
+      case 'executive': return 'Executive';
+      default:          return _titleCase(experienceLevel);
     }
   }
 
-  Color get employmentTypeColor {
-    switch (employmentType) {
-      case 'full_time':  return Colors.blue;
-      case 'part_time':  return Colors.purple;
-      case 'contract':   return Colors.orange;
-      case 'internship': return Colors.teal;
-      case 'freelance':  return Colors.pink;
-      default:           return Colors.grey;
-    }
-  }
+  String get employmentTypeDisplay => _titleCase(employmentType);
 
+  static String _titleCase(String s) => s
+      .split('_')
+      .where((w) => w.isNotEmpty)
+      .map((w) => w[0].toUpperCase() + w.substring(1).toLowerCase())
+      .join(' ');
+
+  // ── Equality ─────────────────────────────────────────────────
   @override
-  bool operator ==(Object other) => other is JobListing && other.id == id;
+  bool operator ==(Object other) =>
+      identical(this, other) || (other is JobListing && other.id == id);
+
   @override
   int get hashCode => id.hashCode;
+
   @override
   String toString() => 'JobListing($id: $title @ $company)';
 }
 
-// ── Job Application (unchanged) ───────────────────────────
+/// data/models/job_model.dart — v11
+/// Mirrors the JSON returned by JobRepository.my_applications() in the
+/// Flask backend (a.* columns joined with j.* columns from job_listings).
 class JobApplication {
   final int id;
   final int jobId;
-  final String  status;
+  final String status;
   final String? coverLetter;
+  final int? aiScore;
+  final DateTime? interviewDate;
   final DateTime appliedAt;
-  final String  title;
-  final String  company;
-  final String? location;
-  final String? employmentType;
-  final int?    salaryMin;
-  final int?    salaryMax;
-  final String? salaryCurrency;
+
+  // Joined job_listings fields
+  final String jobTitle;
+  final String company;
+  final String location;
+  final String employmentType;
+  final int? salaryMin;
+  final int? salaryMax;
+  final String salaryCurrency;
 
   const JobApplication({
     required this.id,
     required this.jobId,
     required this.status,
     this.coverLetter,
+    this.aiScore,
+    this.interviewDate,
     required this.appliedAt,
-    required this.title,
+    required this.jobTitle,
     required this.company,
-    this.location,
-    this.employmentType,
+    required this.location,
+    required this.employmentType,
     this.salaryMin,
     this.salaryMax,
-    this.salaryCurrency,
+    this.salaryCurrency = 'USD',
   });
 
-  factory JobApplication.fromJson(Map<String, dynamic> json) => JobApplication(
-    id:             _toInt(json['id'])          ?? 0,
-    jobId:          _toInt(json['job_id'])       ?? 0,
-    status:         json['status']              as String? ?? 'pending',
-    coverLetter:    json['cover_letter']        as String?,
-    appliedAt:      DateTime.tryParse(json['applied_at'] as String? ?? '')
-        ?? DateTime.now(),
-    title:          json['title']              as String? ?? '',
-    company:        json['company']            as String? ?? '',
-    location:       json['location']           as String?,
-    employmentType: json['employment_type']    as String?,
-    salaryMin:      _toInt(json['salary_min']),
-    salaryMax:      _toInt(json['salary_max']),
-    salaryCurrency: json['salary_currency']    as String?,
+  factory JobApplication.fromJson(Map<String, dynamic> j) => JobApplication(
+    id:             JobListing._toInt(j['id']) ?? 0,
+    jobId:          JobListing._toInt(j['job_id']) ?? 0,
+    status:         j['status'] as String? ?? 'pending',
+    coverLetter:    j['cover_letter'] as String?,
+    aiScore:        JobListing._toInt(j['ai_score']),
+    interviewDate:  j['interview_date'] != null
+        ? DateTime.tryParse(j['interview_date'] as String) : null,
+    appliedAt:      DateTime.tryParse(
+        j['applied_at'] as String? ?? '') ?? DateTime.now(),
+    jobTitle:       j['title'] as String? ?? '',
+    company:        j['company'] as String? ?? '',
+    location:       j['location'] as String? ?? '',
+    employmentType: j['employment_type'] as String? ?? 'full_time',
+    salaryMin:      JobListing._toInt(j['salary_min']),
+    salaryMax:      JobListing._toInt(j['salary_max']),
+    salaryCurrency: j['salary_currency'] as String? ?? 'USD',
   );
 
-  String get statusDisplay {
-    const m = {
-      'pending': 'Pending Review', 'reviewed': 'Under Review',
-      'shortlisted': 'Shortlisted ⭐', 'rejected': 'Not Selected',
-      'hired': 'Hired! 🎉', 'withdrawn': 'Withdrawn',
-    };
-    return m[status] ?? status;
-  }
+  Map<String, dynamic> toJson() => {
+    'id': id, 'job_id': jobId, 'status': status,
+    'cover_letter': coverLetter, 'ai_score': aiScore,
+    'title': jobTitle, 'company': company, 'location': location,
+    'employment_type': employmentType,
+    'salary_min': salaryMin, 'salary_max': salaryMax,
+    'salary_currency': salaryCurrency,
+  };
 
-  Color get statusColor {
+  // ── Status helpers ──────────────────────────────────────────
+  bool get isPending     => status == 'pending';
+  bool get isReviewed    => status == 'reviewed';
+  bool get isShortlisted => status == 'shortlisted';
+  bool get isInterview   => status == 'interview';
+  bool get isRejected    => status == 'rejected';
+  bool get isHired       => status == 'hired';
+  bool get isWithdrawn   => status == 'withdrawn';
+
+  String get statusDisplay {
     switch (status) {
-      case 'pending':     return Colors.orange;
-      case 'reviewed':    return Colors.blue;
-      case 'shortlisted': return Colors.green;
-      case 'rejected':    return Colors.red;
-      case 'hired':       return Colors.purple;
-      default:            return Colors.grey;
+      case 'pending':     return 'Pending Review';
+      case 'reviewed':    return 'Reviewed';
+      case 'shortlisted': return 'Shortlisted';
+      case 'interview':   return 'Interview Scheduled';
+      case 'rejected':    return 'Not Selected';
+      case 'hired':       return 'Hired';
+      case 'withdrawn':   return 'Withdrawn';
+      default:            return status;
     }
   }
-
-  bool get isPending     => status == 'pending';
-  bool get isShortlisted => status == 'shortlisted';
-  bool get isHired       => status == 'hired';
-  bool get isRejected    => status == 'rejected';
 }

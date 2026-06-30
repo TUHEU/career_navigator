@@ -75,3 +75,68 @@ extension AppBackgroundExt on AppBackground {
     }
   }
 }
+
+/// Builds the MaterialApp ThemeData for light/dark mode using AppColors.
+class AppTheme {
+  AppTheme._();
+
+  static ThemeData light() => ThemeData(
+        brightness: Brightness.light,
+        useMaterial3: true,
+        scaffoldBackgroundColor: AppColors.lightBackground,
+        primaryColor: AppColors.primaryCyan,
+        colorScheme: ColorScheme.fromSeed(
+          seedColor: AppColors.primaryCyan,
+          brightness: Brightness.light,
+        ),
+        cardColor: AppColors.lightCard,
+        dividerColor: AppColors.lightBorder,
+        textTheme: ThemeData.light().textTheme.apply(
+              bodyColor: AppColors.lightText,
+              displayColor: AppColors.lightText,
+            ),
+        appBarTheme: const AppBarTheme(
+          backgroundColor: AppColors.lightSurface,
+          foregroundColor: AppColors.lightText,
+          elevation: 0,
+        ),
+        inputDecorationTheme: InputDecorationTheme(
+          filled: true,
+          fillColor: AppColors.lightInputFill,
+          border: OutlineInputBorder(
+            borderRadius: BorderRadius.circular(12),
+            borderSide: BorderSide(color: AppColors.lightBorder),
+          ),
+        ),
+      );
+
+  static ThemeData dark() => ThemeData(
+        brightness: Brightness.dark,
+        useMaterial3: true,
+        scaffoldBackgroundColor: AppColors.darkBackground,
+        primaryColor: AppColors.primaryCyanLight,
+        colorScheme: ColorScheme.fromSeed(
+          seedColor: AppColors.primaryCyanLight,
+          brightness: Brightness.dark,
+        ),
+        cardColor: AppColors.darkCard,
+        dividerColor: Colors.white.withOpacity(0.15),
+        textTheme: ThemeData.dark().textTheme.apply(
+              bodyColor: Colors.white,
+              displayColor: Colors.white,
+            ),
+        appBarTheme: const AppBarTheme(
+          backgroundColor: AppColors.darkSurface,
+          foregroundColor: Colors.white,
+          elevation: 0,
+        ),
+        inputDecorationTheme: InputDecorationTheme(
+          filled: true,
+          fillColor: Colors.white.withOpacity(0.07),
+          border: OutlineInputBorder(
+            borderRadius: BorderRadius.circular(12),
+            borderSide: BorderSide(color: Colors.white.withOpacity(0.15)),
+          ),
+        ),
+      );
+}

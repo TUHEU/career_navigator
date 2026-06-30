@@ -1,18 +1,17 @@
-// presentation/screens/auth/splash_screen.dart
-// v8: Animated splash → Onboarding (first time) OR dashboard (returning)
-import 'dart:math';
+// presentation/screens/auth/splash_screen.dart — v11
+// Animated splash with logo pulse, gradient background, version
 import 'package:flutter/material.dart';
-import 'package:flutter_native_splash/flutter_native_splash.dart';
 import 'package:provider/provider.dart';
-import 'package:shared_preferences/shared_preferences.dart';
 
 import '../../../core/themes/app_theme.dart';
 import '../../../providers/auth_provider.dart';
-import 'sign_in_page.dart';
+import '../../../providers/guest_provider.dart';
 import '../dashboard/job_seeker_dashboard.dart';
-import '../dashboard/mentor_dashboard.dart';
 import '../dashboard/admin_dashboard.dart';
+import '../dashboard/mentor_dashboard.dart';
+import 'sign_in_page.dart';
 import '../onboarding/onboarding_screen.dart';
+import '../../../data/datasources/local/token_store.dart';
 
 class SplashScreen extends StatefulWidget {
   const SplashScreen({super.key});
@@ -22,202 +21,186 @@ class SplashScreen extends StatefulWidget {
 
 class _SplashScreenState extends State<SplashScreen>
     with TickerProviderStateMixin {
-  late AnimationController _ringCtrl;
-  late AnimationController _enterCtrl;
-  late Animation<double>   _fade;
-  late Animation<double>   _scale;
+
+  late AnimationController _logoCtrl;
+  late AnimationController _fadeCtrl;
+  late Animation<double>   _logoScale;
+  late Animation<double>   _logoOpacity;
+  late Animation<double>   _taglineFade;
+  late Animation<Offset>   _taglineSlide;
 
   @override
   void initState() {
     super.initState();
-    FlutterNativeSplash.remove();
 
-    _ringCtrl = AnimationController(
-        vsync: this, duration: const Duration(seconds: 12))..repeat();
+    _logoCtrl = AnimationController(
+        vsync: this, duration: const Duration(milliseconds: 1200));
+    _fadeCtrl = AnimationController(
+        vsync: this, duration: const Duration(milliseconds: 800));
 
-    _enterCtrl = AnimationController(
-        vsync: this, duration: const Duration(milliseconds: 900));
+    _logoScale = CurvedAnimation(parent: _logoCtrl, curve: Curves.elasticOut)
+        .drive(Tween(begin: 0.4, end: 1.0));
+    _logoOpacity = CurvedAnimation(parent: _logoCtrl, curve: Curves.easeIn)
+        .drive(Tween(begin: 0.0, end: 1.0));
+    _taglineFade  = CurvedAnimation(parent: _fadeCtrl, curve: Curves.easeIn)
+        .drive(Tween(begin: 0.0, end: 1.0));
+    _taglineSlide = CurvedAnimation(parent: _fadeCtrl, curve: Curves.easeOut)
+        .drive(Tween(begin: const Offset(0, 0.5), end: Offset.zero));
 
-    _fade  = CurvedAnimation(parent: _enterCtrl, curve: Curves.easeOut);
-    _scale = Tween<double>(begin: 0.65, end: 1.0).animate(
-        CurvedAnimation(parent: _enterCtrl, curve: Curves.elasticOut));
+    _logoCtrl.forward().then((_) => _fadeCtrl.forward());
 
-    Future.delayed(const Duration(milliseconds: 200),
-        () { if (mounted) _enterCtrl.forward(); });
-    Future.delayed(const Duration(milliseconds: 2800),
-        () { if (mounted) _navigate(); });
-  }
-
-  @override
-  void dispose() {
-    _ringCtrl.dispose(); _enterCtrl.dispose();
-    super.dispose();
+    Future.delayed(const Duration(milliseconds: 2500), _navigate);
   }
 
   Future<void> _navigate() async {
-    final prefs  = await SharedPreferences.getInstance();
-    final onboarded = prefs.getBool('onboarding_done') ?? false;
+    if (!mounted) return;
+    final store  = TokenStore();
+    final token  = await store.getAccess();
+    final isFirst = await store.isFirstLaunch();
 
-    if (!onboarded) {
-      _go(const OnboardingScreen());
+    if (isFirst) {
+      await store.setFirstLaunchDone();
+      if (mounted) {
+        Navigator.pushReplacement(context,
+            MaterialPageRoute(builder: (_) => const OnboardingScreen()));
+      }
+      return;
+    }
+
+    if (token == null) {
+      if (mounted) {
+        Navigator.pushReplacement(context,
+            MaterialPageRoute(builder: (_) => const SignInPage()));
+      }
       return;
     }
 
     final auth = context.read<AuthProvider>();
-    final token = await auth.getAccessToken();
-    if (token != null) {
-      final ok = await auth.loadUserProfile();
-      if (ok && mounted) {
-        final role = auth.currentUser?.role;
-        if (role == 'admin')  { _go(const AdminDashboard());     return; }
-        if (role == 'mentor') { _go(const MentorDashboard());    return; }
-        _go(const JobSeekerDashboard()); return;
-      }
-      await auth.logout();
+    await auth.loadUserProfile();
+    if (!mounted) return;
+
+    final role = auth.currentUser?.role;
+    Widget dest;
+    if (role == 'admin') {
+      dest = const AdminDashboard();
+    } else if (role == 'mentor') {
+      dest = const MentorDashboard();
+    } else {
+      dest = const JobSeekerDashboard();
     }
-    _go(const SignInPage());
+    Navigator.pushReplacement(context, MaterialPageRoute(builder: (_) => dest));
   }
 
-  void _go(Widget page) {
-    if (!mounted) return;
-    Navigator.pushReplacement(context, PageRouteBuilder(
-      pageBuilder: (_, __, ___) => page,
-      transitionDuration: const Duration(milliseconds: 600),
-      transitionsBuilder: (_, a, __, child) =>
-          FadeTransition(opacity: a, child: child),
-    ));
+  @override
+  void dispose() {
+    _logoCtrl.dispose();
+    _fadeCtrl.dispose();
+    super.dispose();
   }
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: const Color(0xFF080A12),
-      body: Stack(children: [
-        // Background
-        Positioned.fill(child: Container(
-          decoration: const BoxDecoration(
-            gradient: RadialGradient(
-              center: Alignment(0, -0.3), radius: 0.9,
-              colors: [Color(0xFF0D1825), Color(0xFF080A12)],
-            ),
+      body: Container(
+        decoration: const BoxDecoration(
+          gradient: LinearGradient(
+            colors: [Color(0xFF060912), Color(0xFF0B1222), Color(0xFF060912)],
+            begin: Alignment.topLeft, end: Alignment.bottomRight,
           ),
-        )),
+        ),
+        child: Stack(children: [
+          // Glow orbs
+          Positioned(top: -100, left: -100, child: _Orb(360, AppColors.primaryCyan, 0.06)),
+          Positioned(bottom: -150, right: -80, child: _Orb(400, const Color(0xFF7C3AED), 0.05)),
 
-        // Rotating rings (inspired by ApexSpeech)
-        Center(child: AnimatedBuilder(
-          animation: _ringCtrl,
-          builder: (_, __) => Stack(
-            alignment: Alignment.center,
-            children: List.generate(5, (i) {
-              final sz  = 80.0 + i * 72;
-              final op  = 0.025 + i * 0.01;
-              final dir = i.isEven ? 1.0 : -1.0;
-              return Transform.rotate(
-                angle: _ringCtrl.value * 2 * pi * dir * (0.4 + i * 0.1),
-                child: Container(
-                  width: sz, height: sz,
-                  decoration: BoxDecoration(
-                    shape: BoxShape.circle,
-                    border: Border.all(
-                      color: AppColors.primaryCyan.withOpacity(op), width: 1),
+          // Main content
+          Center(child: Column(mainAxisSize: MainAxisSize.min, children: [
+            // Logo
+            AnimatedBuilder(
+              animation: _logoCtrl,
+              builder: (_, __) => Opacity(
+                opacity: _logoOpacity.value,
+                child: Transform.scale(
+                  scale: _logoScale.value,
+                  child: Container(
+                    width: 110, height: 110,
+                    decoration: BoxDecoration(
+                      shape: BoxShape.circle,
+                      color: AppColors.primaryCyan.withOpacity(0.1),
+                      border: Border.all(
+                          color: AppColors.primaryCyan.withOpacity(0.35), width: 2),
+                      boxShadow: [BoxShadow(
+                        color: AppColors.primaryCyan.withOpacity(0.25),
+                        blurRadius: 40, spreadRadius: 8)]),
+                    child: ClipOval(child: Image.asset(
+                      'assets/logo/logo.png', fit: BoxFit.cover,
+                      errorBuilder: (_, __, ___) => const Icon(
+                        Icons.compass_calibration_outlined,
+                        color: AppColors.primaryCyan, size: 52))),
                   ),
                 ),
-              );
-            }),
-          ),
-        )),
+              ),
+            ),
+            const SizedBox(height: 28),
 
-        // Logo + name
-        Center(child: FadeTransition(
-          opacity: _fade,
-          child: ScaleTransition(
-            scale: _scale,
-            child: Column(mainAxisSize: MainAxisSize.min, children: [
-              // Logo with glow
-              Container(
-                width: 100, height: 100,
-                decoration: BoxDecoration(
-                  shape: BoxShape.circle,
-                  color: AppColors.primaryCyan.withOpacity(0.08),
-                  border: Border.all(
-                    color: AppColors.primaryCyan.withOpacity(0.4), width: 1.5),
-                  boxShadow: [BoxShadow(
-                    color: AppColors.primaryCyan.withOpacity(0.3),
-                    blurRadius: 50, spreadRadius: 10,
-                  )],
-                ),
-                child: ClipOval(child: Image.asset(
-                  'assets/logo/logo.png', fit: BoxFit.cover,
-                  errorBuilder: (_, __, ___) => Icon(
-                    Icons.compass_calibration_outlined,
-                    color: AppColors.primaryCyan, size: 46),
-                )),
+            // App name
+            FadeTransition(
+              opacity: _taglineFade,
+              child: SlideTransition(
+                position: _taglineSlide,
+                child: Column(children: [
+                  ShaderMask(
+                    shaderCallback: (b) => const LinearGradient(
+                      colors: [AppColors.primaryCyan, Color(0xFF7C3AED)],
+                    ).createShader(b),
+                    blendMode: BlendMode.srcIn,
+                    child: const Text('Career Navigator',
+                      style: TextStyle(
+                        fontSize: 30, fontWeight: FontWeight.w900,
+                        color: Colors.white, letterSpacing: 0.5)),
+                  ),
+                  const SizedBox(height: 8),
+                  Text('Your Future Starts Here',
+                    style: TextStyle(
+                      color: Colors.white.withOpacity(0.45),
+                      fontSize: 13, letterSpacing: 1.5)),
+                ]),
               ),
-              const SizedBox(height: 28),
-              // Gradient text
-              ShaderMask(
-                shaderCallback: (b) => LinearGradient(
-                  colors: [AppColors.primaryCyan,
-                           AppColors.primaryCyan.withOpacity(0.6)],
-                ).createShader(b),
-                blendMode: BlendMode.srcIn,
-                child: const Text('CAREER NAVIGATOR', style: TextStyle(
-                  fontSize: 22, fontWeight: FontWeight.w800,
-                  color: Colors.white, letterSpacing: 4,
-                )),
-              ),
-              const SizedBox(height: 8),
-              Text('YOUR FUTURE STARTS HERE', style: TextStyle(
-                fontSize: 10, letterSpacing: 3, fontWeight: FontWeight.w500,
-                color: Colors.white.withOpacity(0.3),
-              )),
-              const SizedBox(height: 60),
-              _PulsingDots(),
-            ]),
+            ),
+          ])),
+
+          // Bottom version
+          Positioned(
+            bottom: 40, left: 0, right: 0,
+            child: FadeTransition(
+              opacity: _taglineFade,
+              child: Column(children: [
+                const SizedBox(
+                  width: 24, height: 24,
+                  child: CircularProgressIndicator(
+                    strokeWidth: 2, color: AppColors.primaryCyan)),
+                const SizedBox(height: 16),
+                Text('v10.0 · ICT University',
+                  style: TextStyle(
+                    color: Colors.white.withOpacity(0.25),
+                    fontSize: 11, letterSpacing: 1)),
+              ]),
+            ),
           ),
-        )),
-      ]),
+        ]),
+      ),
     );
   }
 }
 
-class _PulsingDots extends StatefulWidget {
-  @override State<_PulsingDots> createState() => _PulsingDotsState();
-}
-class _PulsingDotsState extends State<_PulsingDots>
-    with TickerProviderStateMixin {
-  final List<AnimationController> _cs = [];
-  final List<Animation<double>>   _as = [];
-
+class _Orb extends StatelessWidget {
+  final double size; final Color color; final double opacity;
+  const _Orb(this.size, this.color, this.opacity);
   @override
-  void initState() {
-    super.initState();
-    for (int i = 0; i < 3; i++) {
-      final c = AnimationController(vsync: this,
-          duration: const Duration(milliseconds: 700));
-      final a = Tween<double>(begin: 0.2, end: 1.0)
-          .animate(CurvedAnimation(parent: c, curve: Curves.easeInOut));
-      _cs.add(c); _as.add(a);
-      Future.delayed(Duration(milliseconds: i * 200),
-          () { if (mounted) c.repeat(reverse: true); });
-    }
-  }
-
-  @override void dispose() { for (final c in _cs) c.dispose(); super.dispose(); }
-
-  @override
-  Widget build(BuildContext context) => Row(
-    mainAxisSize: MainAxisSize.min,
-    children: List.generate(3, (i) => AnimatedBuilder(
-      animation: _as[i],
-      builder: (_, __) => Container(
-        width: 6, height: 6,
-        margin: const EdgeInsets.symmetric(horizontal: 3),
-        decoration: BoxDecoration(
-          shape: BoxShape.circle,
-          color: AppColors.primaryCyan.withOpacity(_as[i].value),
-        ),
-      ),
-    )),
+  Widget build(BuildContext context) => Container(
+    width: size, height: size,
+    decoration: BoxDecoration(
+      shape: BoxShape.circle,
+      color: color.withOpacity(opacity)),
   );
 }

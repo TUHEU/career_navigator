@@ -21,8 +21,8 @@ import '../presentation/screens/settings/privacy_policy_page.dart';
 import '../presentation/screens/settings/send_feedback_page.dart';
 import '../presentation/screens/search/search_page.dart';
 
-class AppRoutes {
-  AppRoutes._();
+class AppRouter {
+  AppRouter._();
   static const String splash          = '/';
   static const String signIn          = '/sign-in';
   static const String register        = '/register';
@@ -43,41 +43,41 @@ class AppRoutes {
   static const String privacyPolicy   = '/settings/privacy';
   static const String sendFeedback    = '/settings/feedback';
   static const String search          = '/search';
-}
 
-Route<dynamic> generateRoute(RouteSettings settings) {
-  final args = settings.arguments as Map<String, dynamic>? ?? {};
-  switch (settings.name) {
-    case AppRoutes.splash:          return _fade(const SplashScreen());
-    case AppRoutes.signIn:          return _slide(const SignInPage());
-    case AppRoutes.register:        return _slide(const RegistrationPage());
-    case AppRoutes.verifyEmail:
-      return _slide(EmailVerificationPage(
-          email: args['email'] as String? ?? ''));
-    case AppRoutes.profileSetup:    return _slide(const ProfileSetupPage());
-    case AppRoutes.resetPassword:
-      return _slide(ResetPasswordPage(
-          email: args['email'] as String? ?? ''));
-    case AppRoutes.questionnaire:   return _slide(const QuestionnaireScreen());
-    case AppRoutes.dashboardSeeker: return _fade(const JobSeekerDashboard());
-    case AppRoutes.dashboardMentor: return _fade(const MentorDashboard());
-    case AppRoutes.dashboardAdmin:  return _fade(const AdminDashboard());
-    case AppRoutes.aiHub:           return _slide(const AIHubPage());
-    case AppRoutes.jobs:            return _slide(const JobListingsPage());
-    case AppRoutes.chat:
-      return _slide(ChatPage(
-        conversationId: args['conversationId'] as int? ?? 0,
-        recipientId:    args['recipientId']    as int? ?? 0,
-        recipientName:  args['recipientName']  as String? ?? 'Unknown',
-      ));
-    case AppRoutes.notifications:   return _slide(const NotificationsPage());
-    case AppRoutes.settings:        return _slide(const SettingsPage());
-    case AppRoutes.aboutUs:         return _slide(const AboutUsPage());
-    case AppRoutes.helpFaq:         return _slide(const HelpFaqPage());
-    case AppRoutes.privacyPolicy:   return _slide(const PrivacyPolicyPage());
-    case AppRoutes.sendFeedback:    return _slide(const SendFeedbackPage());
-    case AppRoutes.search:          return _slide(const SearchPage());
-    default:                        return _fade(const SplashScreen());
+  static Route<dynamic> generateRoute(RouteSettings settings) {
+    final args = settings.arguments as Map<String, dynamic>? ?? {};
+    switch (settings.name) {
+      case AppRouter.splash:          return _fade(const SplashScreen());
+      case AppRouter.signIn:          return _slide(const SignInPage());
+      case AppRouter.register:        return _slide(const RegistrationPage());
+      case AppRouter.verifyEmail:
+        return _slide(EmailVerificationPage(
+            email: args['email'] as String? ?? ''));
+      case AppRouter.profileSetup:    return _slide(const ProfileSetupPage());
+      case AppRouter.resetPassword:
+        return _slide(ResetPasswordPage(
+            email: args['email'] as String? ?? ''));
+      case AppRouter.questionnaire:   return _slide(const QuestionnaireScreen());
+      case AppRouter.dashboardSeeker: return _fade(const JobSeekerDashboard());
+      case AppRouter.dashboardMentor: return _fade(const MentorDashboard());
+      case AppRouter.dashboardAdmin:  return _fade(const AdminDashboard());
+      case AppRouter.aiHub:           return _slide(const AIHubPage());
+      case AppRouter.jobs:            return _slide(const JobListingsPage());
+      case AppRouter.chat:
+        return _slide(ChatPage(
+          conversationId: args['conversationId'] as int? ?? 0,
+          recipientId:    args['recipientId']    as int? ?? 0,
+          recipientName:  args['recipientName']  as String? ?? 'Unknown',
+        ));
+      case AppRouter.notifications:   return _slide(const NotificationsPage());
+      case AppRouter.settings:        return _slide(const SettingsPage());
+      case AppRouter.aboutUs:         return _slide(const AboutUsPage());
+      case AppRouter.helpFaq:         return _slide(const HelpFaqPage());
+      case AppRouter.privacyPolicy:   return _slide(const PrivacyPolicyPage());
+      case AppRouter.sendFeedback:    return _slide(const SendFeedbackPage());
+      case AppRouter.search:          return _slide(const SearchPage());
+      default:                        return _fade(const SplashScreen());
+    }
   }
 }
 

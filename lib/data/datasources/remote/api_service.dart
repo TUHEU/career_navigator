@@ -9,8 +9,15 @@ class ApiService {
   final _c = ApiClient.instance;
 
   // ── AUTH ─────────────────────────────────────────────────────
-  Future<Map<String, dynamic>> register(String email, String password) =>
-      _c.post(ApiEndpoints.register, {'email': email, 'password': password});
+  Future<Map<String, dynamic>> register(String email, String password,
+      {String? fullName, String? phone, String? dateOfBirth, String? gender}) =>
+      _c.post(ApiEndpoints.register, {
+        'email': email, 'password': password,
+        if (fullName != null)    'full_name': fullName,
+        if (phone != null)       'phone': phone,
+        if (dateOfBirth != null) 'date_of_birth': dateOfBirth,
+        if (gender != null)      'gender': gender,
+      });
   Future<Map<String, dynamic>> verifyEmail(String email, String code) =>
       _c.post(ApiEndpoints.verifyEmail, {'email': email, 'code': code});
   Future<Map<String, dynamic>> resendCode(String email) =>
@@ -142,7 +149,6 @@ class ApiService {
     String category = 'General',
     int? rating,
   }) {
-    // FIX: use if-null pattern instead of ?rating (requires Dart 3.8+)
     final body = <String, dynamic>{
       'subject':  subject,
       'message':  message,
@@ -172,4 +178,99 @@ class ApiService {
     if (query.isNotEmpty) p['q']    = query;
     return _c.getWithParams(ApiEndpoints.users, p, token: token);
   }
+
+  // ── POSTS (v10) ────────────────────────────────────────────────
+  Future<Map<String, dynamic>> getPosts({
+    required String token, String category = '', int page = 1,
+  }) {
+    final p = <String, String>{'page': '$page'};
+    if (category.isNotEmpty) p['category'] = category;
+    return _c.getWithParams('/posts', p, token: token);
+  }
+
+  Future<Map<String, dynamic>> createPost({
+    required String token, required String content,
+    required String category, List<String> tags = const [],
+  }) => _c.post('/posts',
+          {'content': content, 'category': category, 'tags': tags},
+          token: token);
+
+  Future<Map<String, dynamic>> likePost({
+    required String token, required int postId,
+  }) => _c.post('/posts/$postId/like', {}, token: token);
+
+  Future<Map<String, dynamic>> unlikePost({
+    required String token, required int postId,
+  }) => _c.delete('/posts/$postId/like', token: token);
+
+  Future<Map<String, dynamic>> deletePost({
+    required String token, required int postId,
+  }) => _c.delete('/posts/$postId', token: token);
+
+  // ── SAVED JOBS (v10) ──────────────────────────────────────────
+  Future<Map<String, dynamic>> getSavedJobs({required String token}) =>
+      _c.get('/jobs/saved', token: token);
+
+  Future<Map<String, dynamic>> saveJob({
+    required String token, required int jobId,
+  }) => _c.post('/jobs/$jobId/save', {}, token: token);
+
+  Future<Map<String, dynamic>> unsaveJob({
+    required String token, required int jobId,
+  }) => _c.delete('/jobs/$jobId/save', token: token);
+
+  // ── STATS & ACHIEVEMENTS (v10) ─────────────────────────────────
+  Future<Map<String, dynamic>> getUserStats({required String token}) =>
+      _c.get('/profile/stats', token: token);
+
+  Future<Map<String, dynamic>> getAchievements({required String token}) =>
+      _c.get('/profile/achievements', token: token);
+
+  // ── CONNECTIONS BROWSE/SEARCH (v10) ─────────────────────────────
+  Future<Map<String, dynamic>> browseUsers({
+    required String token, String role = '', int page = 1,
+  }) {
+    final p = <String, String>{'page': '$page'};
+    if (role.isNotEmpty) p['role'] = role;
+    return _c.getWithParams('/users', p, token: token);
+  }
+
+  Future<Map<String, dynamic>> searchUsers({
+    required String token, required String q,
+  }) => _c.getWithParams('/users/search', {'q': q}, token: token);
+
+  Future<Map<String, dynamic>> sendConnection({
+    required String token, required int addresseeId, String? message,
+  }) => _c.post('/connections/request',
+          {'addressee_id': addresseeId, 'message': message ?? ''},
+          token: token);
+
+  // ── ADMIN (v11) — aligned to actual backend admin_routes.py ─────
+  Future<Map<String, dynamic>> getAdminStats(String token) =>
+      _c.get(ApiEndpoints.adminStats, token: token);
+
+  Future<Map<String, dynamic>> adminGetUsers(String token, {String role = ''}) async {
+    final body = await _c.get(ApiEndpoints.adminUsers, token: token);
+    if (role.isNotEmpty && body['success'] == true) {
+      final list = (body['data'] as List)
+          .where((u) => (u as Map)['role'] == role)
+          .toList();
+      body['data'] = list;
+    }
+    return body;
+  }
+
+  Future<Map<String, dynamic>> adminToggleUserActive(
+    String token, int userId, bool active,
+  ) => _c.put('${ApiEndpoints.adminUsers}/$userId/status',
+          {'is_active': active}, token: token);
+
+  Future<Map<String, dynamic>> adminGetJobs(String token) =>
+      _c.get(ApiEndpoints.adminJobs, token: token);
+
+  Future<Map<String, dynamic>> adminDeactivateJob(String token, int jobId) =>
+      _c.delete('${ApiEndpoints.adminJobs}/$jobId', token: token);
+
+  Future<Map<String, dynamic>> adminGetFeedback(String token) =>
+      _c.get(ApiEndpoints.adminFeedback, token: token);
 }

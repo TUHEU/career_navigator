@@ -7,7 +7,9 @@ class S {
   static const signIn           = 'signIn';
   static const signUp           = 'signUp';
   static const email            = 'email';
+  static const emailAddress     = 'emailAddress';
   static const password         = 'password';
+  static const rememberMe       = 'rememberMe';
   static const forgotPassword   = 'forgotPassword';
   static const createAccount    = 'createAccount';
   static const alreadyAccount   = 'alreadyAccount';
@@ -114,7 +116,9 @@ const Map<String, String> enStrings = {
   S.signIn:          'Sign In',
   S.signUp:          'Sign Up',
   S.email:           'Email Address',
+  S.emailAddress:    'Email Address',
   S.password:        'Password',
+  S.rememberMe:      'Remember me',
   S.forgotPassword:  'Forgot Password?',
   S.createAccount:   'Create Account',
   S.alreadyAccount:  'Already have an account?',
@@ -213,7 +217,9 @@ const Map<String, String> frStrings = {
   S.signIn:          'Se connecter',
   S.signUp:          "S'inscrire",
   S.email:           'Adresse email',
+  S.emailAddress:    'Adresse email',
   S.password:        'Mot de passe',
+  S.rememberMe:      'Se souvenir de moi',
   S.forgotPassword:  'Mot de passe oublié ?',
   S.createAccount:   'Créer un compte',
   S.alreadyAccount:  'Vous avez déjà un compte ?',
